@@ -1,0 +1,18 @@
+# HistFinTS — brief for a consuming team
+
+**What it is:** HistFinTS is a local, single-user desktop application (Python, SQLite) that maintains a deduplicated, incrementally-updated historical database of financial/economic time series ("Series") pulled from multiple interchangeable data providers (Yahoo Finance, Alpha Vantage, FRED, ECB, Stooq, BYMA, etc.). It also has a separate "Series Catalog" subsystem that discovers and deduplicates raw provider tickers before they become a Series — you likely won't need that part; it's about how data gets *created*, not how it's read back.
+
+**Where the data lives:** a single SQLite 3.37+ file (`foreign_keys = ON`). No server, no concurrent-writer model — treat it as a read-only source when connecting from outside the app.
+
+**The tables you actually care about, for Series + historic prices:**
+
+- **`series`** — one row per tracked instrument (`label`, `series_type` — STOCK/ETF/BOND/CURRENCY_PAIR/etc., `configured_interval`, `status` — ACTIVE/DISABLED/DELISTED/etc., plus optional `currency`/`country`/`instrument_subtype`). This is the entity your team will represent.
+- **`provider`** / **`provider_assignment`** — a Series can be backed by more than one provider at once, ranked by `priority` (1 = primary, used first; others are fallback). `provider_assignment` links `series_id` ↔ `provider_id` with the provider's own raw ticker string.
+- **`import_run`** — one row per fetch attempt against a `provider_assignment` (`SUCCESS`/`PARTIAL`/`FAILED`, timestamps) — the provenance trail for every price point.
+- **`observation`** — the actual historical prices: `series_id`, `observed_at` (UTC datetime), `value`, plus optional `open`/`high`/`low`/`volume` (NULL for value-only sources like FRED/ECB). `UNIQUE(series_id, observed_at)` — one row per instant. **This is what you'll query for price history.**
+- **`correction`** — an audit log only. When a provider revises a past value, HistFinTS overwrites it in `observation` directly and writes a `correction` row recording the old/new value — you never need to reconcile `correction` yourself; `observation.value` is always the current, corrected number.
+
+**A couple of things worth knowing up front:**
+- A Series' price history can legitimately come from more than one provider over time (fallback), so don't assume one `series_id` ↔ one `provider` — join through `provider_assignment`/`import_run` if provenance matters to you.
+- `series.status` matters: `DELISTED_OR_DISCONTINUED`/`USER_DISABLED` Series still have valid historical `observation` rows, they're just no longer actively imported.
+- Full, current schema reference (all columns, constraints, FK behavior) lives in `docs/DATABASE_SCHEMA.md` in this repo — that's the source of truth, not the raw `schema.sql` file (which is deliberately frozen at an old baseline; the doc already has every migration merged in).
