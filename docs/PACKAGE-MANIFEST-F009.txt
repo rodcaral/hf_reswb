@@ -1,0 +1,201 @@
+================================================================================
+F-009 CONSULTANT REVIEW PACKAGE — MANIFEST
+================================================================================
+
+Date Prepared: 2026-08-17
+Total Size: ~36 KB of documentation + test code
+Defect ID: F-009 (Incremental import scale discontinuities)
+Status: Ready for external review
+
+================================================================================
+PACKAGE CONTENTS
+================================================================================
+
+ENTRY POINTS (start here):
+  ✓ CONSULTANT-README-F009.txt (4.1 KB)
+    Quick navigation guide, questions being asked, how to run tests
+
+  ✓ CONSULTANT-PACKAGE-F009.md (13 KB)
+    Full overview, quick-start, schema primer, remedy evaluation framework
+    This is the main package document
+
+CORE DEFECT DOCUMENTATION:
+  ✓ DEFECT-F009.md (8.8 KB)
+    Complete analysis: summary, evidence chain, root cause, mechanism
+    - §1: Why values drift (split-adjusted basis)
+    - §2: Evidence chain with real data (AAPL example)
+    - §3: Constructed reproduction test results
+    - §4: Why production looks clean today (survivorship)
+    - §5: Five candidate remedies evaluated
+
+SUPPORTING CONTEXT:
+  ✓ SPEC-panel-eligibility.md (cross-referenced)
+    Panel diagnostic requirements; mentions why data quality matters
+
+  ✓ DECISIONS.md (cross-referenced)
+    Decision D-007 (event capture), D-009 (artifact verification)
+    Context for why F-009 was raised
+
+REGRESSION TEST:
+  ✓ test_import_service_defect_f009.py (212 lines)
+    Runnable pytest tests that reproduce the defect
+    - Case (a): split scale break
+    - Case (b): FRED revision blindness
+    Both use real ImportService + real SQLite schema
+
+REFERENCED (filed separately to HistFinTS upstream):
+  ~ REQUEST-basis-factsheet.md
+    What adjustment basis does each provider report?
+    (Referenced in package for context)
+
+  ~ REQUEST-event-capture.md
+    Can we parse and persist provider corporate action events?
+    (Background for Remedy R2 evaluation)
+
+  ~ REQUEST-tranche2-migration.md
+    Schema change: add adjustment-basis field
+    (Orthogonal to F-009 remedies)
+
+================================================================================
+QUICK FACTS
+================================================================================
+
+Defect Type: Data integrity (silent scale break)
+Severity: High (affects data reliability)
+Current Status: Dormant (no affected production Series yet)
+Root Cause: Incremental import only re-fetches trailing window; basis changes applied retroactively by provider are never re-applied to historical data
+
+Affected Providers:
+  - Yahoo Finance (stock splits)
+  - FRED (economic indicator revisions)
+  - Any provider with basis-shift or revision behavior
+
+When it occurs:
+  1. Series is backfilled before a basis-changing event
+  2. Event occurs (split, revision, etc.)
+  3. Incremental import runs, fetching only from latest stored date forward
+  4. Pre-event rows never re-fetched
+  5. Post-event rows arrive already adjusted to new basis
+  6. Result: permanent discontinuity with no marker/correction row
+
+Why no corrections are fired:
+  - Correction mechanism only fires when a re-fetched value differs from stored
+  - Dates before the re-fetch window are never re-fetched
+  - Therefore dates before the window can never produce a correction
+  - Oldest ever-corrected observation: 4 days old (the re-fetch window)
+
+================================================================================
+REMEDY OPTIONS SUMMARY
+================================================================================
+
+Three approaches evaluated in detail in CONSULTANT-PACKAGE-F009.md:
+
+R1: PERIODIC FULL-RANGE RE-FETCH
+  Cost: High (bandwidth + rate limits)
+  Coverage: Complete (catches all basis shifts)
+  Use when: You need guaranteed accuracy, can afford bandwidth
+
+R2: EVENT CAPTURE BACKFILL
+  Cost: Medium (parsing, schema change, event backfill)
+  Coverage: Partial (only splits/dividends/events, not silent revisions)
+  Use when: You want to prevent future breaks without full re-fetch
+
+R3: DETECT-AND-REFUSE CONSUMER-SIDE
+  Cost: Low (heuristic detection only)
+  Coverage: Defensive (gates against use, doesn't fix data)
+  Use when: You want to prevent accidental use of broken data
+
+See CONSULTANT-PACKAGE-F009.md for 2-page detailed evaluation.
+
+================================================================================
+HOW TO USE THIS PACKAGE
+================================================================================
+
+STEP 1: Read the entry point (5 min)
+  -> CONSULTANT-README-F009.txt
+
+STEP 2: Read the main package (15 min)
+  -> CONSULTANT-PACKAGE-F009.md (Quick Start section)
+
+STEP 3: Read the defect analysis (25 min)
+  -> DEFECT-F009.md (full document)
+
+STEP 4: Run the regression test (2 min)
+  -> See CONSULTANT-README-F009.txt for command
+
+STEP 5: Evaluate remedies (15 min)
+  -> CONSULTANT-PACKAGE-F009.md (Remedy Evaluation Framework)
+
+TOTAL TIME: ~60 minutes for complete review
+
+================================================================================
+QUESTIONS FOR THE CONSULTANT
+================================================================================
+
+1. DEFECT SEVERITY
+   Is this defect as severe as presented? Are there scenarios where silent
+   scale breaks are acceptable?
+
+2. SCOPE
+   Which providers in the HistFinTS ecosystem are actually affected? (Beyond
+   Yahoo and FRED, what else?)
+
+3. REMEDY RECOMMENDATION
+   Given the use case (Research Workbench needs reliable data for statistics),
+   which remedy approach is appropriate? Can they be combined?
+
+4. IMPLEMENTATION ORDER
+   If multiple remedies are needed, which should ship first? Are there
+   dependencies between them?
+
+5. TESTING
+   Do the regression tests adequately capture the defect? Are there edge cases
+   or scenarios not covered?
+
+6. GRACEFUL DEGRADATION
+   If we can't fix all providers simultaneously, is it acceptable to apply
+   different remedies to different providers?
+
+================================================================================
+VERIFICATION CHECKLIST FOR CONSULTANT
+================================================================================
+
+Code inspection:
+  ☐ Read ImportService._determine_range() (src/histfints/application/import_service.py:183–200)
+  ☐ Verify the revalidation_window logic
+  ☐ Check Provider.default_revalidation_window_days (is it ever set?)
+  ☐ Inspect Correction table schema (src/histfints/persistence/schema.sql)
+
+Data verification:
+  ☐ Run: SELECT MIN(o.observed_at) FROM correction c JOIN observation o
+         (Should show ~4 days old, proving the re-fetch window)
+
+Test execution:
+  ☐ Run: pytest tests/application/test_import_service_defect_f009.py -v
+  ☐ Both cases (a) and (b) should PASS
+  ☐ Output should show discontinuity ratio > 2 (case a) and frozen value (case b)
+
+================================================================================
+CONTACT & FOLLOW-UP
+================================================================================
+
+Questions about:
+  - The defect mechanism → See DEFECT-F009.md
+  - The test harness → See test_import_service_defect_f009.py comments
+  - Schema/data structures → See CONSULTANT-PACKAGE-F009.md (Schema Primer)
+  - Remedy evaluation → See CONSULTANT-PACKAGE-F009.md (Framework)
+
+This is a formal specification document prepared for independent review.
+
+================================================================================
+DOCUMENT HISTORY
+================================================================================
+
+2026-08-15 — Defect filed from Research Workbench spec review
+2026-08-17 — Regression tests committed to HistFinTS test suite
+2026-08-17 — Consultant package prepared (this document)
+
+Status: Ready for external review. No follow-up or approval from HistFinTS
+team is required before the consultant begins their analysis.
+
+================================================================================
