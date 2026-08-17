@@ -2576,26 +2576,26 @@ this review and neither should be taken on memory (D-009b):
   `last_available_date` exist only on `provider_symbol` (the Catalog-side table D-025
   already found unreachable from most Series), which is a different gap than what
   `REQUEST-tranche2-migration.md` item 2 asked for. `minimum_coverage` stays inactive.
-- **Q-061 — status is internally inconsistent in this log and must be resolved before
-  "readiness" is judged, not after.** The open-questions table carries **two** entries
-  under the same ID: one struck through as *"closed in principle → D-024"*, another live and
-  marked *"open · Workbench-side, blocks nothing upstream"* with three sub-parts (minimum
-  depth, liquidity criterion, confidence reporting) still unanswered. D-024 closed a
-  *different* part of the panel design (time-varying membership, §"Panel eligibility
-  proposal reviewed") — not these three inclusion-rule questions. The strikethrough entry is
-  a **stale duplicate**, not evidence Q-061 is actually closed. Flagged here rather than
-  silently picked one way, per this project's own standing rule against inferring resolution
-  from an ambiguous artifact (D-009b).
+- **Q-061 — cleaned up; three concrete inclusion-rule questions now authoritative.** The
+  stale strikethrough entry (one element claiming closure via D-024, which actually closed
+  *time-varying membership*, a separate concern) has been removed. Q-061's real state is
+  three unanswered parameters: **`include_delisted`** (survivorship — does a discontinuted
+  Series enter historical panels retroactively?), **`staleness_policy`** orthogonal to
+  liquidity (when a member passes volume bars but prints lag, does it degrade consensus,
+  the ratio-change detector, or both?), and **`dispersion_threshold`** (above what residual
+  should a result be suppressed rather than flagged?). All three are documented in D-024
+  under "Additions to the parameter set" and need domain judgement — see sequencing below.
 
-**Sequencing for whatever comes next.** Work should follow whichever of the two gates is
-ready first — Tranche 2 is upstream (HistFinTS availability-marker development, not
-requested yet, plus an adjustment-basis backfill that is application logic only) and Q-061
-is Workbench-side (three inclusion-rule questions, no HistFinTS dependency, but requiring
-the same domain-review discipline D-036 and D-039 got). Neither is closer to done than the
-other as of this decision — Tranche 2 needs upstream work not yet even filed for item 2, and
-Q-061 needs its own duplicate-entry cleanup before its true state is known. **No financial-
-domain decision is required right now** on either gate; one becomes necessary only once a
-concrete question surfaces while resolving them (as happened for D-036 and D-039).
+**Sequencing: clean up Q-061 first, then Tranche 2, then send Q-061 to domain review, then
+authorize panel-eligibility implementation.** This order makes artifacts legible (Q-061 is
+now clean), avoids upstream work on Tranche 2 if Q-061 surfaces a blocker, and keeps the
+decision flow clear: one gate resolved at a time, verified live, not inferred from memory
+or ambiguous artifacts (D-009b). Q-061 cleanup is cheap and removes the confusion-risk
+before any other work. Next step (after confirmation): **file the missing Tranche 2 request
+with both items** (adjustment-basis backfill + the provider-assignment availability marker
+that was never built). Once Q-061 is authoritative, send its three questions to the
+financial advisor. Panel-eligibility implementation starts only after both gates are
+resolved.
 
 **The observation-suitability contract is not to be touched while either gate is worked.**
 `classify_series()` / `derive_calendar()` / `apply_calendar()` and the object shapes in
@@ -2636,10 +2636,9 @@ changes the architecture, not just the content.
 | **Q-045** | **blocking · awaiting answer** | **The capability matrix.** D-013 gave the three axes — wrapper (direct/CEDEAR/CEVA/ADR) × underlying asset class (shares/ETF/bond/commodity/virtual asset/index) × venue+currency+settlement. What is missing is the matrix itself: which metrics are permitted, suppressed or replaced for each combination. Without it **AC-04 is untestable** and V0's Statistics section (Q-048) cannot be scoped. Open since the first round, and now fully equipped to be answered. |
 | ~~Q-065~~ | closed | → D-026. |
 | Q-064 | open · Workbench-side, no upstream impact | **Which panel is being specified for V0 — the pair panel only, or both?** V0 needs only the pair panel (implied FX, plus residual as ratio-change and staleness detector). The cross-section panel serves screeners and studies, which sit in V5. Specifying both now is scope creep; specifying only the pair panel risks a parameter set that will not generalise. My view: **pair panel only for V0**, with the cross-section spec written but explicitly deferred. |
-| ~~Q-061~~ | closed in principle | → D-024. |
+| Q-061 | open · Workbench-side, gates panel-eligibility implementation | **What are the panel's three inclusion-rule parameters?** D-024 closed *time-varying membership* — the structural question that membership must be evaluated as-of-date, not once at query time. But D-024 also identified three distinct inclusion rules that remain unanswered (D-024 "Additions to the parameter set", lines 1115–1123): (a) **`include_delisted` — does a Series excluded today (e.g. `status = DELISTED_OR_DISCONTINUED`) enter the historical panel retroactively?** This is the survivorship decision, and must be an explicit parameter. (b) **`staleness_policy`, orthogonal to liquidity — when a member (e.g. BIDU) passes volume bars but its prints lag, does it degrade the consensus, the residual-based ratio-change detector, or both? How should this affect panel membership?** D-017 documented the signature; D-024 named it a separate concern. (c) **`dispersion_threshold` — above what residual magnitude should a result be suppressed rather than flagged?** D-016/D-017 used dispersion as a ratio-change alarm; D-024 proposed it as a gate. How high is "too dispersed to publish"? All three need domain judgement (D-040 routes them to the financial advisor once Q-061 cleanup is done). |
 | ~~Q-063~~ | closed | → D-022. **Run the §3.1 constructed reproduction** before `DEFECT-F009.md` goes out: backfill a fixture Series to before a known split, run an incremental import past it, record the values either side. Decision recorded in D-020. Also worth capturing per-provider `default_revalidation_window_days` values while in there — the window may be zero for some, which would make their blind spot total. |
 | Q-062 | open · gates the first-trade-date item only | **Is `provider_symbol.first_available_date` reachable from a `series_id`?** If Workbench can traverse series → provider_assignment → provider_symbol, then item 2 is purely an application-logic fix: populate the existing column from Yahoo's `meta.firstTradeDate`. If it is not reachable, the real gap is a completeness marker on the series/observation side, and the ask changes shape entirely. |
-| Q-061 | open · Workbench-side, blocks nothing upstream | **What are the panel's inclusion rules?** Three parts, all now blocking implementation: (a) **minimum depth** — below how many members is a consensus rate not published at all? (b) **liquidity criterion** — BIDU is clean but stale, and a stale member drags consensus toward its own lagged level; is it included, weighted down, or excluded? (c) **confidence reporting** — how is panel depth and dispersion surfaced under P3, given depth is thinnest where history is longest? |
 | ~~Q-060~~ | closed | → D-017. **Cross-pair coherence test on 2020-04-14.** Do GLD, BABA, UBER and AAPL show a comparable sustained level shift around that date? All pairs moving together → real CCL widening, BIDU is clean, and only AAPL needs the AIF lookup. BIDU alone moving → instrument-specific, and it joins the worklist. Free — the series are already held. |
 | ~~Q-059~~ | closed | → D-016. **Run the same detector across every CEDEAR pair.** The method is proven and cheap. GLD, ETHA, BABA, BIDU and UBER CEDEARs all carry ratios that may have changed, and any of them may contain the same seam. The output is an inventory of suspected ratio-change dates with estimated factors — the worklist for the authoritative AIF/BYMA lookup, and the scope estimate for how much of the CEDEAR universe is currently unquarantined and wrong. |
 | ~~Q-058~~ | closed | → D-015. **Run the F-019 validation.** Every prerequisite is now in place: 11305 has ~9 years of CEDEAR history, the US AAPL Series is populated, and the relationship and ratio are set. Compute the implied-FX series across full history and compare against known historical CCL. Smooth and tracking → constant current ratio is correct for the adjusted data. Step discontinuities at ratio-change dates → dated ratios are mandatory before any FX figure is displayed. |
