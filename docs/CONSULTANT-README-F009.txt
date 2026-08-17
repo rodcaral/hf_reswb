@@ -87,9 +87,22 @@ When does this occur:
 
 Who is affected:
   - Any Series tracked through a basis-changing event (split, dividend, revision)
-  - Yahoo Finance (stock splits)
+  - Yahoo Finance (stock splits) -- infrequent for US large-caps
   - FRED (economic indicator revisions)
-  - Potentially others
+  - CEDEAR/BYMA conversion-ratio changes -- fire quarterly by regulation (CNV RG
+    1142/2026), plus ad hoc local ratio changes; a confirmed real instance already
+    exists in this database. This is the higher-frequency trigger for this project's
+    actual universe. See CONSULTANT-PACKAGE-F009.md ("Trigger Frequency") for detail.
+
+Sequencing note:
+  - Implementation order is not fully open, but the original D-008 tranche table has
+    been superseded by D-019 -- Tranche 2 reduced to ONE item (adjustment-basis field),
+    not four. That one item is now done. F-009 itself is Tranche 1 (gated only on the
+    reproduction, satisfied by the included regression tests). R2 (event capture) was
+    NEVER part of Tranche 2 -- it's explicitly excluded (filed separately as F-012,
+    REQUEST-event-capture.md) and remains unscheduled. See CONSULTANT-PACKAGE-F009.md
+    ("Sequencing: What's Already Decided") for the corrected picture before
+    recommending an order from scratch.
 
 ================================================================================
 CONTACT

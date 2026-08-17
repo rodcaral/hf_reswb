@@ -1546,6 +1546,251 @@ gaps) and Tranche 2 (availability metadata itself), not on further specification
 
 ---
 
+### D-032 — The F-009 evidence chain is code-complete upstream and **absent from the live database**
+
+*Decided 2026-08-17. Supersedes the stale parts of D-019 and D-021. Prerequisite for
+`SPEC-f009-evidence-consumption.md`.*
+
+**Context.** The directive that opened this increment was to build "the minimum Workbench
+capability needed to consume the **completed** HistFinTS F-009 evidence chain." Before
+designing against it, the chain was inspected in the live `histfints-v3` checkout
+(`E:\Carlos\Documents\Mi Software\Proyectos\histfints-v3`) and in the production database.
+
+**What has landed in code since 2026-08-15.** Materially more than D-019/D-021 record, and
+those two entries are now partly stale:
+
+| Item | D-019/D-021 said | Current fact | Citation |
+|---|---|---|---|
+| Adjustment basis | requested, not landed | migration written; `provider.adjustment_basis` + `provider_assignment.adjustment_basis_override`, 5-value CHECK, **no DEFAULT, backfill deferred to application logic** | `persistence/migrations/0011_add_adjustment_basis.sql:22–33` |
+| Retroactive-change detection (R1) | detection "must live in Workbench or nowhere" (D-006) | `RevalidationService` exists — provider risk tiers, per-provider windows (Yahoo 730d, FRED 365d), 0.1% tolerance | `application/revalidation_service.py:23–63` |
+| Correction audit trail | only the v1 `correction` table | new `observation_correction` + `revalidation_run` tables | `migrations/0012_add_revalidation_tracking.sql:5–49` |
+| Yahoo events (F-012) | "requested on every fetch, `_to_records()` never reads it" | **partly remedied**: a new `get_splits_and_dividends()` parses `events.splits`/`events.dividends`; `_to_records()` still ignores them and the method issues its **own second chart request** | `providers/yahoo_finance.py:70–92`, `95–126`; `_to_records` at `128` |
+| FRED vintages | "never requested" | **landed**: `get_vintage_dates()` hits `/fred/series/vintagedates`; `get_observations_at_vintage()` exists with `realtime_start`/`realtime_end` | `providers/fred.py:9`, `67–85`, `87–106` |
+| Provider-event storage | requested (`REQUEST-event-capture.md`) | `provider_event` table + `ProviderEvent` domain entity + repository, with mandatory `acquired_at`, `provider_source_id`, `provenance_note` | `migrations/0013_add_provider_event.sql:5–23`; `domain/provider_event.py:20–52` |
+| BYMA `underlying_ratio` | reader exists, field never populated | **unchanged.** `underlying_ratio` exists only on the `RawCatalogRecord` port (`application/ports.py:236`) and is populated **only** by the hand-authored JSON reader (`infrastructure/json_snapshot_reader.py:58`). `byma_snapshot_reader.py` never sets it. | as cited |
+
+HistFinTS's own status doc agrees: R1, R2a, R2b-FRED and R2b-Yahoo are marked
+**Implemented**, R2b-ECB **Not viable** (ECB publishes no revision data), R3 **out of
+scope** — `histfints-v3/docs/KNOWN_LIMITATIONS.md:71–82`.
+
+**The decisive fact, which the directive's phrasing conceals.** None of it is in the
+database the Workbench would ATTACH to.
+
+```
+sqlite3 -readonly "C:/Users/CarlonTinto/AppData/Local/histfints/histfints/histfints.db" \
+  "PRAGMA user_version;"                                   -->  10
+  "SELECT COUNT(*) FROM sqlite_master WHERE name='provider_event';"        -->  0
+  "SELECT COUNT(*) FROM sqlite_master WHERE name='observation_correction';"-->  0
+  "SELECT COUNT(*) FROM sqlite_master WHERE name='revalidation_run';"      -->  0
+  "PRAGMA table_info(provider_assignment);"  --> no adjustment_basis_override,
+                                                 no last_revalidated_at
+  "PRAGMA table_info(provider);"             --> no adjustment_basis
+```
+
+`user_version = 10` with migrations 0011, 0012 and 0013 present on disk means
+`apply_pending_migrations()` (`persistence/migrations.py:20–29`) has not been run since they
+were written. Corroborated independently by the backup trail in the data directory, which
+stops at `histfints_backup_before_migration0010_20260812_182934.db` — and HistFinTS's own
+convention is to back the file up before applying a migration for real
+(`histfints-v3/CLAUDE.md:63–70`).
+
+**Decision.** The F-009 evidence chain is **implemented but unexercised, and invisible
+across the boundary.** Three consequences are binding on this increment:
+
+1. **The Workbench cannot be designed against `provider_event`, `observation_correction` or
+   `revalidation_run` as present data.** A read-only ATTACH against today's file fails on
+   `no such table`. Any query touching them must be behind a schema-presence probe, and
+   their absence must resolve to **`insufficient evidence`**, never to "not explained."
+2. **The evidence that *does* exist today is the v1 chain**, and it is real and populated:
+   `observation.import_run_id` → `import_run.provider_assignment_id` →
+   `provider_assignment.provider_id` → `provider`, plus 13,304 rows in the legacy
+   `correction` table. Verified end to end:
+   ```sql
+   SELECT o.id, o.observed_at, ir.status, pa.provider_series_identifier, p.implementation_key
+   FROM correction c JOIN observation o ON o.id=c.observation_id
+     JOIN import_run ir ON ir.id=c.import_run_id
+     JOIN provider_assignment pa ON pa.id=ir.provider_assignment_id
+     JOIN provider p ON p.id=pa.provider_id LIMIT 5;
+   -- 5597 | 2026-08-04T13:30:00+00:00 | SUCCESS | GLD | yahoo_finance
+   ```
+   A **new** and useful property, verified both ways: on a correction the upsert preserves
+   the *original inserting* run, because `_reconcile()` returns the loaded `existing`
+   Observation and never rewrites its `import_run_id`
+   (`application/import_service.py:240–264`; `ON CONFLICT ... DO UPDATE SET import_run_id =
+   excluded.import_run_id` at `persistence/sqlite_observation_repository.py:61–66` therefore
+   writes the old value back). Confirmed in data: observation 5597 retains
+   `import_run_id = 2` while its corrections were detected by run 4; observation 5598
+   retains 6 against detecting run 8. So the Workbench gets **two** provenance anchors per
+   corrected observation — who first wrote it, and who overwrote it.
+3. **D-006 is not superseded.** `_determine_range()` still starts at
+   `latest − default_revalidation_window_days`, with **zero** look-back when the field is
+   unset (`application/import_service.py:183–200`, now at lines 183–201 verbatim), and
+   `default_revalidation_window_days` remains **NULL for all three live providers**
+   (`SELECT id, display_name, implementation_key, default_revalidation_window_days FROM
+   provider;` → FRED, Yahoo Finance, BYMA, all empty). The 730/365-day windows in
+   `RevalidationService.REVALIDATION_WINDOWS` are a *separate*, manually-invoked code path,
+   not a change to import behaviour.
+
+**Rationale for not waiting.** The tempting alternative was to declare the increment blocked
+until migrations 0011–0013 are applied. Rejected: the increment's stated purpose is to prove
+the Workbench can *consume* an evidence chain without confusing evidence with
+interpretation, and the harder half of that proof — declining to explain a discontinuity
+when the evidence is absent — is exercised **better** by today's database than by a
+populated one. A consumer that only works once the evidence exists is a consumer that has
+never been tested on the case that actually occurs. The migration is a prerequisite for the
+*"explained"* verdict, not for the capability.
+
+**Consequence — D-009 applies with unusual force.** Every `provider_assignment` in the live
+database was created between 2026-08-04 and 2026-08-15
+(`SELECT MIN(created_at), MAX(created_at) FROM provider_assignment;`), i.e. the oldest
+provenance in the store is **13 days old** as of today. No tracked Series has lived through a
+split under HistFinTS's own observation. A reconciliation run that returns "no discontinuity
+found" therefore proves nothing about the detector; the acceptance test must construct the
+discontinuity, not look for one.
+
+---
+
+### D-033 — Workbench references upstream evidence by key; four epistemic layers stay separate and the verdict vocabulary stays at three values
+
+*Decided 2026-08-17. Governs `SPEC-f009-evidence-consumption.md`. Depends on D-032.*
+
+**Context.** Having established what is actually readable (D-032), the question was what the
+Workbench should *store*. Two shapes were available.
+
+**(a) Materialise upstream evidence into Workbench tables** — copy the relevant
+observations, corrections and (eventually) events into local tables at analysis time, so a
+finding is self-contained and reproducible even if HistFinTS changes underneath.
+
+**(b) Reference by upstream key, resolve at read time** — store only the identifiers
+(`series_id`, the observation id range, the `import_run_id`s, and later
+`observation_correction.id` / `provider_event.id`) plus the Workbench's own calculated
+quantities, and re-resolve the evidence through the ATTACH on every display.
+
+**Decision: (b), with one narrow exception.** The Workbench stores no upstream observation
+values. It stores upstream *keys*, its own *calculated* quantities, and its own *findings*.
+The exception: the specific numbers a finding asserts about (the values either side of a
+discontinuity, and the computed step factor) are recorded as Workbench **Calculated** values
+with their inputs named — because a finding that cannot restate its own arithmetic is not
+traceable, and re-deriving it later against mutated upstream data would silently change what
+the finding said.
+
+**Rationale.** Shape (a) is the more obvious answer and it is wrong here for a specific
+reason: HistFinTS observations are **mutable in place** — the whole content of F-009 — so a
+Workbench copy is not a snapshot with integrity, it is a second version of the truth with no
+way to tell which is stale. Duplication would also make the Workbench a de facto second
+time-series store, which D-001 exists to prevent, and it directly violates the standing
+instruction not to replicate historical observations. The cost of (b) is honest and
+acceptable: a finding can become *unresolvable* if the upstream row it points at is archived
+or overwritten. That is a state the UI must be able to render, and it is strictly better
+information than a stale local copy that looks fresh.
+
+**The four layers, in existing P4 vocabulary — no new terms.**
+
+| Layer | P4 status | Owner | Example |
+|---|---|---|---|
+| **Provider evidence** | `Observed` | HistFinTS | a `correction` row; a `provider_event` SPLIT with ratio 4:1; an `import_run` and its `provider_assignment` |
+| **Workbench calculation** | `Calculated` | Workbench | the step factor across 2024-01-24; the persistence test at 15 and 60 trading days |
+| **Analytical finding** | `Calculated`, plus a named verdict | Workbench | "a −49.4% single-day step at 2024-01-24, persistent, not matched by any captured event" |
+| **Research conclusion** | `Asserted` | the human | "this Series' pre-2024-01-24 history is unusable for return series" |
+
+The load-bearing rule: **a finding may never be promoted to a conclusion by the system.**
+Only a person writes an `Asserted` row, and it must cite the finding it rests on. The reason
+is P4 itself — "explained by captured evidence" is a statement about *what HistFinTS
+recorded*, not a statement about what happened in the world, and collapsing the two is
+exactly the fabricated-lineage failure P3 exists to prevent.
+
+**Why the verdict vocabulary stays at exactly three values.** `explained by captured
+evidence` / `not explained by captured evidence` / `insufficient evidence`. Every richer
+vocabulary that suggested itself — "partially explained", "explained with residual",
+"probably a ratio change" — turned out to encode a *magnitude judgement* the Workbench is
+not entitled to make from event metadata alone. A 4:1 split beside a 3.9× step is either
+consistent within a stated tolerance or it is not; "partially" would let a mismatch pass as
+half-explained and thereby launder an unexplained break. The residual magnitude is still
+reported — as a `Calculated` number beside the verdict, where it belongs — but it does not
+get its own verdict value.
+
+**The third value is the important one.** `insufficient evidence` covers three distinct real
+situations, and all three are live today per D-032: the evidence tables do not exist in the
+attached database; they exist but hold nothing for this Series/period; or the provider is one
+that supplies no revision data at all (ECB, per HistFinTS
+`docs/KNOWN_LIMITATIONS.md:79–81`). Collapsing any of these into "not explained" would report
+a HistFinTS gap as a data defect. The three underlying reasons are carried as a *reason
+code* beside the verdict, not as extra verdict values.
+
+**Consequence.** Against today's database (`user_version = 10`), the only verdicts reachable
+for a price Series are `not explained by captured evidence` — when a discontinuity is found
+and the legacy `correction` table has nothing at that date — and `insufficient evidence`.
+`explained by captured evidence` is **structurally unreachable until migrations 0011–0013
+are applied and the capture commands are actually run.** The increment must therefore be
+accepted on the two reachable verdicts, with the third exercised against a constructed
+fixture. Stated plainly so it is not later mistaken for a bug in the reconciler.
+
+---
+
+### D-034 — Proceed with `hf_reswb` evidence consumption against the currently deployed schema; migration application filed as a separate mechanical ask
+
+*Decided 2026-08-17. Ratifies §8 of `SPEC-f009-evidence-consumption.md`. Depends on D-032, D-033.*
+
+**The call.** Proceed with the `hf_reswb` reconciliation implementation now, against
+`histfints.db` as it actually stands (`user_version = 10`, migrations 0011–0013 unapplied).
+Do not wait for those migrations to land. `explained by captured evidence` is **structurally
+unreachable** against the live database today; if the reconciler ever returns it against
+production before the migration is applied, that is a reconciler defect, not a success — this
+must be stated in the increment's acceptance criteria, not left implicit.
+
+**Why proceeding is stronger than waiting.** An empty evidence store forces the first
+implementation to demonstrate its two hardest behaviours immediately: `not explained by
+captured evidence` (evidence tables readable, hold nothing at the boundary) and `insufficient
+evidence` (tables absent, per D-032). A reconciler built and first tested against a
+populated fixture would prove the *easy* verdict works and defer the two that actually occur
+in production.
+
+**Two-stage validation sequence, adopted as the plan going forward:**
+
+```
+Now:            empty/legacy evidence  -> not-explained / insufficient verdicts, full traceability
+After upstream: migrated + captured evidence -> explained verdict, validated positive path
+```
+
+Stage 2 is not blocking on stage 1 shipping — it is the acceptance test for a *second,
+later* increment, run once the migration below has landed.
+
+**Separate mechanical ask, filed to HistFinTS.** Request application of migrations
+0011–0013 to a **copy** of the production database, plus one run of the existing capture
+commands, plus a report of what was actually captured. This is **deployment of code that
+already exists**, not new HistFinTS development, and does not reopen the workstream halted
+earlier this session. The production file itself stays untouched until the copy is
+validated. Filed as `REQUEST-apply-migrations-0011-0013.md`.
+
+**F-023, F-024, F-025 are binding on the implementation, not just noted.** Restated here so
+they cannot be designed around by accident:
+- **F-023** — `provider_event` carries no FK to any observation or correction. Event
+  correlation is a `Calculated` join by `series_id` + date proximity + a stated tolerance,
+  never treated as an `Observed` link.
+- **F-024** — a FRED `REVISION` event records a vintage *date*, not a vintage *value*. A bare
+  vintage date must not, by itself, produce `explained by captured evidence` — per D-033
+  §4.4, it resolves to `insufficient evidence` / `PROVIDER_SUPPLIES_NO_REVISION_DATA` unless
+  `get_observations_at_vintage()` values are actually fetched and compared.
+- **F-025** — `provider_event.acquired_at` is capture time, not fetch time. Any
+  before/after-import timing claim built on it must be labelled a proxy, not treated as
+  exact.
+
+All three converge on one rule, restated because it is the point of the increment: **evidence
+presence is not evidence of explanation.** A row existing in `provider_event` is necessary but
+not sufficient for the `explained` verdict; magnitude reconciliation within a stated tolerance
+is what makes it sufficient.
+
+**Documentation, not blocking.** `SPEC-f009-evidence-consumption.md` gets a row in
+`CLAUDE.md`'s "Where things are" table (done alongside this entry). A-014 (correct
+`HISTFINTS-BRIEF-v2.md`'s now-stale FRED-vintage and Yahoo-events claims) stays queued,
+explicitly not folded into this implementation increment.
+
+**Immediate actions.** (1) Development starts on the `hf_reswb` reconciliation
+implementation against the current schema. (2) `REQUEST-apply-migrations-0011-0013.md` goes
+to HistFinTS as a separate, mechanical, non-blocking ask.
+
+---
+
 ### Inherited principles (ratified, not re-decided)
 
 These come from the specification and are treated as binding constraints on all
@@ -1988,6 +2233,75 @@ Series. Nothing is permanently gone. But because incremental import covers only 
 trailing window (D-006), a parse-only fix captures events **go-forward** and leaves
 history empty until a deliberate backfill pass runs.
 
+**Update 2026-08-17 — partly remedied in code, still unremedied on the import path.**
+`YahooFinanceClient.get_splits_and_dividends()` now parses both event blocks
+(`providers/yahoo_finance.py:70–92`, `_parse_splits` at `95`, `_parse_dividends` at `112`),
+and `YahooEventCaptureService` persists them as `ProviderEvent` rows
+(`application/yahoo_event_capture_service.py:76–164`). **But `_to_records()` at
+`yahoo_finance.py:128` still ignores `events` entirely**, and
+`get_splits_and_dividends()` issues its own second `_request_chart()` call
+(`yahoo_finance.py:80`, duplicating the one at `:52`). So every price import still pays for the events payload and
+discards it, and capturing events costs a duplicate HTTP request against an API with no
+supported systematic-use terms. The finding stands, narrowed: the waste is now
+architectural rather than a missing parser.
+
+### F-023 · M — `provider_event` has no link to the observations or corrections it would explain
+
+Verified against `migrations/0013_add_provider_event.sql:5–18`. The table carries
+`series_id`, `provider_id`, `event_type`, `event_date`, `acquired_at`,
+`provider_source_id`, `structured_data`, `provenance_note`, `created_at` — and **no
+`observation_id`, no `observation_correction_id`, no `import_run_id`**. The reciprocal is
+also true: `observation_correction`
+(`migrations/0012_add_revalidation_tracking.sql:5–26`) links to `observation` and to
+`revalidation_run`, and carries no reference to any event.
+
+**What it breaks.** Nothing upstream — this is arguably the correct shape, since asserting
+that an event *caused* a change is interpretation and HistFinTS is right to stay out of it
+(D-028, and `domain/provider_event.py:22–34` says so explicitly). But it means the
+correlation is entirely the **Workbench's** to compute, by `series_id` plus date proximity
+plus a tolerance, with no upstream key to lean on. Consequently the join is a
+`Calculated` step with a stated tolerance, not an `Observed` fact, and the tolerance is a
+parameter that must appear in the finding's provenance. Recorded so that a later
+implementer does not go looking for the FK and conclude it was overlooked.
+
+### F-024 · M — FRED `REVISION` events record the vintage *date* only, with no changed values, making "explained by captured evidence" near-vacuous for macro Series
+
+`FredEventCaptureService.capture_events_for_series()` calls `get_vintage_dates()` and emits
+one `ProviderEvent(REVISION)` per vintage date, with
+`structured_data = {"source": ..., "series_id": ...}` — no value, no changed range, no
+before/after (`application/fred_event_capture_service.py:58`, `96–108`). The client
+*does* have `get_observations_at_vintage()` with `realtime_start`/`realtime_end`
+(`providers/fred.py:87–106`) and it is **called from nowhere in `src/`** — only from
+`tests/providers/test_fred.py`.
+
+**What it breaks.** FRED publishes a vintage date on essentially every release, so for a
+monthly series the captured event set approximates "one event per month, forever." Any
+reconciliation rule of the form *"a REVISION event exists within N days of the
+discontinuity → explained"* will return `explained by captured evidence` for almost every
+macro discontinuity, including genuine defects. That is a fabricated-lineage outcome and it
+invalidates the verdict for FRED Series specifically. Mitigation for this increment: the
+reconciler must **not** accept a bare `REVISION` event as explanatory; a vintage date is
+evidence that a revision *window* was open, not evidence of what changed. Either the
+verdict for FRED stays at `insufficient evidence`, or a vintage-value comparison via
+`get_observations_at_vintage()` becomes a prerequisite. This increment takes the former.
+
+### F-025 · L — `provider_event.acquired_at` is capture time, not fetch time, so the event table cannot say what the provider reported *at the moment of an import*
+
+`acquired_at = datetime.now(timezone.utc)` at the point the capture service runs
+(`application/yahoo_event_capture_service.py:73`,
+`application/fred_event_capture_service.py:70`), and capture is a **separate operator
+action** — CLI `capture-yahoo-events` / `capture-fred-events`
+(`presentation/cli.py:173`, `183`), not part of `run_import`. There is no
+`import_run_id` on the row (F-023).
+
+**What it breaks.** The bitemporal question "did the provider tell us about this split
+before or after the import that broke the scale?" is unanswerable from the event table
+alone; the best available proxy is comparing `provider_event.created_at` against
+`import_run.started_at`, which conflates *when HistFinTS asked* with *when the provider
+knew*. Low severity because the proxy is usable and the ordering is usually obvious, but it
+must be labelled as a proxy in any provenance display rather than presented as the
+provider's own timing.
+
 ### F-007 · L — The database is proprietary; the data is not
 
 Yahoo, Stooq and Alpha Vantage terms bind on redistribution. Irrelevant while this
@@ -2016,6 +2330,8 @@ Written once the governing decision lands; do not edit the spec ahead of them.
 | A-007 | Q-020, Q-045 | Unify vocabulary on **Series**; add the closed type taxonomy and capability matrix as a numbered spec section. |
 | A-009 | D-006, D-009 | Add **one constructed regression harness** to the HistFinTS suite covering F-009 and F-013 together — they share a root cause, so they should share a test. (a) Split case: backfill a fixture Series to before a known split, import past it, assert both sides are on one scale. (b) Revision case: set `backfill_start_date` back, delete a chunk of recent observations, re-run `run_import` across the boundary, assert an already-stored value is actually revisited. Both defects are unfalsifiable by observation and must be held down by construction. |
 | A-012 | D-011 | Make the **implied-FX pair the V0 demo**, not a generic quote page. Three instances now exist in real data, in increasing order of cleanliness: (a) **YPF (NYSE, USD) + YPF.BA (BYMA, ARS)** — a genuine dual listing; adjusted for the ADR ratio, the quotient *is* the implied rate, with no CEDEAR ratio to carry. (b) **Series 33 (AAPL) + 11305 (Apple CEDEAR, ratio 20.0)** — exercises the `underlying_series_id`/`ratio` edge as well. (c) Banco Macro and Pampa, which also carry US listings. Each exercises P1 identity, P3 provenance, P4 Observed-vs-Calculated and the currency question on one screen, using data that exists today and needing nothing from the 1,491-symbol backlog. |
+| A-013 | D-032, D-033 | Add an **evidence-consumption** section to the spec, per `SPEC-f009-evidence-consumption.md`: the four epistemic layers (provider evidence / Workbench calculation / analytical finding / research conclusion) with their P4 statuses, the three-value reconciliation verdict with its reason codes, and the rule that no finding is ever auto-promoted to a conclusion. Must state that `explained by captured evidence` is unreachable until HistFinTS migrations 0011–0013 are applied and the capture commands have been run. |
+| A-014 | D-032 | **Correct the stale rows in `HISTFINTS-BRIEF-v2.md`.** The brief predates HistFinTS's R1/R2a/R2b work and currently reads as though FRED vintages were never requested and Yahoo events never parsed. Both are now false in code and both are still true in the live database — the brief must carry that distinction explicitly (`code-complete / not migrated`), because a reader who trusts either half alone will design wrongly. |
 | A-011 | D-007 | Add a two-layer corporate-actions section to the spec: HistFinTS-side raw provider events (Observed, P4) vs Workbench-side reconciled model and derivation (Calculated, P4). State explicitly that Yahoo events cover Yahoo Series only and that BYMA/CEDEAR ratio changes need a separate source. |
 
 ---
@@ -2040,6 +2356,8 @@ Binding across spec, code and conversation.
 
 | Date | Change |
 |---|---|
+| 2026-08-17 | §8 of `SPEC-f009-evidence-consumption.md` accepted → **D-034**: proceed with the `hf_reswb` reconciliation implementation against the current schema (migrations 0011–0013 unapplied); `explained by captured evidence` remains structurally unreachable against production until they land, and must be stated as such in acceptance criteria, not left implicit. Two-stage validation adopted (now: not-explained/insufficient against legacy evidence; later: explained, once migrated). Migration application filed as a **separate, non-blocking, mechanical** ask (`REQUEST-apply-migrations-0011-0013.md`) — deployment of already-built code, not reopened HistFinTS development. F-023/F-024/F-025 restated as binding on the implementation: event correlation is `Calculated` not `Observed` (no FK); a bare FRED vintage date is not explanatory; `acquired_at` is capture time, not fetch time. `CLAUDE.md` gains a row for the new spec; A-014 stays queued, not folded into this increment. |
+| 2026-08-17 | F-009 remediation halted in HistFinTS; focus moved to proving Workbench evidence *consumption*. Upstream inspected before designing → **D-032**: the evidence chain is **code-complete and absent from the live database**. R1 (`RevalidationService`), R2a (`provider_event`), R2b-FRED (vintage dates) and R2b-Yahoo (splits/dividends) are all implemented, and **FRED vintages and Yahoo event parsing have landed since D-021**, which is now partly stale. But the production DB is at `PRAGMA user_version = 10` with migrations 0011–0013 unapplied, so `provider_event`, `observation_correction` and `revalidation_run` **do not exist across the ATTACH boundary** — corroborated by a backup trail stopping at migration 0010. BYMA `underlying_ratio` unchanged (hand-authored JSON reader only). D-006 **not** superseded: `default_revalidation_window_days` is still NULL for all three live providers. New verified provenance property: a corrected observation **retains its original inserting `import_run_id`**, giving two anchors per correction. **D-033** settles the Workbench-side model — reference upstream evidence by key, never duplicate observations (they are mutable in place, so a copy is a second truth, not a snapshot); four epistemic layers in existing P4 vocabulary, with **no auto-promotion of a finding to a conclusion**; verdict vocabulary fixed at three values because every richer option encodes a magnitude judgement the Workbench cannot make from event metadata. **F-012 updated** (parser landed; `_to_records()` still discards events and capture costs a duplicate request). **F-023** raised (`provider_event` has no FK to observations or corrections — correlation is the Workbench's `Calculated` step with a stated tolerance). **F-024** raised (FRED REVISION events carry vintage *dates only*; a bare vintage date must not count as explanatory or the verdict is vacuous for macro). **F-025** raised (`acquired_at` is capture time, not fetch time). Design note written: `SPEC-f009-evidence-consumption.md`. A-013, A-014 queued. |
 | 2026-08-15 | Log created. D-001…D-004 recorded; F-001…F-008 raised; open questions Q-006…Q-050 migrated in from the review sequence. |
 | 2026-08-15 | Codebase grep confirms the `events` payload is requested and discarded → **D-007** closes Q-051: HistFinTS captures raw provider events (faithful recording, inside D-002), Workbench owns reconciliation and derivation (spans providers; BYMA/CEDEAR unreachable from Yahoo events). V0/V1 = detect and quarantine. **F-012** raised (events discarded, recoverable). **Q-054** added (periodic full-range re-fetch as combined detector/repair). A-011 queued. Adjustment thread closed; **Q-046 (Series individuation) promoted to live** after five rounds on data integrity. |
 | 2026-08-15 | Review paused to assess ask timing → **D-008**: asks tranched by migration cost rather than review completeness. Tranche 1 (F-009 defect, basis fact sheet, Q-039/Q-050) sent now; Tranche 2 batched into one migration gated on Q-039 and Q-046. |

@@ -3,8 +3,11 @@
 Multi-asset financial research application, built on top of the **HistFinTS** local
 time-series database (separate project, read-only from here — see `docs/DECISIONS.md` D-001).
 
-**Before writing any code, read `docs/DECISIONS.md` in full.** It is the actual
-specification. This file is an index into it, not a substitute.
+**Before writing any code, read `docs/HISTFINTS-BRIEF-v2.md`.** It is the corrected,
+current-state technical reference — schema facts, known defects, adjustment basis per
+provider, V0 data reality — all verified against real code and data, not summarised from
+memory. `docs/DECISIONS.md` is the full reasoning and evidence trail behind it; consult that
+when the brief's summary isn't enough, not as your first read.
 
 ## What this project is
 
@@ -18,10 +21,12 @@ displayed value must be traceable).
 
 | File | What it is |
 |---|---|
-| `docs/DECISIONS.md` | **The specification.** Every architectural decision (`D-###`), open question (`Q-###`), known defect (`F-###`), and queued spec amendment (`A-###`), each with evidence. Read before implementing anything touching identity, adjustment, currency, or panels. |
+| `docs/HISTFINTS-BRIEF-v2.md` | **Start here.** Corrected technical brief: schema, known defects, adjustment basis, V0 data reality. Supersedes the original consuming-team brief, which was twice misread as exhaustive during review and caused a retracted finding. |
+| `docs/DECISIONS.md` | The full specification and reasoning log. Every architectural decision (`D-###`), open question (`Q-###`), known defect (`F-###`), and queued spec amendment (`A-###`), each with evidence. Read before implementing anything touching identity, adjustment, currency, or panels — the brief gives you the facts, this gives you why. |
 | `docs/SPEC-panel-eligibility.md` | Converged spec for panel-derived analytics (implied FX, cross-section screening). Status: design-complete, gated on Q-027 (trading calendar) and the HistFinTS Tranche 2 migration. |
+| `docs/SPEC-f009-evidence-consumption.md` | Design note for the Workbench-side F-009 evidence-consumption/reconciliation capability (D-032–D-034). Reference-by-key evidence model, three-verdict reconciler (`explained` / `not explained` / `insufficient evidence`), full traceability chain. `explained by captured evidence` is structurally unreachable against the live database until HistFinTS migrations 0011–0013 are applied — read §8 before assuming otherwise. |
 | `docs/KB-argentine-instruments.md` | Standing reference on CEDEARs, Argentine market structure, and the multiple-dollar FX regime. Not HistFinTS-specific — background knowledge. |
-| `docs/histfints-requests/` | Filings sent to (or pending for) the HistFinTS team: `DEFECT-F009.md`, `REQUEST-tranche2-migration.md`, `REQUEST-event-capture.md`. Track their status in `DECISIONS.md`'s Tranche table before assuming any of them have landed. |
+| `docs/histfints-requests/` | Filings sent to (or pending for) the HistFinTS team: `DEFECT-F009.md`, `REQUEST-tranche2-migration.md`, `REQUEST-event-capture.md`, `REQUEST-apply-migrations-0011-0013.md`. Track their status in `DECISIONS.md`'s Tranche table before assuming any of them have landed. |
 | `.claude/agents/spec-interrogator.md` | Subagent for continuing the requirements-interrogation process (one question at a time, verify-before-log, D-009/D-009b discipline). Use it when a design question needs the same rigor as the original review, not for routine coding. |
 
 ## Non-negotiable constraints, extracted for quick reference

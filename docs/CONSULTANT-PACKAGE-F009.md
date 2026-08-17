@@ -119,6 +119,30 @@ The store is supposed to be a **reliable point of truth** for observation data. 
   2. Revises already-published values
   3. Changes how an identifier resolves over time
 
+### Trigger Frequency — Don't Read This as a Rare US-Equity Edge Case
+
+Yahoo's `close` is dividend-**un**adjusted, so ordinary ex-dividend dates do **not**
+trigger a rescale — only splits do, and for US large-caps those are infrequent. Taken in
+isolation, that makes F-009 look like a low-frequency risk.
+
+**It is not, for this project's actual universe.** This Workbench's differentiating
+scope is Argentine/CEDEAR names, and CEDEARs rescale far more often than US-listed
+splits do:
+
+- **Regulatory cadence:** CNV Normas, Título II, Capítulo VIII (as substituted by RG
+  1142/2026) requires CEDEAR issuers to report the conversion ratio **quarterly**, and a
+  ratio change triggers a Prospectus Supplement.
+- **Ratio changes also happen for purely local reasons** — issuers halve unit prices by
+  doubling the ratio when peso price levels rise, with no corporate action on the
+  underlying at all. This is a BYMA/CEDEAR-specific trigger with no US-equity analogue.
+- **A confirmed instance already exists in this database:** a clean ~2:1 step on
+  2024-01-24 in a CEDEAR whose US-listed underlying moved −0.35% that day — i.e., the
+  step is attributable to the ratio, not the market.
+
+Any severity or scope judgment should weight the CEDEAR/BYMA trigger higher than the
+Yahoo-splits trigger, not treat them as comparable-frequency instances of the same
+defect. See `DEFECT-F009.md` §4 for the full basis.
+
 ---
 
 ## Remedy Evaluation
@@ -136,6 +160,47 @@ See **REMEDY-EVALUATION-FRAMEWORK.md** (included below) for detailed comparison.
 Each has different tradeoffs. The framework below helps evaluate which is appropriate for your use case.
 
 ---
+
+## Sequencing: What's Already Decided (D-008, superseded in part by D-019)
+
+Implementation order is not fully open — some of it has already been decided upstream.
+The original tranche plan (`DECISIONS.md` D-008) proposed four items for Tranche 2, but
+**D-019 ("Tranche 2 reduces to one migration item; two of three were already in the
+schema") superseded that** after schema review. Read the current state, not the
+original proposal, before recommending a sequence:
+
+| Tranche | Contents | Status |
+|---|---|---|
+| **1** (no schema) | Fact sheet (done, D-021) · basis questions (answered, D-018) · **F-009 defect report** | Only gated on the §3.1 reproduction — **satisfied by the regression tests in this package.** |
+| **2** (reduced to one item, D-019) | ~~`import_run_id` on `observation`~~ — already existed, withdrawn · ~~`firstTradeDate` capture~~ — column already existed unpopulated, re-scoped as an availability-marker item · **adjustment-basis field — the one genuine schema change. Confirmed done as of this update.** | **Item 1 (adjustment basis) done. Item 2 (provider-assignment-level availability marker) status not confirmed here — check before assuming.** |
+| **3** (later, separable) | Asserted-identity evidence, settlement dimension, dated conversion ratios, adapter-versioning | Judged independently, never bundled with Tranche 2. |
+
+**Corporate-action/event capture (R2) is not, and was never, part of Tranche 2.**
+`REQUEST-tranche2-migration.md` excludes it explicitly ("dated conversion ratios,
+settlement modelling and corporate-action reconciliation are all live issues on our
+side and are **not** here"). It is filed separately as `F-012` /
+`REQUEST-event-capture.md`, and sits **unscheduled** — not gated on anything, not
+batched with anything, just not yet assigned to a tranche.
+
+**What this means for your recommendation:**
+- **F-009 itself (the defect report, not a remedy) is Tranche 1** — schema-free, and
+  its only gate (a forced reproduction, since the defect is dormant and unobservable
+  today per D-009) is already met by `test_import_service_defect_f009.py`.
+- **R2 (event capture) has no landing spot yet.** If you recommend it, you are
+  recommending new scheduling work, not confirming an existing plan — say so
+  explicitly, and note it would need its own tranche placement or a case for bundling.
+- **R1 (periodic full re-fetch) and R3 (consumer-side gate) are likewise unscheduled.**
+  If you recommend either, state where it should sit and whether it needs schema (R1
+  likely doesn't; R3 doesn't).
+- **The adjustment-basis field landing does not touch F-009.** `DEFECT-F009.md`
+  deliberately decouples the two: recording a provider's general adjustment
+  *convention* (e.g., "Yahoo is split-adjusted") does not detect or repair a scale
+  break in any specific Series' stored history. Treat Item 1's completion as
+  removing one item from the schema backlog, not as progress on this defect.
+
+Your recommendation on remedy priority should treat this table as the honest current
+state — mostly unscheduled beyond the defect report itself — not assume any remedy
+already has a home.
 
 ## Understanding the Schema
 
@@ -280,11 +345,11 @@ As you review this, consider:
 
 1. **Severity:** Is this defect as severe as presented? Are there scenarios where silent scale breaks are acceptable?
 
-2. **Scope:** Which providers in the HistFinTS ecosystem are actually affected? (Yahoo for splits/symbol changes, FRED for revisions — others?)
+2. **Scope:** Which providers in the HistFinTS ecosystem are actually affected? (Yahoo for splits/symbol changes, FRED for revisions — and see "Trigger Frequency" above: CEDEAR/BYMA ratio changes, which fire considerably more often for this project's actual universe.)
 
 3. **Remedy recommendation:** Given the use case (Research Workbench needs reliable data for statistical analysis), which remedy makes sense?
 
-4. **Implementation order:** If multiple remedies: which should ship first?
+4. **Implementation order:** If multiple remedies: which should ship first? (See "Sequencing: What's Already Decided (D-008)" above before proposing an order from scratch.)
 
 5. **Testing:** Do the regression tests adequately capture the defect? Are there other scenarios to test?
 

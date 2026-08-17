@@ -66,8 +66,13 @@ Current Status: Dormant (no affected production Series yet)
 Root Cause: Incremental import only re-fetches trailing window; basis changes applied retroactively by provider are never re-applied to historical data
 
 Affected Providers:
-  - Yahoo Finance (stock splits)
+  - Yahoo Finance (stock splits) -- rare for US large-caps; dividend-unadjusted close
+    means ex-dividend dates don't trigger a rescale
   - FRED (economic indicator revisions)
+  - CEDEAR/BYMA conversion-ratio changes -- higher frequency for this project's actual
+    universe: quarterly regulatory reporting cadence (CNV RG 1142/2026) plus ad hoc
+    local ratio changes; a confirmed real ~2:1 step exists in this database
+    (2024-01-24). See CONSULTANT-PACKAGE-F009.md ("Trigger Frequency").
   - Any provider with basis-shift or revision behavior
 
 When it occurs:
@@ -138,7 +143,8 @@ QUESTIONS FOR THE CONSULTANT
 
 2. SCOPE
    Which providers in the HistFinTS ecosystem are actually affected? (Beyond
-   Yahoo and FRED, what else?)
+   Yahoo and FRED -- see the CEDEAR/BYMA trigger-frequency note above, which is
+   the higher-frequency case for this project's actual universe.)
 
 3. REMEDY RECOMMENDATION
    Given the use case (Research Workbench needs reliable data for statistics),
@@ -146,7 +152,13 @@ QUESTIONS FOR THE CONSULTANT
 
 4. IMPLEMENTATION ORDER
    If multiple remedies are needed, which should ship first? Are there
-   dependencies between them?
+   dependencies between them? NOTE: the original D-008 tranche table is
+   superseded by D-019 -- Tranche 2 reduced to ONE item (adjustment-basis field,
+   now done), not the four originally proposed. F-009 is Tranche 1, gated only on
+   the reproduction, now satisfied by the included tests. R2/event-capture was
+   NEVER part of Tranche 2 (explicitly excluded; filed separately as F-012) and
+   remains unscheduled. See CONSULTANT-PACKAGE-F009.md ("Sequencing: What's
+   Already Decided") for the corrected picture before proposing an order.
 
 5. TESTING
    Do the regression tests adequately capture the defect? Are there edge cases
