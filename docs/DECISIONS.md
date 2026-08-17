@@ -2605,6 +2605,28 @@ progress on both fronts at once.
 
 ---
 
+### D-041 — File the complete Tranche 2 request with both items, following Q-061 cleanup
+
+*Decided 2026-08-17. Implements the sequencing established in D-040.*
+
+Filed as `docs/histfints-requests/REQUEST-tranche2-completion.md`: two items, neither
+blocking the other, both necessary before panel-eligibility implementation:
+
+1. **Adjustment-basis backfill.** `provider.adjustment_basis` column exists but is NULL
+   for all three providers. Must be populated (`UNADJUSTED` for FRED and BYMA,
+   `SPLIT_ADJUSTED` for Yahoo) so SPEC-panel-eligibility.md's `adjustment_policy` parameter
+   can activate.
+2. **Provider-assignment availability marker.** Never built — only `provider_symbol`
+   (Catalog-side, unreachable from most Series per D-025) currently holds this data. A
+   provider-assignment-level marker is needed so `minimum_coverage` parameter works on the
+   operational path (Series → ProviderAssignment), not just the Catalog path.
+
+Both requests are factual (verified live against the database, not inferred) and ready to
+forward. Next step per D-040 sequencing: once confirmed, send Q-061's three inclusion-rule
+parameters to the financial advisor for domain review.
+
+---
+
 ### Inherited principles (ratified, not re-decided)
 
 These come from the specification and are treated as binding constraints on all
