@@ -2206,6 +2206,291 @@ came back clean.
 
 ---
 
+### D-038 — Observation suitability is **two orthogonal axes**, not one enum: *did a trade occur* is row-local and governs; *was the venue open* is downstream of it and governs nothing. D-036's principle transfers, its softness does not
+
+*Decided 2026-08-17. Governs `SPEC-observation-suitability.md`. Depends on D-001, D-033,
+D-036, D-037. Sharpens F-026, corrects its proposed mitigation, and raises F-028, F-029,
+F-030, F-031. Gates `SPEC-panel-eligibility.md` implementation.*
+
+**Context.** F-026 found Yahoo `.BA` phantom bars by observing `value = previous close` and
+`volume = 0` on dates that are not real BYMA sessions, and proposed as mitigation: *treat
+`volume = 0` on an equity Series as no observed trade, exclude such bars*. A-016 queued that
+sentence to be folded into the spec "wherever returns are specified". The directive was to
+determine the actual treatment before `SPEC-panel-eligibility.md` is built, preserving the
+upstream rows untouched. Investigating the detection rule rather than accepting F-026's
+description changed the answer in three places.
+
+---
+
+#### (a) `volume = 0` is not a no-trade signal — 19.7% of zero-volume bars are real
+
+300-Series USD equity/ETF sample, all history, 27,564 zero-volume bars decomposed by whether
+OHLC collapse to one price and whether that price equals the prior stored close:
+
+| `open=high=low=close` | `= prior close` | count |
+|---|---|---|
+| yes | yes | 19,883 |
+| yes | no | 2,235 |
+| no | no | **4,247** |
+| no | yes | **1,187** |
+
+**5,434 bars (19.7%) carry a genuine intraday high/low range with `volume` reported as 0** —
+spot-checked on series 118 (Aclarion), 2023-11-22…2023-12-14, ranges of 3–15%. These are real
+price bars with a defective volume field. F-026's mitigation would discard every one of them.
+Raised as **F-028**. `volume IS NULL` is 0 across every sample, and
+`providers/yahoo_finance.py:162` passes the provider's value straight through, so a zero is
+Yahoo asserting zero, not HistFinTS defaulting — which is what makes the field usable as *one*
+conjunct.
+
+**The rule adopted is conjunctive:** `volume = 0` **and** `open = high = low = value`
+**and** `value` = the prior stored close for that Series, compared for **exact** equality.
+Exact, not tolerant: the repeated closes are bit-identical (`29.3999996185303`), because Yahoo
+echoes the same float rather than recomputing, so a tolerance buys nothing on true positives
+and starts admitting genuine thin-session prints near the prior close.
+
+**Recall validated against ground truth independent of the store.** Argentina's *feriados
+inamovibles* — 01-01, 05-01, 07-09, 12-08, 12-25 — which no decree moves. All 75 bars found
+on those dates across series 11312/11313/11314/11315 match all three conjuncts, bit-identical
+prior close included. 04-02 was deliberately excluded from the ground-truth set because the
+store has a full-volume session on 2020-04-02 and **no** bar on 2020-03-31 — the holiday was
+moved and the store is right about it, the same failure that made `XBUE` wrong on ten 2025
+dates (D-037(c)).
+
+#### (b) The decisive finding: roughly half the fills are on **real** trading sessions
+
+Eight daily BYMA Series, 1,910 bars matching the full signature, split by whether *any* of the
+eight reported a trade on the same date:
+
+| | no Series traded | another Series traded |
+|---|---|---|
+| pre-2015 | 966 | 868 |
+| 2015+ | 68 | 8 |
+| **total** | **1,034 (54%)** | **876 (46%)** |
+
+**2026-07-06** is the clean instance: a Monday on which seven of nine Series traded normally,
+while 11305 (`AAPL.BA`) and 11317 (`BIDU.BA`) each carry a zero-volume carried-forward bar.
+The venue was open, those two Series did not trade, and Yahoo emitted a fill instead of the
+null close F-027 documents — so Yahoo's own behaviour is not consistent between the two cases.
+
+On the US side the split is total. Across the 300-Series sample there is **not one
+observation** on 2025-01-09 (Carter closure), 2018-12-05, 2012-10-29/30 (Sandy),
+2001-09-11…14, 2025-01-01, 2025-07-04 or 2025-12-25. All 19,883 US fills are on genuine
+sessions. No weekend bars exist on any BYMA Series.
+
+**So "not in the derived venue calendar" is neither necessary nor sufficient as a detection
+rule** — and, worse, it *cannot* be one. It is unavailable exactly where it is most needed
+(BYMA pre-2015 is *Unresolved* per D-037(f), and 1,834 of the 1,910 cases live there), and it
+is **circular**: D-037 derives the calendar from observation dates and D-037(f) states in
+terms that the derivation over-counts because of these very bars.
+
+**Resolved by ordering, which is why axis A is specified as row-local:** (1) trade evidence,
+from the row and its predecessor, no calendar input; (2) calendar, derived per D-037 but with
+the quorum run over **trade-bearing** dates rather than raw dates; (3) session status, from the
+calendar in (2). No cycle. Step (2) is a correction to D-037; D-037's own reason for not
+filtering by volume — a real session can be quiet across two or three thin contributors —
+survives untouched and is precisely why step (3) returns `SESSION_UNRESOLVED` rather than
+`SESSION_ABSENT` for the thin era.
+
+#### (c) The mechanism is **live in 2026**, and the era-boundary framing is dead
+
+D-037(f) recorded raw dates = `volume > 0` dates from ~2019; F-026 concluded the pattern
+"disappear[s] entirely from ~2019". Extending the count through the current year, which D-037
+did not sample:
+
+| year | 2019 | 2020 | 2021 | 2022 | 2023 | 2024 | 2025 | 2026 |
+|---|---|---|---|---|---|---|---|---|
+| raw dates | 244 | 241 | 244 | 244 | 243 | 246 | 243 | **156** |
+| `volume > 0` | 244 | 241 | 244 | 244 | 243 | 246 | 243 | **152** |
+
+The four divergences are 2026-05-01, 05-25, 06-15 and 07-09 — all real Argentine holidays —
+each carrying a fill on **seven of nine** Series simultaneously. Raised as **F-029**. Two
+consequences: the derived BYMA calendar is threshold-sensitive at 7/9 in the era D-037 rated
+*Reliable*, and D-037's claim of a sharply-separated quorum does not hold there.
+
+The obvious rolling-window explanation is **dead**: all 6,624 observations of series 11312,
+2000-01-03 through 2026-08-14, carry `import_run_id = 25552`. One provider response contained
+fills for 2000–2018 and for 2026-05…07 and none for 2019–2025. Why is not determinable from
+the store, and this entry does not guess. It is the reason classification must run
+continuously over whatever range is analysed rather than as a one-off cleanup of deep history,
+and the reason no era cut-off may be hard-coded.
+
+#### (d) Does D-036's principle transfer? Yes — the *softness* does not
+
+The question was put deliberately, since D-036 used similar language for a different problem.
+Two defensible readings existed. **(a) Full transfer** — the classification is a flag, every
+consumer decides; argues from a single epistemic posture across the Workbench. **(b) Harder
+exclusion** — a `NO_TRADE_REPORTED` row is not an unresolved question about the world, it is
+the provider stating nothing traded, so treating it as advisory lets a calculation consume a
+price no trade produced, which is P3's fabricated-lineage failure with the fabrication
+performed upstream.
+
+**Adopted: the principle transfers, the softness does not, because D-036's softness was a
+consequence of evidence *absence*, not of the principle.** D-036's third verdict exists to
+describe HistFinTS not having captured something (`TABLE_ABSENT`, an empty `provider_event`, a
+provider that publishes no revisions), and under that constraint the analytical method really
+is better placed to judge its own tolerance. The trade-evidence axis has no analogous absence:
+it is decided deterministically from two rows that are always present, with no dependence on
+evidence that may or may not have been captured. Importing the hedge would hedge against a
+risk that is not there.
+
+Three operative rules:
+
+1. **No global gate**, and no suppression at the read layer. A price chart, a volume study, a
+   data-quality panel and a coverage count all legitimately want these rows, and two of them
+   want them *because* of the classification. This is D-036's requirement met literally.
+2. **A default that cannot be overridden in silence.** Continuity-sensitive calculations —
+   returns, volatility, correlation, beta, CAGR, implied-FX series, and F-009 candidate
+   generation — exclude `NO_TRADE_REPORTED` by default. Including them is permitted and must
+   be declared in the calculation's own P3 provenance with the count included. The strength is
+   in the audit obligation, not in a prohibition.
+3. **`TRADE_EVIDENCE_UNRESOLVED` keeps D-036's pattern unchanged**, because it *is* an
+   evidence-absence case — excluded by default, reported as a separate count, never merged
+   into the `NO_TRADE_REPORTED` count. **Q-067** raised.
+
+**Session status gates nothing.** It explains a classification to a reader and feeds A-016(f)'s
+calendar-confidence display. A row is not less suitable for a return because the venue was
+shut; it is unsuitable because no trade produced its price. The vocabulary
+`PHANTOM_FILL`/`LEGITIMATE_ZERO_VOLUME`/`AMBIGUOUS` is rejected for collapsing the two axes
+and for attaching the word *legitimate* to the axis that matters least — a fill on a genuine
+session is exactly as unusable for a return as one on Christmas Day. `PHANTOM_FILL` survives
+only as a display label for one cell of the grid, derived at render time (P43).
+
+#### (e) Treatment: exclusion is a **date removal upstream of the intersection**
+
+No new analytical machinery is needed. Removing the date from the Series' usable set before
+D-037(d)'s pairwise intersection means the CEDEAR leg does not contribute that date, no
+implied-FX point is computed, no forward-fill is introduced, and the surviving return spans
+more than one session and must be labelled per A-016(d).
+
+**The argument in one case.** Series 11315 (`PAMP.BA`) has an unbroken 116-bar run,
+**2004-11-09 to 2005-04-19**, frozen at `0.113329999148846`. Untreated: 116 fabricated zero
+returns and one compressed jump — D-017's staleness pathology, wrong in the flattering
+direction. Treated: a 116-session hole and one honest ~5.5-month multi-session return, labelled
+as such. Run lengths across the four deep Series: 756 of length 1, 151 of 2, then a tail at 20,
+30, 37, 39, 51, 76, 116. A run is never bridged, interpolated, averaged or annualised into
+daily terms.
+
+**F-031, found while doing this.** Series 11312 has a 10× step at 2001-12-12 — `17.0` on 12-10
+and 12-11, `1.70000004768372` from 12-12 — and *every* bar on both sides is zero-volume,
+collapsed and carried-forward. F-009's detector on raw rows would generate this as a candidate
+and, the legacy `correction` table holding nothing, return *not explained by captured
+evidence*, quarantining a span on the strength of two rows representing no trade. Rule: a
+boundary whose endpoints are both `NO_TRADE_REPORTED` is not a candidate; one such endpoint
+makes it a candidate whose calculation records the classification. **Specification only — the
+D-035 freeze holds.**
+
+#### (f) Object shape: reference by key, and a deliberate narrowing of D-033's exception
+
+`observation_suitability` (P4 `Calculated`) references F-009's existing `evidence_reference`
+rather than inventing a second pointer type, and carries a second reference to the predecessor
+observation the equality test used — without which the test is not restatable. Supporting
+objects: `calendar_derivation` (the D-037 calendar as a citable object, since it is an input to
+a displayed number), `suitability_run` (without which the *absence* of a classification row is
+ambiguous between "ordinary" and "never examined" — the D-009b trap in its own right, so a
+consumer must refuse to apply the default over an uncovered range), and a derived
+`no_trade_run` because §5 shows run length, not row count, is what a display must warn on.
+
+**No upstream values are copied**, and D-033's finding-restates-its-own-arithmetic exception is
+**not** extended to cover this. The assertion is an equality *relation*, restatable by
+re-reading two named rows; and at ~20k rows per 300 Series, extrapolating to ~750k across the
+store, a value copy is not an audit note but a shadow price store, which D-001 forbids. Stated
+explicitly so it does not read as an oversight. Classification runs **lazily**, over the range
+an analysis touches, driven by `suitability_run`.
+
+**Nothing is deleted or rewritten upstream.** HistFinTS keeps every row exactly as it stands
+(D-001); the only new records are the Workbench's own classifications.
+
+#### Consequences
+
+1. **`SPEC-panel-eligibility.md` implementation is gated on this spec's items 1–3** (axis A,
+   the trade-filtered calendar, axis B). The 116-session run and its 20/30/37/39/51/76
+   companions produce precisely the persistent implied-FX excursion the panel residual uses as
+   its ratio-change signal (D-016/D-017), on the longest-history pairs — which are the ones
+   A-012's demo depends on.
+2. **A-016 is amended**: its trailing instruction to fold in F-026's zero-volume exclusion rule
+   is withdrawn per F-028, and its calendar quorum must run over trade-bearing dates with the
+   confidence table extended through 2026. **A-017 queued** for the spec section itself.
+3. **D-037's BYMA rating for ~2019→present is downgraded** from *Reliable* to *Reliable, with
+   the quorum filtered by trade evidence* — the underlying derivation is sound, the unfiltered
+   form is not (F-029).
+4. **F-026 stands as a finding but its mitigation sentence is superseded** by (a). F-026's open
+   item on Alpha Vantage and Stooq is **unanswerable from the store** — `provider` holds
+   exactly three rows, `fred`/`yahoo_finance`/`byma`, and no AV or Stooq row exists. It stays
+   open as a question about a provider not in use, not recorded as a clean result (D-009).
+5. **F-030 blocks series 11311 from classification and from any calendar quorum** until
+   resolved.
+6. No HistFinTS change is required and nothing is filed. F-027 remains the honest limit: axis A
+   is a reconstruction of a signal the provider sent and HistFinTS discarded, and should be
+   labelled as such wherever its confidence is displayed.
+
+**Evidence.** All queries against
+`C:\Users\CarlonTinto\AppData\Local\histfints\histfints\histfints.db` with `sqlite3 -readonly`
+and `PRAGMA temp_store=2`.
+
+```sql
+-- (a) zero-volume decomposition, 300-Series USD sample
+CREATE TEMP TABLE samp AS SELECT id FROM series WHERE currency='USD'
+  AND series_type IN ('STOCK','ETF') ORDER BY id LIMIT 300;
+CREATE TEMP TABLE b AS SELECT o.series_id sid, date(o.observed_at) d, o.value v,
+  o.open op,o.high hi,o.low lo,o.volume vol,
+  lag(o.value) OVER (PARTITION BY o.series_id ORDER BY o.observed_at) pv
+  FROM observation o JOIN samp ON samp.id=o.series_id;
+SELECT (op=hi AND hi=lo AND lo=v) collapsed, (v=pv) eqprev, count(*)
+  FROM b WHERE vol=0 GROUP BY 1,2;      -- 19883 / 2235 / 4247 / 1187
+
+-- (a) recall on feriados inamovibles: 75 rows, all three conjuncts, bit-identical
+WITH b AS (SELECT series_id, date(observed_at) d, value, open,high,low,volume,
+  lag(value) OVER (PARTITION BY series_id ORDER BY observed_at) pv
+  FROM observation WHERE series_id IN (11312,11313,11314,11315))
+SELECT series_id,d,value,pv,(value=pv) eq,volume FROM b
+WHERE substr(d,6,5) IN ('01-01','05-01','12-25','07-09','12-08') ORDER BY 1,2;
+
+-- (b) on-session vs off-session split: 876 vs 1034
+CREATE TEMP TABLE traded AS SELECT DISTINCT d FROM b WHERE vol>0;
+SELECT (t.d IS NOT NULL), count(*) FROM b LEFT JOIN traded t ON t.d=b.d
+WHERE vol=0 AND op=hi AND hi=lo AND lo=v AND v=pv GROUP BY 1;
+
+-- (b) US: zero rows on every known NYSE closure across 300 Series
+SELECT date(o.observed_at), count(*) FROM observation o JOIN samp ON samp.id=o.series_id
+WHERE date(o.observed_at) IN ('2025-01-09','2018-12-05','2012-10-29','2012-10-30',
+  '2001-09-11','2001-09-12','2001-09-13','2001-09-14','2025-01-01','2025-07-04','2025-12-25')
+GROUP BY 1;                             -- empty
+
+-- (c) raw vs trade-bearing session dates, 2019-2026: diverges again in 2026 (156 vs 152)
+SELECT substr(observed_at,1,4) y, count(DISTINCT date(observed_at)),
+  count(DISTINCT CASE WHEN volume>0 THEN date(observed_at) END)
+FROM observation WHERE series_id IN (11305,11311,11312,11313,11314,11315,11316,11317,11319)
+AND observed_at>='2019' GROUP BY 1;
+
+-- (c) single import run spans 2000-2026, killing the rolling-window explanation
+SELECT import_run_id, count(*), min(date(observed_at)), max(date(observed_at))
+FROM observation WHERE series_id=11312 GROUP BY 1;   -- 25552 | 6624 | 2000-01-03 | 2026-08-14
+
+-- (e) run lengths, and the 116-bar frozen run on 11315
+-- (e/F-031) the phantom-to-phantom 10x step
+SELECT date(observed_at),open,high,low,value,volume FROM observation
+WHERE series_id=11312 AND date(observed_at) BETWEEN '2001-12-10' AND '2001-12-17';
+
+-- F-030
+SELECT id,configured_interval FROM series WHERE id=11311;   -- 5m
+SELECT count(*) FROM observation WHERE series_id=11311
+  AND substr(observed_at,12,5)<>'14:00';                    -- 72
+-- §1.7
+SELECT id,implementation_key FROM provider;   -- fred | yahoo_finance | byma, and nothing else
+```
+
+**D-009 check.** Two clean results appear in this entry and neither is treated as reassuring.
+The zero-observations-on-NYSE-closures result is load-bearing in the *positive* direction — it
+establishes that US fills are on real sessions, which is what makes the two axes necessary —
+and it rests on 300 Series across six independently-known closure dates, not on absence of
+evidence. The 2019–2025 raw-equals-filtered result is explicitly **not** accepted as evidence
+the mechanism stopped: extending the same count one year forward broke it (F-029), which is the
+D-009 failure caught in the act, against a claim D-037 had already logged. The Alpha
+Vantage/Stooq question is recorded as untestable rather than clean, because no such provider
+row exists.
+
+---
+
 ### Inherited principles (ratified, not re-decided)
 
 These come from the specification and are treated as binding constraints on all
@@ -2231,6 +2516,7 @@ changes the architecture, not just the content.
 
 | ID | Status | Question |
 |---|---|---|
+| Q-067 | open · Workbench-side, provisionally answered, blocks nothing | **Should `TRADE_EVIDENCE_UNRESOLVED` bars be excluded from continuity-sensitive calculations by default?** These are zero-volume, single-price bars whose price *moved* — 2,235 in the 300-Series US sample, 50 across the deep BYMA Series. They cannot be pure carry-forwards (the price changed) and cannot be confirmed as trades (volume says none occurred). D-038(d)/§4.3 adopts *exclude by default* provisionally, on the D-036 pattern, since this genuinely is an evidence-absence case. Including them is defensible — the price moved, so something happened, and a single-print bar is normal in an illiquid name. **Not decidable from the store**: it needs either an external print source (Rava/BYMA for the ARS side, a US tape for the other) or a domain judgement. Whichever way it goes, the count must stay reported separately from the `NO_TRADE_REPORTED` exclusion count, never merged. |
 | ~~Q-066~~ | closed | → D-036. Verdict quarantines the affected span, not the Series; downstream consumer decides relevance to its own analysis. |
 | ~~Q-056~~ | closed | → D-014. |
 | **Q-045** | **blocking · awaiting answer** | **The capability matrix.** D-013 gave the three axes — wrapper (direct/CEDEAR/CEVA/ADR) × underlying asset class (shares/ETF/bond/commodity/virtual asset/index) × venue+currency+settlement. What is missing is the matrix itself: which metrics are permitted, suppressed or replaced for each combination. Without it **AC-04 is untestable** and V0's Statistics section (Q-048) cannot be scoped. Open since the first round, and now fully equipped to be answered. |
@@ -2786,6 +3072,94 @@ it would be H for a single-Series venue. Not filed upstream yet — it belongs w
 event-capture family (`REQUEST-event-capture.md`) rather than as a new standalone ask, and
 D-008's tranching rule applies.
 
+### F-028 · H — F-026's own mitigation is unsafe: one zero-volume bar in five is a real bar with a defective volume field
+
+F-026 proposed *"treat `volume = 0` on an equity Series as no observed trade, exclude such
+bars"*, and A-016 queued that sentence to be folded into the spec wherever returns are
+specified. Measured on a 300-Series USD equity/ETF sample, all history: of 27,564 zero-volume
+bars, **5,434 (19.7%) carry a genuine intraday high/low range** — 4,247 with a price change and
+1,187 closing back at the prior close. Series 118 (Aclarion) shows 3–15% daily ranges with
+`volume = 0` throughout 2023-11-22…2023-12-14.
+
+`observation.volume IS NULL` is 0 across every sample and
+`providers/yahoo_finance.py:162` passes the provider's value through unchanged, so these are
+Yahoo reporting zero volume against bars whose own OHLC contradict it — a defective volume
+field, not a missing trade.
+
+**What it breaks.** The mitigation clause of F-026, and the trailing instruction in **A-016**
+("fold in F-026's zero-volume exclusion rule wherever returns are specified"). Implemented as
+written it would delete 19.7% of zero-volume bars that are real price evidence, and would do so
+concentrated in illiquid small caps — biasing any cross-section that includes them.
+Superseded by D-038(a)'s conjunctive rule. **`volume = 0` is usable only as one conjunct of
+three, never alone.**
+
+### F-029 · H — The phantom mechanism is live in 2026, and D-037's own reliability rating for BYMA rests on a year it did not sample
+
+D-037(f) recorded that raw session dates equal `volume > 0` session dates from ~2019 and rated
+BYMA ~2019→present *Reliable*; F-026 stated the pattern "disappear[s] entirely from ~2019".
+Both stop at 2025. Extending the identical count over the nine tracked BYMA Series:
+
+| year | 2019 | 2020 | 2021 | 2022 | 2023 | 2024 | 2025 | 2026 |
+|---|---|---|---|---|---|---|---|---|
+| raw dates | 244 | 241 | 244 | 244 | 243 | 246 | 243 | **156** |
+| `volume > 0` dates | 244 | 241 | 244 | 244 | 243 | 246 | 243 | **152** |
+
+The four 2026 divergences are 05-01, 05-25, 06-15 and 07-09 — Labour Day, Revolución de Mayo,
+Güemes (moved) and Independencia — and each carries a zero-volume carried-forward bar on **seven
+of nine** Series at once.
+
+**What it breaks.**
+
+- **D-037's calendar-confidence table**: BYMA ~2019→present cannot be rated *Reliable* on the
+  unfiltered derivation. At a 7/9 participation those four dates enter the derived calendar
+  under any quorum below 78%, and D-037's claim that the quorum is "sharply separated" does not
+  hold for BYMA in 2026. The fix is D-038(b)'s ordering — quorum over trade-bearing dates — not
+  a threshold tweak.
+- **Any cleanup scoped by era.** All 6,624 observations of series 11312, 2000-01-03 through
+  2026-08-14, carry `import_run_id = 25552`: one provider response contained fills for
+  2000–2018 and for 2026-05…07 and none for 2019–2025. A rolling-window explanation is
+  therefore dead, the reason for the 2019–2025 hole is unknown, and no era boundary may be
+  hard-coded. Classification must run continuously.
+
+This is the D-009 failure caught in the act against a claim already logged: a clean
+2019–2025 result was read as the mechanism having stopped.
+
+### F-030 · M — Series 11311 holds two intervals in one Series, so `date(observed_at)` is not a session key for it — and it was a calendar quorum contributor
+
+Series 11311 (`GLD.BA`) has `configured_interval = '5m'` and contains **398 daily bars plus 72
+five-minute bars**, the latter all from 2026-08-14 (`import_run_id = 25551`), alongside a daily
+bar for the same date from `import_run_id = 11376`.
+
+**What it breaks.** `date(observed_at)` as the session key — D-037(b) adopted it after checking
+that stored times are session opens, which is true of the daily rows and false of these; any
+`lag(value) ORDER BY observed_at` on this Series mixes granularities; and a 5-minute
+session-open bar legitimately carries `volume = 0`, so it would be misclassified by any daily
+rule. 11311 was **one of D-037's nine BYMA quorum contributors** and is the Series whose
+2025-02-19 / 2025-08-27 gaps D-037 cited as evidence of genuine no-trade days — that evidence
+is unaffected, but the Series must be excluded from quorum and from classification until the
+mixed interval is resolved.
+
+Not a HistFinTS defect claim: whether one Series may legitimately hold two intervals is an
+upstream design question not investigated here.
+
+### F-031 · M — A discontinuity between two carried-forward bars would be reported as an unexplained discontinuity
+
+Series 11312 steps 10× at 2001-12-12: `17.0` on 12-10 and 12-11, `1.70000004768372` from 12-12
+onward. Every bar on both sides is `volume = 0`, OHLC-collapsed and equal to its predecessor —
+the step sits **inside** a carried-forward region, with no trade on either side of it.
+
+**What it breaks.** `SPEC-f009-evidence-consumption.md` §4.2 candidate generation and §4.3's
+verdict. Run on raw rows, the detector generates a 10× candidate; the legacy `correction` table
+holds nothing at that date, so the verdict is *not explained by captured evidence*, and per
+D-036 the span is quarantined — on the strength of two rows that represent no trade. The
+quarantine is not wrong so much as vacuous: it reports a provider fill artefact as a data
+integrity event about the instrument.
+
+Rule adopted in D-038(e): candidate generation runs on the filtered series; a boundary whose
+endpoints are both `NO_TRADE_REPORTED` is not a candidate; one such endpoint makes it a
+candidate whose calculation records the classification. **Specification only — the D-035 freeze
+holds and no reconciler code changes.**
+
 ### F-007 · L — The database is proprietary; the data is not
 
 Yahoo, Stooq and Alpha Vantage terms bind on redistribution. Irrelevant while this
@@ -2817,7 +3191,8 @@ Written once the governing decision lands; do not edit the spec ahead of them.
 | A-013 | D-032, D-033 | Add an **evidence-consumption** section to the spec, per `SPEC-f009-evidence-consumption.md`: the four epistemic layers (provider evidence / Workbench calculation / analytical finding / research conclusion) with their P4 statuses, the three-value reconciliation verdict with its reason codes, and the rule that no finding is ever auto-promoted to a conclusion. Must state that `explained by captured evidence` is unreachable until HistFinTS migrations 0011–0013 are applied and the capture commands have been run. |
 | A-015 | D-036 | Extend `SPEC-f009-evidence-consumption.md` with (a) a downstream-consumption section: verdicts quarantine the affected time span for continuity-sensitive analyses, never the whole Series; the analytical method decides what evidence quality it needs. (b) An explicit CEDEAR-validation-gap statement: Yahoo/FRED evidence validates the general reconciliation mechanism only — a CNV/BYMA ratio-event evidence path is required before verdicts are authoritative for CEDEAR ratio changes. Specification work, not reconciler code; does not lift the D-035 freeze. |
 | A-014 | D-032 | **Correct the stale rows in `HISTFINTS-BRIEF-v2.md`.** The brief predates HistFinTS's R1/R2a/R2b work and currently reads as though FRED vintages were never requested and Yahoo events never parsed. Both are now false in code and both are still true in the live database — the brief must carry that distinction explicitly (`code-complete / not migrated`), because a reader who trusts either half alone will design wrongly. |
-| A-016 | D-037 | Add a **calendar and alignment** section to the spec, stating: (a) the trading calendar is **derived** from the store by quorum over Series sharing a venue, is P4 `Calculated`, and carries the contributing `series_id` list and quorum threshold as provenance; (b) the venue grouping key is a Workbench-owned MIC assertion (P4 `Asserted`) reusing the `XBUE`/`XNYS` vocabulary, because `provider_symbol.venue` is unreachable from a Series by construction; (c) cross-Series alignment is **intersection of common dates, pairwise, differencing after intersecting**, with forward-fill prohibited and the reason stated (P3 — no observation stands behind a filled value); (d) a multi-session return arising from intersection must be labelled with the number of sessions it spans, not silently shown as a one-day return; (e) panel consensus records depth per date (*"derived from N pairs on this date"*), never a global panel intersection; and (f) the **calendar-confidence table** from D-037(f) verbatim, since "BYMA before ~2015 is unresolved" is a display obligation, not an internal note. Also fold in F-026's zero-volume exclusion rule wherever returns are specified. |
+| A-016 | D-037 | Add a **calendar and alignment** section to the spec, stating: (a) the trading calendar is **derived** from the store by quorum over Series sharing a venue, is P4 `Calculated`, and carries the contributing `series_id` list and quorum threshold as provenance; (b) the venue grouping key is a Workbench-owned MIC assertion (P4 `Asserted`) reusing the `XBUE`/`XNYS` vocabulary, because `provider_symbol.venue` is unreachable from a Series by construction; (c) cross-Series alignment is **intersection of common dates, pairwise, differencing after intersecting**, with forward-fill prohibited and the reason stated (P3 — no observation stands behind a filled value); (d) a multi-session return arising from intersection must be labelled with the number of sessions it spans, not silently shown as a one-day return; (e) panel consensus records depth per date (*"derived from N pairs on this date"*), never a global panel intersection; and (f) the **calendar-confidence table** from D-037(f) verbatim, since "BYMA before ~2015 is unresolved" is a display obligation, not an internal note. **Amended 2026-08-17 by D-038:** the trailing instruction to fold in F-026's zero-volume exclusion rule is **withdrawn** — F-028 shows `volume = 0` alone has a 19.7% false-positive rate; use `SPEC-observation-suitability.md`'s conjunctive rule instead. Two further corrections to (a) and (f): the quorum must run over **trade-bearing** dates, not raw dates, and the confidence table must be extended through 2026, where the two diverge again (F-029). |
+| A-017 | D-038 | Add an **observation-suitability** section to the spec, per `SPEC-observation-suitability.md`: (a) the two orthogonal axes — `trade_evidence` (row-local, governs suitability) and `session_status` (downstream of the calendar, governs nothing) — with the explicit statement that "not in the venue calendar" is neither necessary, sufficient, nor non-circular as a detection rule; (b) the conjunctive detection rule with **exact** float equality against the prior stored close, and F-028's reason for not using `volume = 0` alone; (c) the ordering trade-evidence → calendar → session-status, and why it is not a cycle; (d) the treatment as a **date removal upstream of D-037's pairwise intersection** — never a forward-fill, never a zero return, never a bridged or annualised run — with the 116-session `PAMP.BA` run as the worked example and the multi-session label obligation from A-016(d); (e) the D-036 relationship stated in full: no global gate, but a default that continuity-sensitive calculations exclude `NO_TRADE_REPORTED` and must declare inclusion in their own provenance, because D-036's softness was a consequence of evidence absence and there is no absence here; and (f) the object shape referencing upstream rows by key with **no value copies**, including `suitability_run`, without which an absent classification is ambiguous between *ordinary* and *never examined*. |
 | A-011 | D-007 | Add a two-layer corporate-actions section to the spec: HistFinTS-side raw provider events (Observed, P4) vs Workbench-side reconciled model and derivation (Calculated, P4). State explicitly that Yahoo events cover Yahoo Series only and that BYMA/CEDEAR ratio changes need a separate source. |
 
 ---
@@ -2842,6 +3217,7 @@ Binding across spec, code and conversation.
 
 | Date | Change |
 |---|---|
+| 2026-08-17 | **F-026 investigated before treatment, per an explicit directive to define suitability before building `SPEC-panel-eligibility.md` → D-038.** Investigating the detection rule rather than accepting F-026's description changed the answer three times. **F-028 (H)**: F-026's own mitigation — *treat `volume = 0` as no observed trade* — is unsafe; **5,434 of 27,564 zero-volume bars (19.7%) in a 300-Series US sample carry a genuine intraday range** (series 118, 3–15% ranges), so `volume = 0` is usable only as one conjunct of three. The adopted rule is `volume = 0` **and** `open = high = low = value` **and** `value` = prior stored close at **exact** float equality (the closes are bit-identical because Yahoo echoes the same float; a tolerance buys nothing and admits real thin prints). Validated at 100% recall against ground truth independent of the store — Argentina's five *feriados inamovibles*, with 04-02 deliberately excluded because the store is *right* that the 2020 holiday moved. **The decisive finding: the venue calendar cannot be the detection rule.** 876 of 1,910 BYMA fills (46%) fall on dates another BYMA Series traded — 2026-07-06 is the clean case, seven of nine trading while `AAPL.BA` and `BIDU.BA` carry fills — and **all 19,883 US fills are on real sessions** (zero observations on any of six known NYSE closures across 300 Series). It is also unavailable where it is most needed (1,834 of 1,910 cases are in BYMA's *Unresolved* pre-2015 era) and **circular** (D-037 derives the calendar from the very bars in question). Resolved by an **ordering**: trade evidence (row-local) → calendar (quorum over **trade-bearing** dates) → session status. **F-029 (H)**: the mechanism is **live in 2026** — raw 156 vs trade-bearing 152 session dates, four real Argentine holidays each carrying fills on seven of nine Series — so D-037's *Reliable* rating for BYMA ~2019+ rests on a year it did not sample, and the derived calendar is threshold-sensitive at 7/9. All 6,624 rows of series 11312 spanning 2000–2026 came from **one** `import_run_id = 25552`, killing the rolling-window explanation and any era-boundary cleanup. **D-036's principle transfers; its softness does not** — D-036's third verdict exists to describe *evidence absence*, and the trade axis has none, being decided from two rows always present. So: no global gate and no read-layer suppression (a volume study and a data-quality panel both want these rows), but continuity-sensitive calculations exclude `NO_TRADE_REPORTED` **by default**, and inclusion must be declared in the calculation's own P3 provenance. `PHANTOM_FILL`/`LEGITIMATE_ZERO_VOLUME`/`AMBIGUOUS` **rejected** for collapsing two axes and calling a fill on a real session *legitimate* when it is exactly as unusable for a return as one on Christmas Day. Treatment is a **date removal upstream of D-037's pairwise intersection** — never a fill, never a zero: `PAMP.BA`'s unbroken 116-bar frozen run (2004-11-09→2005-04-19) becomes one labelled ~5.5-month multi-session return instead of 116 fabricated zeros. **F-030 (M)**: series 11311 holds 398 daily plus 72 five-minute bars in one Series, so `date(observed_at)` is not a session key for it, and it was one of D-037's nine quorum contributors. **F-031 (M)**: 11312's 10× step at 2001-12-12 sits entirely inside a carried-forward region, so F-009's detector would quarantine a span on two rows representing no trade — candidate generation must run on filtered rows; **the D-035 freeze holds.** Reference-by-key throughout with **no value copies**, and D-033's restate-your-own-arithmetic exception deliberately **not** extended (an equality relation is restatable from two named keys; ~750k value copies would be a shadow price store). `suitability_run` adopted so an absent classification is not ambiguous between *ordinary* and *never examined*. **Nothing deleted or rewritten upstream.** Needs nothing from HistFinTS. `SPEC-observation-suitability.md` written; **`SPEC-panel-eligibility.md` implementation gated on it**; **A-016 amended**, **A-017 queued**, **Q-067 raised**. F-026's Alpha Vantage/Stooq open item recorded as **untestable** — `provider` holds only `fred`/`yahoo_finance`/`byma` — not as clean (D-009). |
 | 2026-08-17 | **Q-027 investigated and substantially closed → D-037.** Its premise ("no calendar table exists and no provider supplies one") was half wrong: the **store itself encodes both venue calendars**, derivable by quorum over Series sharing a venue — **zero** symmetric difference against `exchange_calendars`' `XNYS` for 2000/2005/2010/2015/2020/2025 (quorum 190–200 of 200, nothing in between), and for BYMA the 2025 NYSE↔BYMA symmetric difference resolves to 23 dates that are each an identifiable holiday of the correct country, including the ad-hoc 2025-01-09 NYSE closure. **`exchange_calendars` rejected as a runtime dependency** — for BYMA it is *less* accurate than data already held (wrong on ten 2025 dates: it carries Argentina's un-moved statutory dates instead of the traded ones, and misses the 05-02 bridge and 12-31 close), for NYSE it reproduces the store exactly at the cost of pandas/numpy in a zero-dependency project, and its value as an *independent* cross-check dies the moment it becomes the source; kept as an offline validation instrument, which is how the derivation was validated non-circularly. **Alignment ratified, not newly chosen** — D-016/D-017 already used intersection of common dates and got an externally corroborated result; forward-fill rejected on three evidenced grounds (manufactures D-017's stale-print artifact; is indistinguishable from F-026's phantom bars; has no provenance under P3). Two unstated implementation rules made explicit: **intersect dates before differencing** (otherwise a one-session US return is paired with a three-session BYMA return), and **intersect pairwise with per-date panel depth** rather than globally (233 of 258 dates at full depth in 2025; a global intersection would discard 25 for one thin CEDEAR). **Needs nothing from HistFinTS** — no schema change, no filing; Q-027 leaves the Tranche list. `provider_symbol.venue` **does exist** and is populated `XBUE` for 1,491 rows, but is unreachable from a Series **by construction** (`identifier` has `CHECK ((provider_symbol_id IS NULL) != (series_id IS NULL))`; 1,256 of 1,256 rows have `series_id IS NULL`) — a schema-level strengthening of D-025. **Unblocks D-030/D-031 interior-gap detection** for NYSE and BYMA ~2019+, and **removes Q-027 as a gate on `SPEC-panel-eligibility.md`** (still gated on Tranche 2 and Q-061). **Left open, narrowly:** BYMA before ~2015, where raw dates over-count, volume-filtered dates under-count, and `XBUE` is wrong — logged as *unresolved*, not *approximate*. **F-026 raised (H)**: Yahoo's deep `.BA` history contains zero-volume carried-forward **phantom bars** stored as real observations (2000-12-25 has a bar at the 12-22 close with volume 0; every weekday of 2000/2001 present; 21.9% of pre-2006 bars on 11312) — fabricates zero returns and will generate false ratio-change candidates in the implied-FX panel on exactly the longest-history pairs. **F-027 raised (M)**: Yahoo's null-close session marker — the only per-Series signal separating *venue closed* / *did not trade* / *fetch loss* — is discarded at `providers/yahoo_finance.py:149–154` and **unrecoverable**, because `RawSnapshotArchive` is wired only into catalog discovery and no price payload is ever archived; fourth instance of the D-021/D-028 discard characteristic. **A-016 queued.** D-036's `calendar_basis` stand-in can be replaced later for NYSE Series — named as a future consequence only; **the D-035 freeze holds.** |
 | 2026-08-17 | Financial-domain review of `SPEC-f009-evidence-consumption.md` (requested by D-035) → **D-036**, closing **Q-066**. Three decisions: (1) a verdict quarantines the affected **time span**, not the whole Series — precedent from CEDEAR detect-and-quarantine (D-015/A-012); a downstream-consumption table adopted (`explained`→proceed, `not explained`→quarantine the span for continuity-sensitive analyses, `insufficient evidence`→don't treat as validated). (2) Yahoo/FRED validation proves the **general** reconciliation mechanism only — CEDEAR ratio changes have a locally-invisible cause (confirmed AAPL 2024-01-24 case) and require a CNV/BYMA ratio-event path before CEDEAR verdicts are authoritative; reconciler work is **not** blocked on this. (3) The 20% step threshold is a **candidate-generation filter, not a financial discontinuity definition** — the project's own evidence (BABA reverted, BIDU was market-wide, AAPL persisted) already established persistence + cross-pair residual as the real discriminator; the calendar-day detector implementation stays labelled provisional until Q-027 lands. Governing principle recorded: a verdict describes evidence state, it does not decide whether an analysis is permissible — that is the analytical method's call. **A-015 queued** (spec additions for both (1) and (2)); does not lift the D-035 freeze. |
 | 2026-08-17 | F-009 evidence-consumption increment reviewed against its own acceptance criteria → **D-035**: established (enforced read-only boundary, no observation duplication, the four-step pipeline, explicit `TABLE_ABSENT`, all three verdicts reachable, `explained` gated on actual magnitude reconciliation per F-023/F-024). **Increment frozen except defects.** Two-stage acceptance test formalised: Stage 1 (current schema, absence/incompleteness → not-explained/insufficient) is closed by the passing tests; Stage 2 (real 0011–0013 evidence) is gated entirely on the already-filed, non-blocking migration request — no Workbench-side work until then. **Q-066 queued**: whether the three-verdict vocabulary is *sufficient for V0's actual research questions* is named as a financial-domain judgement, deliberately not decided by default and explicitly not to be closed by adding more reconciler machinery. |

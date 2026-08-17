@@ -1,7 +1,7 @@
 # SPEC — Panel Eligibility and Diagnostics
 
 **Status:** draft for review · **Version:** 0.1 · **Date:** 2026-08-15
-**Governing decisions:** D-016 (panel principle) · D-017 (time-varying membership) · D-024 (this spec) · **D-037 (calendar and alignment)**
+**Governing decisions:** D-016 (panel principle) · D-017 (time-varying membership) · D-024 (this spec) · **D-037 (calendar and alignment)** · **D-038 (observation suitability — gates implementation)**
 
 > **Update 2026-08-17 — D-037 removes Q-027 as a gate on this spec.** Cross-Series alignment is
 > **intersection of common dates, pairwise, differencing *after* intersecting**, with per-date
@@ -12,6 +12,32 @@
 > Tranche 2 migration (coverage metadata) and on Q-061 (inclusion rules) only. **See also F-026:**
 > zero-volume carried-forward phantom bars in Yahoo's deep `.BA` history will generate false
 > ratio-change candidates on the longest-history pairs unless excluded from return series.
+
+> ### Update 2026-08-17 — **implementation of this spec is GATED on `SPEC-observation-suitability.md`** (D-038)
+>
+> Per an explicit directive, no part of this spec is to be implemented until observation
+> suitability lands. The gate is not procedural. F-026's phantom bars include an unbroken
+> **116-session** frozen run on `PAMP.BA` (2004-11-09 → 2005-04-19), plus runs of 76, 51, 39,
+> 37, 30 and 20 sessions. Each produces a persistent implied-FX excursion on the CEDEAR leg
+> that is the *same signature* the panel residual uses to flag a ratio change (D-016/D-017) —
+> on the longest-history pairs, which are exactly the ones A-012's demo depends on. Built
+> before the filter, this spec would generate confident false ratio-change candidates.
+>
+> Three corrections to the update above, all from D-038:
+>
+> 1. **F-026's mitigation is withdrawn (F-028).** Do **not** treat `volume = 0` as no observed
+>    trade: 19.7% of zero-volume bars in a 300-Series US sample carry a genuine intraday range.
+>    Use the conjunctive rule in `SPEC-observation-suitability.md` §2.1.
+> 2. **The calendar quorum must run over trade-bearing dates, not raw dates,** and D-037's
+>    BYMA ~2019+ *Reliable* rating holds only in that filtered form — the unfiltered
+>    derivation admits four 2026 Argentine holidays at 7-of-9 participation (F-029).
+> 3. **Phantom bars are not confined to the deep `.BA` era.** They are live in 2026, present on
+>    US Series at scale (19,883 in the 300-Series sample), and 46% of them fall on **real**
+>    trading sessions. Any assumption that this is a pre-2015 BYMA problem is wrong.
+>
+> The alignment machinery itself needs no change: exclusion is a **date removal upstream of the
+> pairwise intersection**, so a filtered leg simply contributes fewer dates and the resulting
+> multi-session return carries the label A-016(d) already requires.
 
 ---
 
@@ -298,7 +324,7 @@ are computable against the current database today:
 | Exclusion reason | Computable now? |
 |---|---|
 | Insufficient history | **Yes** — observation count and date range per Series |
-| Liquidity | **Yes** — volume on `observation`, though null for value-only sources |
+| Liquidity | **Qualified yes** — volume on `observation`, null for value-only sources, and **`volume = 0` does not mean no trade** (F-028: 19.7% of zero-volume bars carry a real intraday range). A liquidity screen must read `trade_evidence`, not raw volume. |
 | Insufficient coverage | **No** — see below |
 | Instrument type | **No** — needs the capability matrix, which does not exist yet |
 
@@ -313,6 +339,19 @@ Two parameters cannot be implemented yet:
 
 Everything else is implementable against the current schema. **The spec can be written now;
 these two parameters activate when the upstream migration lands.**
+
+**Superseding gate (D-038).** The sentence above is about *upstream* blockers and still holds.
+Independently of it, **implementation of any part of this spec is gated on
+`SPEC-observation-suitability.md` items 1–3** (trade-evidence classification, the trade-filtered
+calendar derivation, session status). Those three need nothing from HistFinTS and are buildable
+today; they are simply not built yet. Nothing here may be implemented against raw
+`observation` rows.
+
+| Additional blocker | Blocked on |
+|---|---|
+| Any return, volatility, correlation or implied-FX series | `trade_evidence` classification (`SPEC-observation-suitability.md` §2.1, §5) |
+| interior-gap detection *and* the derived calendar it now rests on | the calendar quorum being filtered to trade-bearing dates (F-029) |
+| Series 11311 (`GLD.BA`) participating in any panel or quorum | **F-030** — mixed daily/5-minute bars in one Series |
 
 ---
 
