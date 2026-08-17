@@ -1,7 +1,17 @@
 # SPEC — Panel Eligibility and Diagnostics
 
 **Status:** draft for review · **Version:** 0.1 · **Date:** 2026-08-15
-**Governing decisions:** D-016 (panel principle) · D-017 (time-varying membership) · D-024 (this spec)
+**Governing decisions:** D-016 (panel principle) · D-017 (time-varying membership) · D-024 (this spec) · **D-037 (calendar and alignment)**
+
+> **Update 2026-08-17 — D-037 removes Q-027 as a gate on this spec.** Cross-Series alignment is
+> **intersection of common dates, pairwise, differencing *after* intersecting**, with per-date
+> panel depth recorded as provenance; forward-fill is prohibited. The trading calendar is
+> **derived from the store** by quorum over Series sharing a venue — authoritative for NYSE
+> across all eras, reliable for BYMA from ~2019, and **unresolved before ~2015**, which must be
+> declared rather than approximated. Needs no HistFinTS change. This spec remains gated on the
+> Tranche 2 migration (coverage metadata) and on Q-061 (inclusion rules) only. **See also F-026:**
+> zero-volume carried-forward phantom bars in Yahoo's deep `.BA` history will generate false
+> ratio-change candidates on the longest-history pairs unless excluded from return series.
 
 ---
 

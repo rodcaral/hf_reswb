@@ -422,7 +422,7 @@ been deliberately halted, in exchange for exercising the *easiest* of the three 
 
 | Item | Status |
 |---|---|
-| Q-027 (trading calendar) | Open. The implemented detector counts **calendar** days, not trading days, and every `discontinuity_calculation` records `calendar_basis` explicitly so this is never silently mistaken for a trading-day count. |
+| Q-027 (trading calendar) | **Substantially closed 2026-08-17 → D-037**, but **nothing changes in this increment.** A trading calendar is now available by derivation from the store (authoritative for NYSE all eras; BYMA from ~2019; **unresolved before ~2015**) and needs no HistFinTS change. The detector still counts **calendar** days and every `discontinuity_calculation` still records `calendar_basis` explicitly — which is exactly what makes the later substitution safe. Replacing it is a **future increment**: the D-035 freeze holds, and a trading-day basis would in any case be unavailable for BYMA-side spans before ~2015, so the substitution is not uniform and must be designed, not patched in. |
 | Migrations 0011–0013 applied upstream | **Not applied.** Filed separately, non-blocking (`REQUEST-apply-migrations-0011-0013.md`, D-034). Gates Stage 2 / the `explained` verdict against real data only. |
 | FRED vintage-value capture | Not implemented (F-024). Gates any real `explained` verdict for macro Series even after the migration lands. |
 | A-014 (correct `HISTFINTS-BRIEF-v2.md`) | Queued, not a blocker. |
@@ -430,4 +430,4 @@ been deliberately halted, in exchange for exercising the *easiest* of the three 
 | ~~Q-066~~ | **Closed → D-036.** Verdicts quarantine the affected span (§2.3), not the Series; step threshold is a candidate filter, not a financial definition (§4.2). |
 | **CNV/BYMA ratio-event evidence path** | **Not implemented, required before CEDEAR verdicts are authoritative (D-036, §1.2a).** Does not block general reconciler work; blocks calling any CEDEAR verdict from this increment authoritative. |
 | A-015 (spec additions: §2.3, §1.2a) | **Done in this revision.** Queued by D-036, written here. |
-| Detector methodological adequacy beyond this proof-of-concept | **Open, explicitly not assessed here (D-035, reaffirmed D-036).** The 15/60–75-trading-day framework is the empirically adopted target; the shipped calendar-day implementation remains provisional until Q-027 lands, and must not be presented as financially validated. |
+| Detector methodological adequacy beyond this proof-of-concept | **Open, explicitly not assessed here (D-035, reaffirmed D-036).** The 15/60–75-trading-day framework is the empirically adopted target; the shipped calendar-day implementation remains provisional — D-037 makes a real trading-day basis *possible* but does not make this detector validated — and must not be presented as financially validated. |
