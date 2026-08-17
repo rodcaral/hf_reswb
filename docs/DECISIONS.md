@@ -1791,6 +1791,68 @@ to HistFinTS as a separate, mechanical, non-blocking ask.
 
 ---
 
+### D-035 — F-009 evidence-consumption increment frozen except defects; two-stage acceptance test adopted; V0-sufficiency review deferred to a domain question, not more machinery
+
+*Decided 2026-08-17. Closes out the increment opened by D-032/D-033/D-034.*
+
+**What is established**, verified by the implementation and its passing tests, not merely
+asserted: the `hf_reswb` → HistFinTS boundary is genuinely read-only (enforced, not just
+documented — a write attempt raises `sqlite3.OperationalError`, tested against both a
+same-schema fixture and the real production file); no historical observation is duplicated
+Workbench-side (D-033's key-reference model, as built); the four-step pipeline (detect →
+resolve evidence → classify → record) exists and runs; evidence absence is represented
+explicitly (`TABLE_ABSENT` is a real, tested state, not an inferred one); all three verdicts
+are implemented and reachable under the right fixture; `explained` requires an actual
+magnitude-reconciling evidence row, never bare presence (F-023/F-024's guards are in the
+classify function itself, not just in prose).
+
+**Freeze, except defects.** No further expansion of the reconciliation framework — no
+richer verdict vocabulary, no additional evidence sources, no detector refinement — until
+Stage 2 below has run. Bug fixes against the existing scope are in scope for this freeze;
+new capability is not.
+
+**The two-stage acceptance test, formalised:**
+
+```
+Stage 1 (done, against current production schema):
+  absent/incomplete evidence -> correctly NOT explained / insufficient evidence
+Stage 2 (pending REQUEST-apply-migrations-0011-0013.md):
+  real captured provider_event / vintage evidence -> correctly explained / not explained / insufficient
+```
+
+Stage 1 is closed by this increment's tests. Stage 2 is gated entirely on an external,
+already-filed, non-blocking request — there is no Workbench-side work between here and
+Stage 2 running, only a wait.
+
+**What is explicitly still open, and not to be closed by writing more code:**
+
+1. **Stage 2 itself** — validation against real 0011–0013 evidence, once HistFinTS applies
+   the migration and reports what capture actually produced. Mechanical, not a design
+   question.
+2. **Whether the current detector (§4.2, calendar-day persistence, fixed step threshold) is
+   methodologically adequate beyond this proof-of-concept.** Not answered here. Explicitly
+   deferred rather than quietly assumed adequate by omission.
+3. **Q-066** — whether the three-verdict finding vocabulary is *sufficient to support V0's
+   intended research questions* is a financial-domain judgement, not a technical one, and is
+   queued as an open question rather than decided by default. See §2.
+
+**Why this is a domain question and not an engineering one.** D-033 fixed the vocabulary at
+three values because a richer one would encode a magnitude judgement the Workbench cannot
+make from event metadata (D-033). That reasoning constrains what the *system* may assert. It
+does not establish that "explained / not explained / insufficient" is the right question to
+be answering for the actual research use cases this project exists to serve — that is a
+separate, and prior, question, and defaulting to "add more classifier logic" without asking
+it first would repeat the exact failure mode P3 exists to prevent: technical machinery
+substituting for a decision that should have been made explicitly.
+
+**Immediate actions.** (1) Development freezes this increment except for defects. (2) Next
+technical action is Stage 2, triggered by HistFinTS's response to the filed migration
+request — no Workbench action until then. (3) Q-066 is queued for review against the actual
+V0 research questions this capability is meant to serve, before any further technical
+investment in this direction.
+
+---
+
 ### Inherited principles (ratified, not re-decided)
 
 These come from the specification and are treated as binding constraints on all
@@ -1816,6 +1878,7 @@ changes the architecture, not just the content.
 
 | ID | Status | Question |
 |---|---|---|
+| **Q-066** | **open · domain, not technical — see D-035** | **Are the three F-009 reconciler verdicts (`explained` / `not explained` / `insufficient evidence`) actually sufficient to support V0's intended research questions?** Not a request to expand the vocabulary — D-033 fixed it at three values for a stated reason. This asks whether *answering that question at all*, in that shape, serves the actual analytical use cases, before any further technical investment in the reconciler. Explicitly deferred rather than decided by default; must be answered by financial-domain review of real V0 research questions, not by adding classifier logic. |
 | ~~Q-056~~ | closed | → D-014. |
 | **Q-045** | **blocking · awaiting answer** | **The capability matrix.** D-013 gave the three axes — wrapper (direct/CEDEAR/CEVA/ADR) × underlying asset class (shares/ETF/bond/commodity/virtual asset/index) × venue+currency+settlement. What is missing is the matrix itself: which metrics are permitted, suppressed or replaced for each combination. Without it **AC-04 is untestable** and V0's Statistics section (Q-048) cannot be scoped. Open since the first round, and now fully equipped to be answered. |
 | ~~Q-065~~ | closed | → D-026. |
@@ -2356,6 +2419,7 @@ Binding across spec, code and conversation.
 
 | Date | Change |
 |---|---|
+| 2026-08-17 | F-009 evidence-consumption increment reviewed against its own acceptance criteria → **D-035**: established (enforced read-only boundary, no observation duplication, the four-step pipeline, explicit `TABLE_ABSENT`, all three verdicts reachable, `explained` gated on actual magnitude reconciliation per F-023/F-024). **Increment frozen except defects.** Two-stage acceptance test formalised: Stage 1 (current schema, absence/incompleteness → not-explained/insufficient) is closed by the passing tests; Stage 2 (real 0011–0013 evidence) is gated entirely on the already-filed, non-blocking migration request — no Workbench-side work until then. **Q-066 queued**: whether the three-verdict vocabulary is *sufficient for V0's actual research questions* is named as a financial-domain judgement, deliberately not decided by default and explicitly not to be closed by adding more reconciler machinery. |
 | 2026-08-17 | §8 of `SPEC-f009-evidence-consumption.md` accepted → **D-034**: proceed with the `hf_reswb` reconciliation implementation against the current schema (migrations 0011–0013 unapplied); `explained by captured evidence` remains structurally unreachable against production until they land, and must be stated as such in acceptance criteria, not left implicit. Two-stage validation adopted (now: not-explained/insufficient against legacy evidence; later: explained, once migrated). Migration application filed as a **separate, non-blocking, mechanical** ask (`REQUEST-apply-migrations-0011-0013.md`) — deployment of already-built code, not reopened HistFinTS development. F-023/F-024/F-025 restated as binding on the implementation: event correlation is `Calculated` not `Observed` (no FK); a bare FRED vintage date is not explanatory; `acquired_at` is capture time, not fetch time. `CLAUDE.md` gains a row for the new spec; A-014 stays queued, not folded into this increment. |
 | 2026-08-17 | F-009 remediation halted in HistFinTS; focus moved to proving Workbench evidence *consumption*. Upstream inspected before designing → **D-032**: the evidence chain is **code-complete and absent from the live database**. R1 (`RevalidationService`), R2a (`provider_event`), R2b-FRED (vintage dates) and R2b-Yahoo (splits/dividends) are all implemented, and **FRED vintages and Yahoo event parsing have landed since D-021**, which is now partly stale. But the production DB is at `PRAGMA user_version = 10` with migrations 0011–0013 unapplied, so `provider_event`, `observation_correction` and `revalidation_run` **do not exist across the ATTACH boundary** — corroborated by a backup trail stopping at migration 0010. BYMA `underlying_ratio` unchanged (hand-authored JSON reader only). D-006 **not** superseded: `default_revalidation_window_days` is still NULL for all three live providers. New verified provenance property: a corrected observation **retains its original inserting `import_run_id`**, giving two anchors per correction. **D-033** settles the Workbench-side model — reference upstream evidence by key, never duplicate observations (they are mutable in place, so a copy is a second truth, not a snapshot); four epistemic layers in existing P4 vocabulary, with **no auto-promotion of a finding to a conclusion**; verdict vocabulary fixed at three values because every richer option encodes a magnitude judgement the Workbench cannot make from event metadata. **F-012 updated** (parser landed; `_to_records()` still discards events and capture costs a duplicate request). **F-023** raised (`provider_event` has no FK to observations or corrections — correlation is the Workbench's `Calculated` step with a stated tolerance). **F-024** raised (FRED REVISION events carry vintage *dates only*; a bare vintage date must not count as explanatory or the verdict is vacuous for macro). **F-025** raised (`acquired_at` is capture time, not fetch time). Design note written: `SPEC-f009-evidence-consumption.md`. A-013, A-014 queued. |
 | 2026-08-15 | Log created. D-001…D-004 recorded; F-001…F-008 raised; open questions Q-006…Q-050 migrated in from the review sequence. |

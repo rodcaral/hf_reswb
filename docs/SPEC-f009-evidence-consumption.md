@@ -1,12 +1,18 @@
 # SPEC — F-009 Evidence Consumption and Reconciliation
 
-**Status:** design note for review · **Version:** 0.1 · **Date:** 2026-08-17
+**Status:** implemented (Stage 1), **frozen except defects** — see D-035 · **Version:** 0.2 ·
+**Date:** 2026-08-17
 **Governing decisions:** D-001 (read-only ATTACH) · D-032 (what upstream actually holds) ·
-D-033 (reference-not-duplicate; four layers; three verdicts)
+D-033 (reference-not-duplicate; four layers; three verdicts) · D-034 (proceed now; migration
+filed separately) · D-035 (Stage 1 accepted; increment frozen; Stage 2 and Q-066 pending)
 **Findings it must respect:** F-009 · F-012 · F-017 · F-023 · F-024 · F-025
 
-> **Implementation is not authorised by this note alone.** §8 names what must be true before
-> code starts, and one item in it is not yet true.
+> **Implementation shipped** in `src/hf_reswb/{domain,persistence,application}`, with
+> `tests/test_reconciliation_boundary.py` passing 5/5 — including against the real
+> production file, and including the `explained` path against a migrated fixture.
+> **Frozen except defects (D-035)** until Stage 2 (real 0011–0013 evidence) runs and Q-066
+> (whether this verdict vocabulary actually serves V0's research questions) is answered. Do
+> not expand scope on the strength of this note alone.
 
 ---
 
@@ -354,7 +360,10 @@ been deliberately halted, in exchange for exercising the *easiest* of the three 
 
 | Item | Status |
 |---|---|
-| Q-027 (trading calendar) | Open. The persistence test counts **trading** days at 15 and 60–75; without a venue calendar it degrades to calendar days, which is acceptable for this increment provided the finding records which was used. |
-| Migrations 0011–0013 applied upstream | **Not applied.** Gates the `explained` verdict only (§8.1). |
-| FRED vintage-value capture | Not implemented (F-024). Gates any `explained` verdict for macro Series. |
-| A-014 (correct `HISTFINTS-BRIEF-v2.md`) | Queued. The brief is stale on FRED vintages and Yahoo events. |
+| Q-027 (trading calendar) | Open. The implemented detector counts **calendar** days, not trading days, and every `discontinuity_calculation` records `calendar_basis` explicitly so this is never silently mistaken for a trading-day count. |
+| Migrations 0011–0013 applied upstream | **Not applied.** Filed separately, non-blocking (`REQUEST-apply-migrations-0011-0013.md`, D-034). Gates Stage 2 / the `explained` verdict against real data only. |
+| FRED vintage-value capture | Not implemented (F-024). Gates any real `explained` verdict for macro Series even after the migration lands. |
+| A-014 (correct `HISTFINTS-BRIEF-v2.md`) | Queued, not a blocker. |
+| **Stage 2 validation** | **Pending.** Run this increment's reconciler against a copy with 0011–0013 applied and real capture output once HistFinTS responds (D-035). |
+| **Q-066 — is this verdict vocabulary sufficient for V0's actual research questions?** | **Open, explicitly deferred (D-035).** A financial-domain review question, not to be closed by adding reconciler machinery. Gates any decision to expose this capability in a V0 user-facing workflow. |
+| Detector methodological adequacy beyond this proof-of-concept | **Open, explicitly not assessed here (D-035).** Fixed step-threshold/persistence-tolerance parameters were chosen to make the increment demonstrable, not validated as financially sound. |
