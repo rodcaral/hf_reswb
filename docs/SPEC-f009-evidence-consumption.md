@@ -4,7 +4,9 @@
 **Date:** 2026-08-17
 **Governing decisions:** D-001 (read-only ATTACH) · D-032 (what upstream actually holds) ·
 D-033 (reference-not-duplicate; four layers; three verdicts) · D-034 (proceed now; migration
-filed separately) · D-035 (Stage 1 accepted; increment frozen; Stage 2 and Q-066 pending)
+filed separately) · D-035 (Stage 1 accepted; increment frozen; Stage 2 and Q-066 pending) ·
+D-036 (Q-066 closed: span-level quarantine, not Series-level; CEDEAR reconciliation
+separately unvalidated; step threshold is a candidate filter, not a financial definition)
 **Findings it must respect:** F-009 · F-012 · F-017 · F-023 · F-024 · F-025
 
 > **Implementation shipped** in `src/hf_reswb/{domain,persistence,application}`, with
@@ -69,6 +71,31 @@ therefore name both the origin and the mutation.
 `provider_assignment.last_revalidated_at`. Migrations 0011–0013 exist on disk and have not
 been applied. `SELECT * FROM histfints.provider_event` against today's file raises
 `no such table`.
+
+### 1.2a Validation scope: general mechanism only, not CEDEAR-specific (D-036, A-015)
+
+**Yahoo/FRED evidence validates that the reconciliation architecture works — discontinuity
+→ provider evidence → reconciliation → finding — for the evidence types those two providers
+supply. It does not validate CEDEAR-specific reconciliation**, which is this project's
+differentiating universe.
+
+CEDEAR ratio changes have two causes: US corporate actions, visible to a US feed, and local
+tradability-driven ratio changes, which are invisible to any non-Argentine source. The
+confirmed AAPL CEDEAR event (~2:1, 2024-01-24) is the second kind — no corresponding US
+corporate action exists. CNV AIF / BYMA is the authoritative source for this case (D-007,
+A-011), and it is not wired into this reconciler.
+
+**The correct characterisation of this increment, stated so it is not overclaimed:**
+
+> General reconciliation mechanism validated; CEDEAR-specific reconciliation not yet
+> validated.
+
+Reconciler development is **not** blocked on a BYMA/CNV ratio-event path landing. But no
+`explained`/`not explained` verdict against a CEDEAR Series should be presented as
+authoritative until that path exists. Note BYMA's two roles: it does not supply the CEDEAR
+prices being reconciled (those arrive via Yahoo `.BA`), but it is exactly where the ratio
+*evidence* should come from — a future CEDEAR path adds a new evidence source, not a price
+source.
 
 ### 1.3 Not implemented at all
 
@@ -136,6 +163,33 @@ absence consulted is part of the lineage), and the correlation tolerance applied
 write one. The only thing this increment owes the conclusion layer is that a finding is
 citable.
 
+### 2.3 Downstream consumption model (specified, not implemented — D-036, A-015)
+
+Not built in this increment — no quarantine mechanism, no consumer exists yet. Specified now
+so a future implementer does not have to re-derive it, and so this capability is not
+exposed to V0 users under a wrong mental model in the meantime.
+
+**The governing principle:** a finding's verdict describes the evidence state. It does not
+itself decide whether a financial analysis is permissible — that decision belongs to the
+analytical method, which knows what evidence quality it requires. A binary
+Series-good/Series-bad gate would violate this directly.
+
+**The unit of quarantine is the affected time span, not the Series.** Precedent: CEDEAR
+ratio changes with no dated ratio are handled by *detect and quarantine* (D-015), not by
+discarding the Series. The AAPL case is concrete: 1,574 of 1,575 overlapping observations
+behaved coherently; one boundary was problematic. A return calculation entirely after a
+boundary may be valid; a CAGR or normalised comparison crossing it is not.
+
+| Verdict | Domain meaning | Downstream behaviour |
+|---|---|---|
+| **Explained** | Evidence supports the discontinuity | Analysis may proceed, subject to normal diagnostics |
+| **Not explained by captured evidence** | An anomalous change exists; available evidence does not explain it | Flag and quarantine the affected interval for analyses sensitive to level continuity |
+| **Insufficient evidence** | Cannot determine whether the change is legitimate | Do not treat the affected interval as validated; proceed only where the analytical method does not depend on that evidence |
+| Known-good / unaffected | No relevant integrity issue detected | Normal use |
+
+The consumer — not the finding — decides whether a boundary falls inside its own analysis
+window.
+
 ---
 
 ## 3. The four layers, with epistemic status
@@ -181,6 +235,14 @@ displayed as *provenance*, never used as identity.
    period: candidate single-day moves, persistence at 15 and 60–75 trading days, and (for
    CEDEAR pairs only) residual against panel consensus. Output: zero or more boundary dates.
    Writes a `discontinuity_calculation` per boundary.
+
+   **The step threshold is a candidate-generation filter, not a financial definition of a
+   discontinuity (D-036).** The project's own evidence rules out move-size alone: a +19.1%
+   BIDU move was a market-wide CCL shift (clean, D-017); a −18.3% BABA move reverted
+   (clean); a −49.4% AAPL move persisted at a ~2:1 level shift (confirmed artifact, D-015).
+   Persistence, refined by cross-pair residual, is the validated discriminator — never the
+   step size by itself. Nothing in this increment should describe `step_threshold` as
+   "what counts as a real discontinuity."
 2. **Resolve evidence.** For each boundary, gather, and record as `evidence_reference` rows:
    - the observations either side, and their `import_run` → `provider_assignment` → `provider`
      chain — including **whether the two sides came from different providers**, which is the
@@ -365,5 +427,7 @@ been deliberately halted, in exchange for exercising the *easiest* of the three 
 | FRED vintage-value capture | Not implemented (F-024). Gates any real `explained` verdict for macro Series even after the migration lands. |
 | A-014 (correct `HISTFINTS-BRIEF-v2.md`) | Queued, not a blocker. |
 | **Stage 2 validation** | **Pending.** Run this increment's reconciler against a copy with 0011–0013 applied and real capture output once HistFinTS responds (D-035). |
-| **Q-066 — is this verdict vocabulary sufficient for V0's actual research questions?** | **Open, explicitly deferred (D-035).** A financial-domain review question, not to be closed by adding reconciler machinery. Gates any decision to expose this capability in a V0 user-facing workflow. |
-| Detector methodological adequacy beyond this proof-of-concept | **Open, explicitly not assessed here (D-035).** Fixed step-threshold/persistence-tolerance parameters were chosen to make the increment demonstrable, not validated as financially sound. |
+| ~~Q-066~~ | **Closed → D-036.** Verdicts quarantine the affected span (§2.3), not the Series; step threshold is a candidate filter, not a financial definition (§4.2). |
+| **CNV/BYMA ratio-event evidence path** | **Not implemented, required before CEDEAR verdicts are authoritative (D-036, §1.2a).** Does not block general reconciler work; blocks calling any CEDEAR verdict from this increment authoritative. |
+| A-015 (spec additions: §2.3, §1.2a) | **Done in this revision.** Queued by D-036, written here. |
+| Detector methodological adequacy beyond this proof-of-concept | **Open, explicitly not assessed here (D-035, reaffirmed D-036).** The 15/60–75-trading-day framework is the empirically adopted target; the shipped calendar-day implementation remains provisional until Q-027 lands, and must not be presented as financially validated. |

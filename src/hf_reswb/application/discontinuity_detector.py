@@ -4,6 +4,12 @@ Deliberately simple: a single-step move beyond `step_threshold` that persists th
 horizons without reverting. Trading-calendar-aware persistence is blocked on Q-027 (open) —
 this counts calendar days and every calculation records that basis explicitly (SPEC §9), so
 it is never mistaken for a trading-day count.
+
+`step_threshold` is a candidate-generation filter, not a financial definition of a
+discontinuity (D-036). Move size alone is not the discriminator — the project's own
+evidence rules that out (a +19.1% move that was a market-wide FX shift, a -18.3% move that
+reverted, a -49.4% move that persisted and was confirmed real). Persistence is what the
+project has actually validated; do not present the threshold as calibrated on its own.
 """
 from __future__ import annotations
 

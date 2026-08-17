@@ -1853,6 +1853,83 @@ investment in this direction.
 
 ---
 
+### D-036 — Q-066 closed: verdicts quarantine the affected span, not the Series; CEDEAR reconciliation is separately unvalidated; the step threshold is a candidate filter, not a financial definition
+
+*Decided 2026-08-17. Closes Q-066. Financial-domain review of `SPEC-f009-evidence-consumption.md`, requested by D-035.*
+
+Three domain decisions, at different levels of certainty, plus one principle that governs
+all three.
+
+**1. Downstream consumption: the unit of quarantine is the affected time span, not the
+Series.** Precedent already exists — CEDEAR ratio changes with no dated ratio are handled
+by *detect and quarantine* (D-015, A-012 as respecified), not by discarding the Series. The
+AAPL evidence is the concrete case: 1,574 of 1,575 overlapping observations behaved
+coherently; one boundary was demonstrably problematic. Generalised:
+
+| Verdict | Domain meaning | Downstream behaviour |
+|---|---|---|
+| **Explained** | Evidence supports the discontinuity | Analysis may proceed, subject to normal diagnostics |
+| **Not explained by captured evidence** | An anomalous change exists; available evidence does not explain it | Flag and quarantine the affected interval for analyses sensitive to level continuity |
+| **Insufficient evidence** | Cannot determine whether the change is legitimate | Do not treat the affected interval as validated; proceed only where the analytical method does not depend on that evidence |
+| Known-good / unaffected | No relevant integrity issue detected | Normal use |
+
+A return calculation entirely after a boundary may be valid; a CAGR or normalised
+comparison crossing it is not. **The downstream consumer, not the finding, decides whether
+the boundary is inside its window** — this is a data-quality/data-usability distinction,
+not a single good/bad gate. This is design guidance for a future consumer; it does not
+change this increment's object set (`analytical_finding` still stops at the verdict,
+per D-033 — no auto-promotion, no quarantine mechanism implemented here).
+
+**2. Yahoo/FRED validate the general reconciliation mechanism, not CEDEAR-specific
+reconciliation — and the gap is not closable by more Yahoo/FRED work.** CEDEAR ratio
+changes have two causes: US corporate actions (visible to a US feed) and local
+tradability-driven ratio changes (invisible to any non-Argentine source — the confirmed
+AAPL CEDEAR event, ~2:1 on 2024-01-24, is exactly this kind, with no corresponding US
+corporate action). D-007/A-011 already named CNV AIF / BYMA as the authoritative source for
+this case; this decision makes the consequence for the reconciler explicit: **a BYMA/CNV
+ratio-event evidence path is required before `explained`/`not explained` verdicts can be
+considered authoritative for CEDEAR ratio changes** — not because the mechanism is wrong,
+but because it has only ever been fed Yahoo/FRED evidence. Reconciler development is **not**
+blocked on BYMA support landing; the correct label for the current state is:
+
+> **General reconciliation mechanism validated; CEDEAR-specific reconciliation not yet
+> validated.**
+
+One architectural note carried over from D-011/D-021: BYMA plays two different roles here.
+It does not supply the CEDEAR prices being reconciled (those arrive via Yahoo `.BA`), but it
+is exactly where the *ratio evidence* should come from. A future CEDEAR evidence path adds a
+new `provider_event`-like source, not a price source.
+
+**3. The step threshold is a candidate-generation filter, not a financial definition of a
+discontinuity — do not present it as one.** The project's own evidence already rules out
+move-size alone: a +19.1% BIDU move looked suspicious and turned out to be a market-wide CCL
+shift (clean, per cross-pair coherence, D-017); a −18.3% BABA move reverted (clean); a
+−49.4% AAPL move persisted at a ~2:1 level shift (confirmed ratio artifact, D-015). The
+discriminator the project already validated is **persistence**, refined by **cross-pair
+residual** against panel consensus (D-016, Q-052). Consequence for this increment's
+detector: the 20% `step_threshold` stays as a candidate filter only; it must not be
+described anywhere as a financial threshold. The target framework remains the empirically
+adopted one — roughly 15 trading days for level comparison, 60–75 for persistence — and
+**the current `calendar_basis="calendar_days"` implementation is explicitly provisional**,
+not a financially validated criterion, until Q-027 (trading calendar) lands. This does not
+change code under the D-035 freeze; it changes how the existing parameters must be
+documented and read.
+
+**The governing principle, stated so it can be cited going forward:** **a data-integrity
+verdict describes the evidence state; it does not itself decide whether a financial
+analysis is permissible. The analytical method determines what evidence quality it
+requires.** This is what makes point 1 non-negotiable — a binary Series-good/Series-bad
+model would violate it directly, by letting the verdict make a permission decision that
+belongs to the analysis.
+
+**New open item.** **A-015** — extend `SPEC-f009-evidence-consumption.md` with an explicit
+downstream-consumption section per point 1 above (span-level quarantine, not Series-level),
+and add a CEDEAR-validation-gap statement per point 2, before any V0 user-facing exposure of
+this capability. Queued, not implemented now — the D-035 freeze holds; this is
+specification work, not reconciler code.
+
+---
+
 ### Inherited principles (ratified, not re-decided)
 
 These come from the specification and are treated as binding constraints on all
@@ -1878,7 +1955,7 @@ changes the architecture, not just the content.
 
 | ID | Status | Question |
 |---|---|---|
-| **Q-066** | **open · domain, not technical — see D-035** | **Are the three F-009 reconciler verdicts (`explained` / `not explained` / `insufficient evidence`) actually sufficient to support V0's intended research questions?** Not a request to expand the vocabulary — D-033 fixed it at three values for a stated reason. This asks whether *answering that question at all*, in that shape, serves the actual analytical use cases, before any further technical investment in the reconciler. Explicitly deferred rather than decided by default; must be answered by financial-domain review of real V0 research questions, not by adding classifier logic. |
+| ~~Q-066~~ | closed | → D-036. Verdict quarantines the affected span, not the Series; downstream consumer decides relevance to its own analysis. |
 | ~~Q-056~~ | closed | → D-014. |
 | **Q-045** | **blocking · awaiting answer** | **The capability matrix.** D-013 gave the three axes — wrapper (direct/CEDEAR/CEVA/ADR) × underlying asset class (shares/ETF/bond/commodity/virtual asset/index) × venue+currency+settlement. What is missing is the matrix itself: which metrics are permitted, suppressed or replaced for each combination. Without it **AC-04 is untestable** and V0's Statistics section (Q-048) cannot be scoped. Open since the first round, and now fully equipped to be answered. |
 | ~~Q-065~~ | closed | → D-026. |
@@ -2394,6 +2471,7 @@ Written once the governing decision lands; do not edit the spec ahead of them.
 | A-009 | D-006, D-009 | Add **one constructed regression harness** to the HistFinTS suite covering F-009 and F-013 together — they share a root cause, so they should share a test. (a) Split case: backfill a fixture Series to before a known split, import past it, assert both sides are on one scale. (b) Revision case: set `backfill_start_date` back, delete a chunk of recent observations, re-run `run_import` across the boundary, assert an already-stored value is actually revisited. Both defects are unfalsifiable by observation and must be held down by construction. |
 | A-012 | D-011 | Make the **implied-FX pair the V0 demo**, not a generic quote page. Three instances now exist in real data, in increasing order of cleanliness: (a) **YPF (NYSE, USD) + YPF.BA (BYMA, ARS)** — a genuine dual listing; adjusted for the ADR ratio, the quotient *is* the implied rate, with no CEDEAR ratio to carry. (b) **Series 33 (AAPL) + 11305 (Apple CEDEAR, ratio 20.0)** — exercises the `underlying_series_id`/`ratio` edge as well. (c) Banco Macro and Pampa, which also carry US listings. Each exercises P1 identity, P3 provenance, P4 Observed-vs-Calculated and the currency question on one screen, using data that exists today and needing nothing from the 1,491-symbol backlog. |
 | A-013 | D-032, D-033 | Add an **evidence-consumption** section to the spec, per `SPEC-f009-evidence-consumption.md`: the four epistemic layers (provider evidence / Workbench calculation / analytical finding / research conclusion) with their P4 statuses, the three-value reconciliation verdict with its reason codes, and the rule that no finding is ever auto-promoted to a conclusion. Must state that `explained by captured evidence` is unreachable until HistFinTS migrations 0011–0013 are applied and the capture commands have been run. |
+| A-015 | D-036 | Extend `SPEC-f009-evidence-consumption.md` with (a) a downstream-consumption section: verdicts quarantine the affected time span for continuity-sensitive analyses, never the whole Series; the analytical method decides what evidence quality it needs. (b) An explicit CEDEAR-validation-gap statement: Yahoo/FRED evidence validates the general reconciliation mechanism only — a CNV/BYMA ratio-event evidence path is required before verdicts are authoritative for CEDEAR ratio changes. Specification work, not reconciler code; does not lift the D-035 freeze. |
 | A-014 | D-032 | **Correct the stale rows in `HISTFINTS-BRIEF-v2.md`.** The brief predates HistFinTS's R1/R2a/R2b work and currently reads as though FRED vintages were never requested and Yahoo events never parsed. Both are now false in code and both are still true in the live database — the brief must carry that distinction explicitly (`code-complete / not migrated`), because a reader who trusts either half alone will design wrongly. |
 | A-011 | D-007 | Add a two-layer corporate-actions section to the spec: HistFinTS-side raw provider events (Observed, P4) vs Workbench-side reconciled model and derivation (Calculated, P4). State explicitly that Yahoo events cover Yahoo Series only and that BYMA/CEDEAR ratio changes need a separate source. |
 
@@ -2419,6 +2497,7 @@ Binding across spec, code and conversation.
 
 | Date | Change |
 |---|---|
+| 2026-08-17 | Financial-domain review of `SPEC-f009-evidence-consumption.md` (requested by D-035) → **D-036**, closing **Q-066**. Three decisions: (1) a verdict quarantines the affected **time span**, not the whole Series — precedent from CEDEAR detect-and-quarantine (D-015/A-012); a downstream-consumption table adopted (`explained`→proceed, `not explained`→quarantine the span for continuity-sensitive analyses, `insufficient evidence`→don't treat as validated). (2) Yahoo/FRED validation proves the **general** reconciliation mechanism only — CEDEAR ratio changes have a locally-invisible cause (confirmed AAPL 2024-01-24 case) and require a CNV/BYMA ratio-event path before CEDEAR verdicts are authoritative; reconciler work is **not** blocked on this. (3) The 20% step threshold is a **candidate-generation filter, not a financial discontinuity definition** — the project's own evidence (BABA reverted, BIDU was market-wide, AAPL persisted) already established persistence + cross-pair residual as the real discriminator; the calendar-day detector implementation stays labelled provisional until Q-027 lands. Governing principle recorded: a verdict describes evidence state, it does not decide whether an analysis is permissible — that is the analytical method's call. **A-015 queued** (spec additions for both (1) and (2)); does not lift the D-035 freeze. |
 | 2026-08-17 | F-009 evidence-consumption increment reviewed against its own acceptance criteria → **D-035**: established (enforced read-only boundary, no observation duplication, the four-step pipeline, explicit `TABLE_ABSENT`, all three verdicts reachable, `explained` gated on actual magnitude reconciliation per F-023/F-024). **Increment frozen except defects.** Two-stage acceptance test formalised: Stage 1 (current schema, absence/incompleteness → not-explained/insufficient) is closed by the passing tests; Stage 2 (real 0011–0013 evidence) is gated entirely on the already-filed, non-blocking migration request — no Workbench-side work until then. **Q-066 queued**: whether the three-verdict vocabulary is *sufficient for V0's actual research questions* is named as a financial-domain judgement, deliberately not decided by default and explicitly not to be closed by adding more reconciler machinery. |
 | 2026-08-17 | §8 of `SPEC-f009-evidence-consumption.md` accepted → **D-034**: proceed with the `hf_reswb` reconciliation implementation against the current schema (migrations 0011–0013 unapplied); `explained by captured evidence` remains structurally unreachable against production until they land, and must be stated as such in acceptance criteria, not left implicit. Two-stage validation adopted (now: not-explained/insufficient against legacy evidence; later: explained, once migrated). Migration application filed as a **separate, non-blocking, mechanical** ask (`REQUEST-apply-migrations-0011-0013.md`) — deployment of already-built code, not reopened HistFinTS development. F-023/F-024/F-025 restated as binding on the implementation: event correlation is `Calculated` not `Observed` (no FK); a bare FRED vintage date is not explanatory; `acquired_at` is capture time, not fetch time. `CLAUDE.md` gains a row for the new spec; A-014 stays queued, not folded into this increment. |
 | 2026-08-17 | F-009 remediation halted in HistFinTS; focus moved to proving Workbench evidence *consumption*. Upstream inspected before designing → **D-032**: the evidence chain is **code-complete and absent from the live database**. R1 (`RevalidationService`), R2a (`provider_event`), R2b-FRED (vintage dates) and R2b-Yahoo (splits/dividends) are all implemented, and **FRED vintages and Yahoo event parsing have landed since D-021**, which is now partly stale. But the production DB is at `PRAGMA user_version = 10` with migrations 0011–0013 unapplied, so `provider_event`, `observation_correction` and `revalidation_run` **do not exist across the ATTACH boundary** — corroborated by a backup trail stopping at migration 0010. BYMA `underlying_ratio` unchanged (hand-authored JSON reader only). D-006 **not** superseded: `default_revalidation_window_days` is still NULL for all three live providers. New verified provenance property: a corrected observation **retains its original inserting `import_run_id`**, giving two anchors per correction. **D-033** settles the Workbench-side model — reference upstream evidence by key, never duplicate observations (they are mutable in place, so a copy is a second truth, not a snapshot); four epistemic layers in existing P4 vocabulary, with **no auto-promotion of a finding to a conclusion**; verdict vocabulary fixed at three values because every richer option encodes a magnitude judgement the Workbench cannot make from event metadata. **F-012 updated** (parser landed; `_to_records()` still discards events and capture costs a duplicate request). **F-023** raised (`provider_event` has no FK to observations or corrections — correlation is the Workbench's `Calculated` step with a stated tolerance). **F-024** raised (FRED REVISION events carry vintage *dates only*; a bare vintage date must not count as explanatory or the verdict is vacuous for macro). **F-025** raised (`acquired_at` is capture time, not fetch time). Design note written: `SPEC-f009-evidence-consumption.md`. A-013, A-014 queued. |
