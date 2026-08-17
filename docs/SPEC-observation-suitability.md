@@ -1,11 +1,18 @@
 # SPEC — Observation Suitability (zero-volume and carried-forward bars)
 
-**Status:** design-complete, not implemented · **Version:** 0.1 · **Date:** 2026-08-17
+**Status:** implemented (§7 items 1–3, 6), ratified · **Version:** 0.2 · **Date:** 2026-08-17
 **Governing decisions:** D-001 (read-only boundary) · D-033 (reference by key, four epistemic
 layers) · D-036 (a verdict describes evidence state, not permission) · D-037 (derived venue
-calendar, pairwise intersection) · **D-038 (this spec)**
+calendar, pairwise intersection) · D-038 (this spec) · **D-039 (ratified; items 1–3 and the
+F-030 guard implemented, `src/hf_reswb/{domain,application}/suitability*.py`,
+`tests/test_observation_suitability.py`, 6/6 passing)**
 **Findings addressed:** F-026 (phantom bars) · F-027 (null-close marker discarded) ·
 F-028 · F-029 · F-030 · F-031
+
+> Implementation matches this spec exactly — no rule was loosened or reinterpreted during
+> the build. Q-067 (§8) remains open and provisional; the classification layer records
+> `TRADE_EVIDENCE_UNRESOLVED` but does not itself exclude it — that is a consuming
+> calculation's obligation (§4), not built here.
 
 > **Why this is a separate document rather than a section of
 > `SPEC-panel-eligibility.md`.** The classification specified here is consumed by three
@@ -407,12 +414,12 @@ a stored answer — `rule_version` plus the run's date range make the invalidati
 
 | # | Item | State |
 |---|---|---|
-| 1 | Axis A over a Series and range | Buildable today. No HistFinTS change, no gate. |
-| 2 | `calendar_derivation` over `TRADE_OBSERVED` dates | Buildable today; requires the D-037 quorum to be filtered per §3.3 and the confidence table extended through 2026 (F-029). |
-| 3 | Axis B | Follows 2. |
-| 4 | `SPEC-panel-eligibility.md` implementation | **Gated on 1–3 landing.** Untreated, the 116-session run and its 20/30/37/39/51/76 companions generate exactly the persistent implied-FX excursion the panel residual uses as its ratio-change signal (D-016/D-017) — on the longest-history pairs, which are the ones the demo depends on. |
-| 5 | F-009 candidate generation on filtered rows (§5.1) | Specification only; **D-035 freeze holds.** |
-| 6 | F-030 (series 11311 mixed interval) | Must be resolved before 11311 contributes to any calendar quorum or is classified at all. |
+| 1 | Axis A over a Series and range | **Implemented** — `application/suitability_service.py:classify_series()`. No HistFinTS change. |
+| 2 | `calendar_derivation` over `TRADE_OBSERVED` dates | **Implemented** — `derive_calendar()`, quorum filtered to trade-bearing dates per §3.3. Confidence band is caller-supplied (not re-derived per era in code); the era-confidence findings from D-037(f)/D-038 remain the source for what value to pass. |
+| 3 | Axis B | **Implemented** — `apply_calendar()`. Follows 2. |
+| 4 | `SPEC-panel-eligibility.md` implementation | **Unblocked by D-039** for this gate specifically. Tranche 2 and Q-061 remain independent gates — see `SPEC-panel-eligibility.md` header. |
+| 5 | F-009 candidate generation on filtered rows (§5.1) | Specification only; **D-035 freeze holds.** Not implemented — out of scope for D-039. |
+| 6 | F-030 (series 11311 mixed interval) | **Guarded, not fixed** — `is_classifiable()` refuses classification and calendar-quorum participation for any Series failing the daily/unique-date check. Series 11311 itself is untouched upstream. |
 | 7 | Alpha Vantage / Stooq behaviour (§1.7) | Not testable; open, not clean. |
 
 ---

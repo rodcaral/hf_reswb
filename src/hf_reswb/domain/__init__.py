@@ -5,6 +5,15 @@ from hf_reswb.domain.finding import (
     ReasonCode,
     Verdict,
 )
+from hf_reswb.domain.suitability import (
+    CalendarConfidence,
+    CalendarDerivation,
+    NoTradeRun,
+    ObservationSuitability,
+    SessionStatus,
+    SuitabilityRun,
+    TradeEvidence,
+)
 
 __all__ = [
     "EvidenceReference",
@@ -14,4 +23,11 @@ __all__ = [
     "DiscontinuityCalculation",
     "ReasonCode",
     "Verdict",
+    "CalendarConfidence",
+    "CalendarDerivation",
+    "NoTradeRun",
+    "ObservationSuitability",
+    "SessionStatus",
+    "SuitabilityRun",
+    "TradeEvidence",
 ]

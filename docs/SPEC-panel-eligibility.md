@@ -1,7 +1,16 @@
 # SPEC — Panel Eligibility and Diagnostics
 
 **Status:** draft for review · **Version:** 0.1 · **Date:** 2026-08-15
-**Governing decisions:** D-016 (panel principle) · D-017 (time-varying membership) · D-024 (this spec) · **D-037 (calendar and alignment)** · **D-038 (observation suitability — gates implementation)**
+**Governing decisions:** D-016 (panel principle) · D-017 (time-varying membership) · D-024 (this spec) · **D-037 (calendar and alignment)** · **D-038/D-039 (observation suitability — D-039's gate is cleared; suitability classification is implemented and available to build against)**
+
+> **Update 2026-08-17 — D-039: the `SPEC-observation-suitability.md` gate is cleared.**
+> Items 1–3 (trade-evidence classification, trade-filtered calendar derivation, session
+> status) are implemented and tested (`src/hf_reswb/application/suitability_service.py`,
+> 6/6 passing). This spec's **other** two gates — Tranche 2 migration (`minimum_coverage`,
+> `adjustment_policy`) and Q-061 (inclusion rules) — are independent and still stand; see
+> §7 below. Nothing here may be implemented against raw `observation` rows without routing
+> through `classify_series()`/`apply_calendar()` first, per SPEC-observation-suitability.md
+> §5's treatment rule (date removal upstream of the pairwise intersection).
 
 > **Update 2026-08-17 — D-037 removes Q-027 as a gate on this spec.** Cross-Series alignment is
 > **intersection of common dates, pairwise, differencing *after* intersecting**, with per-date
