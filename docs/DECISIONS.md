@@ -2948,6 +2948,59 @@ Full historical V0 CEDEAR/underlying population analyzed per user directive:
 
 **Status:** Calibration evidence complete and committed. All numerical thresholds remain PROVISIONAL. Ready for financial advisor domain review before promotion to production.
 
+**Gates 1-3 & Task C: Cohort Classification and Empirical Analysis (2026-08-18):**
+
+Following FDA ruling on cohort separation (CEDEAR ↔ foreign vs. ADR/local-share as distinct populations), SDT completed gates and empirical re-analysis:
+
+**GATE 1 (HistFinTS): COMPLETED 2026-08-18**
+- Populated 4 CEDEAR ↔ foreign relationships: 11316→903, 11317→1169, 11319→10165, 11311→2
+- All relationships verified queryable; HistFinTS SDT confirmed no concurrent issues
+- Primary cohort now expanded: 1 complete pair (AAPL) + 4 newly populated = 5 pairs total
+
+**GATE 2 (Workbench ADR Schema): DECIDED 2026-08-18**
+- Decision: Implement separate ADR relationship table (Option 1, long-term)
+- Phase 1A approach: External mapping (Workbench-maintained) for this calibration round
+- No HistFinTS schema changes required; secondary cohort unblocked for analysis
+
+**GATE 3 (Workbench YPF Verification): COMPLETED 2026-08-18**
+- YPF stock split confirmed via SEC filing: 10-for-1 split effective 2026-08-04
+- ADR ratio adjusted: 1:1 (pre-split) → 1:10 (post-split)
+- YPF eligible for structural-event validation case study
+
+**TASK C: Empirical Analysis by Cohort (2026-08-18)**
+
+Separate empirical analysis completed per FDA ruling (no pooling of CEDEAR and ADR cohorts).
+
+**PRIMARY CEDEAR COHORT (5 pairs: AAPL, Alibaba, Baidu, Uber, GLD)**
+- Total observations: 6,213
+- Analysis period: 2020-01-02 to 2026-08-14
+- Staleness distribution: median 1d, mean 1.48d, P95 3d (max 7d)
+  - All gaps < 10 days; no structural staleness constraint
+  - Staleness threshold candidate: **15 days (PROVISIONAL)**
+  - Rationale: Covers normal weekend/brief-pause gaps; domain judgment required
+- Dispersion distribution (CV): median 0.062, mean 0.078, P95 0.189
+  - Moderate panel dispersion; no extreme outliers
+  - Dispersion threshold candidate: **P90 CV 0.167 (PROVISIONAL)**
+  - Rationale: Suppresses ~10% most-dispersed dates; balances sensitivity and specificity
+- Panel depth growth: 1.2→3.8 members/date (2020-2026)
+  - Early period (2020-2021) AAPL-dominated; later period (2024-2026) stronger multi-series panel
+- Structural segmentation: F-021 AAPL ratio step (2024-01-24) segmented for downstream continuity analysis; staleness detection unaffected
+- Data-quality exclusions: F-009 (early-period reconciliation flagged), F-017 (coverage unverified), F-026 (negligible carry-forwards <1%)
+- Evidence output: `docs/calibration-evidence-cohort-analysis-2026-08-18.md`
+
+**SECONDARY ADR/LOCAL-SHARE COHORT (3 pairs: YPF, Banco Macro, Pampa Energía) — VALIDATION ONLY**
+- Total observations: 34,855 (18,795 local + 16,060 ADR)
+- Analysis period: 2009-2026 (focus 2020-2026 aligned with primary)
+- Staleness: P95 5d (slightly higher than primary); max 28d (crisis-period closures)
+- Dispersion: P95 CV 0.301 (59% higher than primary median CV)
+- Regime effects visible: 2022-2023 ARS volatility peak shows +44% median CV elevation
+- YPF split as structural-event validation: 2026-08-04 ratio change correctly segmented; framework behavior confirmed; post-split N too small (17 obs) for independent analysis
+- Pampa carry-forward rate (12.2%) flagged for liquidity investigation
+- Evidence output: `docs/calibration-evidence-secondary-cohort-2026-08-18.md`
+- Use case: Regime understanding and secondary validation; explicitly not pooled with primary for threshold calibration
+
+**Status:** Cohort classification locked; empirical analysis complete by population; separate thresholds candidates identified (staleness 15d, dispersion P90 CV) marked PROVISIONAL. Primary evidence ready for financial advisor review. Secondary evidence available for regime/validation context. No numerical thresholds promoted to production pending FDA domain review.
+
 ---
 
 ### Inherited principles (ratified, not re-decided)
