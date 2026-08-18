@@ -2873,7 +2873,36 @@ Bugfix in Phase 4: staleness_detector.py query adjusted from `<` to `<=` to incl
 
 All three core parameters (include_delisted, staleness_policy, dispersion_threshold) have complete unit and integration test coverage. Ready for Phase 5.
 
-Phase 5 (calibration study with empirical analysis) remains queued. Staleness and dispersion parameter calibration gated on domain review post-Phase-5.
+**Phase 5 Completion (2026-08-18):**
+
+Calibration framework for empirical analysis delivered and tested:
+- `application/calibration_analyzer.py`: Data structures for CalibrationReport, CalibrationRequest, StalenessDistribution, DispersionDistribution, ThresholdImpact. Full Markdown report generation with `is_complete` property and PROVISIONAL status marking.
+- `application/calibration_utilities.py`: Helper functions for historical analysis — `compute_staleness_lengths()` (gaps between observations per Series), `compute_staleness_statistics()` (min/max/median/mean/p25/p75/p95), `compute_panel_depth_by_date()` (member count per date), `estimate_threshold_impact()` (rough impact estimation from distribution statistics).
+- `tests/test_panel_calibration.py`: 11 tests covering data structures, report formatting, calibration requests, utility functions, and complete end-to-end workflow.
+
+Calibration framework provides:
+- Staleness threshold candidates (default: 5, 10, 15, 20, 25 days) with estimated impact
+- Dispersion metric candidates (default: coefficient_of_variation at percentiles 50, 75, 90, 95)
+- Sensitivity analysis: panel depth, membership count, and result suppression rate at each threshold
+- Calibration study interface with empirical panel data ready for real-world testing
+
+Test results: 11/11 calibration tests passing, all 46 total tests passing (including 6 observation-suitability, 8 Phase 1, 10 Phase 2, 6 Phase 4 integration, 5 reconciliation boundary, 1 Phase 3 skipped for Tranche 2). No regressions. HistFinTS immutability verified. No hard-coded thresholds; all parameters stay explicitly PROVISIONAL.
+
+**Calibration Study Ready for Execution**
+
+Framework is ready to accept:
+1. Historical panel data (series_ids, observation dates, volumes, prices)
+2. Analysis period (period_start, period_end)
+3. Candidate thresholds (staleness_policy days, dispersion_threshold percentiles)
+4. Optional panel pairs for paired FX analysis
+
+Output: Empirical calibration report with:
+- Observed staleness and dispersion distributions
+- Impact estimates for each candidate threshold
+- Recommended values with supporting statistics
+- Caveats and limitations for domain review
+
+Next step: Execute calibration study with production panel data. Results to be submitted for financial advisor review (D-042 gate) before parameter values are promoted to production.
 
 ---
 
