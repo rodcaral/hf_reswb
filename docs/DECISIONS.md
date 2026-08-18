@@ -2850,7 +2850,30 @@ Blocked on Tranche 2 HistFinTS deployment: provider.adjustment_basis and provide
 2. Run full integration tests (1 placeholder test currently skipped)
 3. Validate against real adjustment_basis values and NULL availability cases
 
-Phase 4 (integration testing) and Phase 5 (calibration study) remain queued. Staleness and dispersion parameter calibration gated on domain review post-implementation.
+**Phase 4 Completion (2026-08-18):**
+
+Testing and validation suite delivered and all tests passing:
+
+Unit tests (8 tests covering all core parameters):
+- TestIncludeDelisted (2): Discontinued Series included/excluded per parameter
+- TestStalenessPolicy (2): Time-local exclusion semantics + resume when trading resumes
+- TestDispersionThreshold (2): Aggregate suppression + diagnostics preservation
+- TestProvisionalStatus (1): Parameter marking and visibility
+- TestPanelResultTraceability (1): Full traceability chain preservation
+
+Integration tests (6 tests covering real-world scenarios):
+- TestPanelWithRealSuitabilityOutput (2): Multi-series panel with mixed trade evidence, varying staleness
+- TestTraceabilityChain (2): Panel result carries full traceability, exclusion reasons recorded
+- TestHistFinTSImmutability (1): HistFinTS observations never modified (read-only constraint verified)
+- TestRegressionTests (1): Observation-suitability contract frozen and unchanged
+
+Regression verification: All 35 tests passing (6 observation-suitability + 8 Phase 1 + 10 Phase 2 + 6 integration + 5 reconciliation boundary). No regressions.
+
+Bugfix in Phase 4: staleness_detector.py query adjusted from `<` to `<=` to include observations on analysis_date (enables staleness resume scenarios).
+
+All three core parameters (include_delisted, staleness_policy, dispersion_threshold) have complete unit and integration test coverage. Ready for Phase 5.
+
+Phase 5 (calibration study with empirical analysis) remains queued. Staleness and dispersion parameter calibration gated on domain review post-Phase-5.
 
 ---
 
