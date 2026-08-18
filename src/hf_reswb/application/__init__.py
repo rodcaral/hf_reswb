@@ -8,6 +8,12 @@ from hf_reswb.application.panel_eligibility_service import (
     compute_panel_result,
     format_provisional_status,
 )
+from hf_reswb.application.panel_integration import (
+    get_session_status_for_date,
+    get_trade_evidence_exclusions,
+    get_trade_evidence_for_date,
+    validate_suitability_coverage,
+)
 from hf_reswb.application.reconciliation_service import reconcile
 from hf_reswb.application.staleness_detector import (
     detect_stale_series,
@@ -28,4 +34,6 @@ __all__ = [
     "compute_panel_eligibility", "compute_panel_result", "format_provisional_status",
     "detect_stale_series", "get_staleness_exclusions",
     "compute_dispersion_metrics", "should_suppress_result",
+    "get_trade_evidence_exclusions", "get_trade_evidence_for_date",
+    "get_session_status_for_date", "validate_suitability_coverage",
 ]

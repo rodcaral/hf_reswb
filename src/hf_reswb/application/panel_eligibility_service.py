@@ -1,9 +1,10 @@
-"""Panel eligibility orchestrator (D-046, Phase 1).
+"""Panel eligibility orchestrator (D-046, Phase 1–2).
 
-Orchestrates three parameters per SPEC-panel-eligibility.md:
+Orchestrates four parameters per SPEC-panel-eligibility.md:
 - include_delisted: Boolean, default TRUE
 - staleness_policy: Time-local exclusion (provisional parameter)
 - dispersion_threshold: Aggregate suppression (provisional parameter)
+- trade_evidence: Liquidity filter, excludes NO_TRADE_REPORTED by default (Phase 2)
 
 Upstream contract (observation-suitability) is FROZEN — not modified here.
 All numerical thresholds marked PROVISIONAL; no hard-coded arbitrary values.
@@ -16,6 +17,10 @@ from datetime import datetime, timezone
 from hf_reswb.application.dispersion_analyzer import (
     compute_dispersion_metrics,
     should_suppress_result,
+)
+from hf_reswb.application.panel_integration import (
+    get_trade_evidence_exclusions,
+    validate_suitability_coverage,
 )
 from hf_reswb.application.staleness_detector import get_staleness_exclusions
 from hf_reswb.domain.panel import (
@@ -35,15 +40,22 @@ def compute_panel_eligibility(
     series_ids: list[int],
     analysis_date: str,
     parameters: PanelEligibilityParameters,
+    validate_suitability: bool = True,
 ) -> PanelMembershipSnapshot:
     """
-    Determine eligible Series for a panel date (D-046, Phase 1).
+    Determine eligible Series for a panel date (D-046, Phase 1–2).
+
+    Integration with observation-suitability (Phase 2):
+    - Requires trade evidence classification (Axis A) to be present
+    - Excludes NO_TRADE_REPORTED by default (liquidity criterion per SPEC §8.2)
+    - Uses session status (Axis B) as display context only (D-036)
 
     Args:
         connection: HistFinTS read-only connection
         series_ids: Candidate Series
         analysis_date: Date in YYYY-MM-DD format
         parameters: include_delisted, staleness_policy, etc.
+        validate_suitability: If True, require observation_suitability coverage (Phase 2)
 
     Returns:
         PanelMembershipSnapshot with included and excluded Series
@@ -52,6 +64,17 @@ def compute_panel_eligibility(
         return PanelMembershipSnapshot(
             date=analysis_date, included_series_ids=[], excluded_records=[]
         )
+
+    # Phase 2: Validate observation-suitability coverage (optional, for safety)
+    if validate_suitability:
+        covered, missing = validate_suitability_coverage(
+            connection, series_ids, analysis_date, analysis_date
+        )
+        if not covered:
+            raise ValueError(
+                f"observation-suitability classification missing for series {[m[0] for m in missing]}. "
+                "Run classify_series() before computing panel eligibility."
+            )
 
     excluded: list[ExclusionRecord] = []
 
@@ -87,7 +110,17 @@ def compute_panel_eligibility(
         )
         excluded.extend(stale_exclusions)
 
-    # 3. Final inclusion list
+    # 3. Phase 2: Trade evidence liquidity criterion (excludes NO_TRADE_REPORTED by default)
+    remaining_ids = [s for s in series_ids if not any(e.series_id == s for e in excluded)]
+    if remaining_ids:
+        trade_exclusions = get_trade_evidence_exclusions(
+            connection,
+            remaining_ids,
+            analysis_date,
+        )
+        excluded.extend(trade_exclusions)
+
+    # 4. Final inclusion list
     excluded_ids = {e.series_id for e in excluded}
     included = [s for s in series_ids if s not in excluded_ids]
 

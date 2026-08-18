@@ -121,8 +121,9 @@ class TestIncludeDelisted:
         connection = connect(tmp_path / "workbench.db", histfints_copy, histfints_readonly=True)
         try:
             params = PanelEligibilityParameters(include_delisted=True)
+            # Phase 1 test: skip suitability validation (Phase 2 integration)
             membership = compute_panel_eligibility(
-                connection, [active_id, delisted_id], "2020-04-14", params
+                connection, [active_id, delisted_id], "2020-04-14", params, validate_suitability=False
             )
 
             # Both should be included
@@ -143,8 +144,9 @@ class TestIncludeDelisted:
         connection = connect(tmp_path / "workbench.db", histfints_copy, histfints_readonly=True)
         try:
             params = PanelEligibilityParameters(include_delisted=False)
+            # Phase 1 test: skip suitability validation (Phase 2 integration)
             membership = compute_panel_eligibility(
-                connection, [active_id, delisted_id], "2020-04-14", params
+                connection, [active_id, delisted_id], "2020-04-14", params, validate_suitability=False
             )
 
             # Only active should be included
@@ -179,14 +181,15 @@ class TestStalenessPolicy:
             params = PanelEligibilityParameters(staleness_policy=policy)
 
             # On 2020-04-14 (4 days since last obs), not stale yet
+            # Phase 1 test: skip suitability validation (Phase 2 integration)
             membership_14 = compute_panel_eligibility(
-                connection, [series_id], "2020-04-14", params
+                connection, [series_id], "2020-04-14", params, validate_suitability=False
             )
             assert series_id in membership_14.included_series_ids
 
             # On 2020-04-16 (6 days since last obs), now stale
             membership_16 = compute_panel_eligibility(
-                connection, [series_id], "2020-04-16", params
+                connection, [series_id], "2020-04-16", params, validate_suitability=False
             )
             assert series_id not in membership_16.included_series_ids
             assert len(membership_16.excluded_records) == 1
@@ -225,8 +228,9 @@ class TestDispersionThreshold:
                 dispersion_threshold=DispersionThreshold(threshold_value=0.01),
             )
 
+            # Phase 1 test: skip suitability validation (Phase 2 integration)
             membership = compute_panel_eligibility(
-                connection, [series_id], "2020-04-14", params
+                connection, [series_id], "2020-04-14", params, validate_suitability=False
             )
 
             # High dispersion (simulated)
@@ -284,8 +288,9 @@ class TestPanelResultTraceability:
                 dispersion_threshold=threshold,
             )
 
+            # Phase 1 test: skip suitability validation (Phase 2 integration)
             membership = compute_panel_eligibility(
-                connection, [series_id], "2020-04-14", params
+                connection, [series_id], "2020-04-14", params, validate_suitability=False
             )
 
             result = compute_panel_result(
