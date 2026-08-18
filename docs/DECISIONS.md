@@ -2822,7 +2822,22 @@ Domain model and application-layer implementation delivered and tested:
 
 Test suite: 7 tests covering include_delisted (TRUE/FALSE), staleness time-local semantics, dispersion suppression logic, provisional status marking, and traceability preservation. All tests passing (regression verified: 6 observation-suitability + 5 reconciliation boundary tests remain passing). No HistFinTS mutations.
 
-Phase 2 (integration with observation-suitability pipeline) and Phase 3–5 (data constraints, testing, calibration) remain queued. Staleness and dispersion parameter calibration gated on domain review post-implementation.
+**Phase 2 Completion (2026-08-18):**
+
+Observation-suitability integration (frozen upstream contract: classify_series → derive_calendar → apply_calendar) delivered and tested:
+- `application/panel_integration.py`: Trade evidence filtering (get_trade_evidence_exclusions, get_trade_evidence_for_date), session status inspection (get_session_status_for_date, display-only per D-036), suitability coverage validation (validate_suitability_coverage)
+- `application/panel_eligibility_service.py` updated: Added trade evidence liquidity criterion (NO_TRADE_REPORTED exclusion per SPEC §8.2), optional suitability coverage validation gate, validate_suitability parameter (default True)
+
+Integration points per SPEC §2.3:
+1. include_delisted filter (Series.status check) — Phase 1
+2. staleness detection (time-local) — Phase 1
+3. trade evidence filtering (NO_TRADE_REPORTED exclusion, liquidity criterion) — Phase 2
+4. dispersion suppression (aggregate result) — Phase 1
+5. Full traceability: panel result → eligibility decisions → underlying evidence
+
+Test suite: 10 Phase 2 tests covering NO_TRADE_REPORTED filtering, session status visibility, coverage validation, parameter composition, and frozen upstream contract. All tests passing (regression verified: 28/28 tests passing = 6 observation-suitability + 7 Phase 1 + 10 Phase 2 + 5 reconciliation boundary). No HistFinTS mutations. Upstream contract (suitability_service) verified unmodified.
+
+Phase 3–5 (data constraints, testing, calibration) remain queued. Staleness and dispersion parameter calibration gated on domain review post-implementation.
 
 ---
 
