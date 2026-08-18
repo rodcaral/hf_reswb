@@ -2755,6 +2755,65 @@ Filed: `TRANCHE2-VERIFICATION-2026-08-17.md` documenting the exact schema state,
 
 ---
 
+### D-046 — Panel-eligibility implementation authorized; three parameters specified, calibration gated
+
+*Decided 2026-08-17. SDT implementation directive following D-045 validation clearance.*
+
+**Implementation Authorization:** SDT may proceed with `SPEC-panel-eligibility.md` implementation under these constraints:
+
+**Contract Preservation:**
+- `classify_series()` → `derive_calendar()` → `apply_calendar()` is a frozen upstream contract (observation-suitability layer, D-035–D-040)
+- Do not modify this contract
+- Integrate panel-eligibility layer downstream
+
+**Three Parameters — Specification Compliance:**
+
+1. **`include_delisted`** — Defaults to TRUE for historical research context
+   - Per SPEC-panel-eligibility.md §8.1
+   - No retroactive removal from historical panels; discontinued Series retain their observations before delisting date
+
+2. **`staleness_policy`** — Time-local exclusion, detection separate from eligibility
+   - Per SPEC-panel-eligibility.md §8.2
+   - Observations eligible BEFORE staleness detected; excluded FROM that date ONWARD (not retroactive)
+   - Detection is row-local and conceptually distinct from the eligibility gate
+   - Numerical staleness tolerance is provisional and configurable
+
+3. **`dispersion_threshold`** — Parameterized aggregate suppression
+   - Per SPEC-panel-eligibility.md §8.3
+   - Excessive dispersion suppresses the aggregate result, not the underlying observations
+   - Underlying observations, diagnostics, and evidence remain available for inspection and traceability
+   - Numerical threshold is provisional, economically contextual, and configurable
+
+**Implementation Discipline:**
+
+- **Do not hard-code arbitrary numerical values** for staleness or dispersion. Keep them explicitly provisional and configurable. Make their provisional status visible in the code and user-facing output.
+- **Do not mutate HistFinTS observations.** Eligibility decisions are analytical only — they filter aggregation, not upstream data.
+- **Preserve traceability:** Panel result → eligibility decisions → underlying evidence (observations, classifications, adjustments).
+
+**Data Constraints:**
+
+- Use `provider.adjustment_basis` for `adjustment_policy` enforcement (now populated for all three providers)
+- Use `provider_assignment.first_available_date` and `.last_available_date` for `minimum_coverage` (99.36% populated)
+- **Do not silently treat the 0.64% with NULL availability as valid or invalid.** Apply SPEC-panel-eligibility.md's coverage rule explicitly and report how incomplete availability metadata affects eligibility decisions.
+
+**Calibration Gate:**
+
+After eligibility layer implementation and testing is complete:
+
+1. **Begin calibration study** using historical panel data
+2. **Return empirical evidence** for staleness and dispersion:
+   - Distributions of observed staleness lengths and dispersion metrics
+   - Candidate parameter values with affected-panel and date counts
+   - Sensitivity analysis (how panel membership, depth, and results change at different thresholds)
+3. **Do not promote candidate values** into production thresholds without domain review (D-036 / D-042 principle)
+4. **Mark provisional status** until calibration review is complete
+
+**Observation-Suitability Contract Remains Frozen:**
+
+The F-009 reconciliation increment (D-035) and observation-suitability classification (D-039–D-040) are frozen except for defects. Panel-eligibility implementation does not alter this boundary.
+
+---
+
 ### Inherited principles (ratified, not re-decided)
 
 These come from the specification and are treated as binding constraints on all
