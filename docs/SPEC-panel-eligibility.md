@@ -1,7 +1,15 @@
 # SPEC — Panel Eligibility and Diagnostics
 
-**Status:** draft for review · **Version:** 0.1 · **Date:** 2026-08-15
-**Governing decisions:** D-016 (panel principle) · D-017 (time-varying membership) · D-024 (this spec) · **D-037 (calendar and alignment)** · **D-038/D-039 (observation suitability — D-039's gate is cleared; suitability classification is implemented and available to build against)**
+**Status:** specification complete; implementation blocked on Tranche 2 schema · **Version:** 0.2 · **Date:** 2026-08-17
+**Governing decisions:** D-016 (panel principle) · D-017 (time-varying membership) · D-024 (this spec) · D-037 (calendar and alignment) · D-038/D-039 (observation suitability — implemented, gate cleared) · **D-041 (Q-061 resolved; three parameters specified with calibration methodology, provisional status)**
+
+> **Update 2026-08-17 — Q-061 resolved at financial-domain level; three inclusion-rule parameters now specified.**
+> `include_delisted` (default to inclusion for historical research), `staleness_policy` (time-local exclusion, 
+> detection separate from eligibility), and `dispersion_threshold` (parameterized aggregate suppression). All three
+> are provisional analytical parameters (§8) pending empirical calibration against historical panel data (§8.5).
+> No hard-coded thresholds in production until calibration is complete and, where financially material, reviewed by 
+> the FDA. Implementation stays blocked on Tranche 2 schema (Workbench cannot proceed without `provider.adjustment_basis` 
+> backfill and the missing provider-assignment availability marker).
 
 > **Update 2026-08-17 — D-039: the `SPEC-observation-suitability.md` gate is cleared.**
 > Items 1–3 (trade-evidence classification, trade-filtered calendar derivation, session
@@ -364,12 +372,235 @@ today; they are simply not built yet. Nothing here may be implemented against ra
 
 ---
 
+## 8. Eligibility parameter specifications — Q-061 resolution
+
+*Resolved 2026-08-17 at financial-domain level (D-041). Three parameters were identified as
+decisions requiring domain judgment (D-024 "Additions to the parameter set"); all three are now
+specified below as provisional analytical parameters pending empirical calibration.*
+
+### 8.1 `include_delisted` — Survivorship switch
+
+**Semantic:** Boolean; defaults to `TRUE` for historical research context.
+
+**Definition:** When `TRUE`, a Series marked `status = DELISTED_OR_DISCONTINUED` in its
+observation era (the date range being analyzed) retains its historical observations and
+participates in the panel on dates where it would otherwise be eligible. When `FALSE`, such
+Series are excluded retroactively from the entire historical window, even for dates when they
+were actively trading.
+
+**Role:** Governs survivorship bias. In historical analysis (e.g., "what was the rate on
+2015-03-15?"), exclusion of Series that later delisted is false — they were real participants
+on that date. In present-day analytics where investability or contemporaneous tradability is
+part of the question, exclusion is appropriate.
+
+**Observational rule:** A Series contributes its observations on dates where **all** the
+following hold: (a) both legs have observations (§4.1 `both_legs_present`); (b) the
+relationship and ratio are known as-of-date; (c) the Series' own `status` **at that historical
+date** would have been `ACTIVE` (not `DELISTED_OR_DISCONTINUED`). The `status` field is
+historical per row, not a current flag. If `include_delisted = TRUE`, condition (c) is
+ignored.
+
+**Why separate from calendar/coverage gates:** A discontinued Series' history is evidence; the
+decision to exclude it is analytical, not technical. It does not belong in a technical
+"missing data" flag.
+
+**Provisional status:** No calibration needed — this is a binary analytical choice, not a
+threshold. The field definition is authoritative; documentation and UI must make the choice
+explicit.
+
+### 8.2 `staleness_policy` — Time-local observation exclusion
+
+**Semantic:** A dictionary mapping series/pair to a staleness condition and its exclusion rule.
+
+```
+staleness_policy: {
+    "condition": "max_consecutive_no_trade_days",
+    "value": <PROVISIONAL_PARAMETER>,
+    "unit": "calendar days",
+    "exclusion_mode": "time_local"
+}
+```
+
+**Definition:** Observations remain eligible and contribute to the panel before the staleness
+condition is detected on a Series/pair. Once the condition is detected on a specific date `D`,
+that Series/pair is excluded **from date D onward within the analysis window**, not
+retroactively for its entire history.
+
+**Time-local exclusion semantics:**
+
+- Compute for each Series: the most recent observation date `last_observed` in a rolling
+  window.
+- On each panel date `D`: if (`D` - `last_observed`) > `value` (in calendar days), the Series
+  is stale on date `D`.
+- A stale Series on date `D` is excluded from the panel on that date and all subsequent dates
+  within the window.
+- Earlier observations of the same Series (before staleness detected) remain eligible and
+  participate in panels for earlier dates.
+- If staleness resolves (new observation arrives), the Series may re-enter the panel on the
+  date the new observation appears, subject to the staleness criterion at that point.
+
+**Why separate from liquidity:** Volume and recency are orthogonal properties. A pair can pass
+a volume floor while prints lag, dragging consensus toward its own stale level (D-017).
+Staleness detection must operate independently, using the observed date, not volume.
+
+**Detection vs. eligibility:** Staleness detection is conceptually separate from the
+eligibility rule. The system detects stale conditions and records them (e.g., as metadata on
+the panel result and per-pair residual diagnostics), but does not alter or remove the
+underlying observations. The exclusion is applied at aggregation time, not at the read layer.
+
+**Provisional status:** The numerical value (calendar days) and the exact condition are
+provisional. See §8.5 (calibration methodology) for how this parameter is empirically
+determined.
+
+### 8.3 `dispersion_threshold` — Aggregate result suppression
+
+**Semantic:** A real number; dimensionless (typically expressed as a basis-point tolerance or
+percentage). Provisional; no universal value should be assumed.
+
+**Definition:** When the panel's per-member residual dispersion exceeds `dispersion_threshold`,
+the aggregate implied-FX rate is **suppressed** — not published, not displayed with a caveat,
+not interpolated into the result stream.
+
+**Suppression mechanics:**
+
+- Compute the consensus rate across eligible members.
+- Compute each member's residual: (member_rate - consensus_rate) / consensus_rate.
+- Compute dispersion: a summary statistic of the residual distribution (e.g., inter-quartile
+  range, coefficient of variation, or percentile spread — see calibration methodology below
+  for the choice).
+- If dispersion > `dispersion_threshold`, set `result_status = SUPPRESSED`.
+- **The aggregate result itself is suppressed, not stored, not interpolated.**
+- **Underlying observations, per-member rates, residuals, dispersion diagnostics, and
+  evidence remain available for inspection and traceability.** A data quality view can show
+  why the result was suppressed without requiring access to a separate database.
+
+**Why suppression, not caveat:** When members disagree about what the rate is by more than
+the threshold, a caveated best-guess is worse than no number. A missing result is honest; a
+false one with a disclaimer is a trap.
+
+**Economically contextual:** The threshold is not a universal constant. It depends on:
+- The currency pair and the volatility regime (high-volatility periods tolerate wider
+  dispersion).
+- Whether the question is "what is today's rate?" (lower tolerance) vs. "what was the rate
+  that period?" (higher tolerance for historical aggregation).
+- The intended use (trading execution vs. analytical reference).
+- The panel depth (a two-member panel's dispersion is noisier than a five-member one).
+
+No single number fits all contexts. The parameter must be configurable per panel spec and
+calibrated against data in that context.
+
+**Provisional status:** The value is provisional. Multiple calibration scenarios (by period,
+by pair, by depth) may emerge from the calibration study (§8.5).
+
+### 8.4 Interaction with time-varying membership
+
+All three parameters operate under the as-of-date principle (§2):
+
+- `include_delisted`: Applied independently on each panel date; a Series that is delisted on
+  date D is excluded from that date onward (when `include_delisted = FALSE`), but included
+  before.
+- `staleness_policy`: Time-local by design; exclusion applies from the detected staleness
+  onward.
+- `dispersion_threshold`: Computed per panel date; the result status (suppressed or published)
+  is per-date.
+
+All three preserve **per-date panel depth** — a diagnostic showing how many members
+contributed to each date's aggregation.
+
+### 8.5 Calibration methodology and validation procedure
+
+**No hard-coded thresholds are to be used in production until both (a) empirical calibration
+against historical panel data is complete and (b) where calibration results have financial-
+domain implications, they are reviewed by the FDA.**
+
+**Calibration inputs:**
+
+1. Historical pair panel across the relevant date range (e.g., the 20-year CEDEAR/USD sample).
+2. Per-date panel membership, residuals, dispersion metrics, and outcome of eligibility rules.
+3. Known real events: actual ratio changes (from audit, public filing), real FX moves (from
+   external CCL history), currency regime shifts.
+4. Out-of-sample validation window: a held-back period where the calibrated parameters are
+   tested against new data without re-fitting.
+
+**Staleness calibration approach:**
+
+- For each Series in the calibration set, compute rolling observation recency (days since
+  last trade).
+- Measure the residual's **time signature** (D-017): does a persistent residual correlate
+  with a period where the Series was stale? Do transient residuals appear during periods of
+  normal recency?
+- Propose candidate thresholds (e.g., 5 days, 10 days, 15 days) and measure:
+  - **Specificity:** How many actual staleness-caused residuals does this threshold capture?
+  - **False-positive rate:** How many residuals attributed to stale observation were actually
+    real price moves?
+  - **Depth impact:** How many additional Series would be excluded at each threshold? (a
+    threshold too strict will empty early-history panels).
+- Choose the threshold that maximizes specificity while tolerating acceptable false positives.
+- Validate on the out-of-sample window.
+
+**Dispersion calibration approach:**
+
+1. Compute dispersion metrics for every panel date in the calibration set using multiple
+   candidates (IQR, coefficient of variation, 90th percentile of |residual|, etc.).
+2. Measure correlation between dispersion and:
+   - Known ratio changes (did dispersion spike around announced changes?).
+   - Currency regime shifts (did dispersion change across CCL-regime boundaries?).
+   - Real FX moves (does high dispersion coincide with high-volatility periods?).
+3. For each candidate metric and threshold:
+   - Measure **suppression rate**: what % of panels would be suppressed?
+   - Measure **false-suppression rate**: of suppressed panels, how many contained genuine
+     market moves rather than ratio anomalies?
+   - Measure **missed signals**: of non-suppressed panels, how many later turned out to
+     reflect undetected ratio changes?
+4. Choose the metric and threshold combination that balances:
+   - Honest suppression when members genuinely disagree on the rate.
+   - Transparency (don't hide signals that later proved important).
+   - Practicality (don't suppress so often that the panel becomes unusable).
+5. Validate on the out-of-sample window.
+
+**Validation procedure:**
+
+- Apply calibrated parameters to the out-of-sample window.
+- Measure:
+  - Suppression rate (does it match the calibration rate, or is it unstable?).
+  - Comparison to external CCL data: for dates where the result was published, how well
+    does it match the published external rate?
+  - Comparison to audit findings: for dates where staleness or ratio changes were manually
+    identified, was the parametrized system's behavior consistent with those findings?
+- Document any regime or pair-specific variations. If calibration results differ materially
+  by pair or era, define separate parameter sets per context (e.g., "dispersion threshold for
+  AAPL pre-2015", "dispersion threshold for BABA post-2020").
+
+**Output of calibration:**
+
+- Chosen values for `staleness_policy` (`value`, `condition`, possibly context-specific
+  variants).
+- Chosen value(s) for `dispersion_threshold` (scalar, or context-specific table).
+- Calibration report documenting:
+  - Methodology and candidate thresholds evaluated.
+  - Validation results on out-of-sample data.
+  - Known limitations and regime/pair dependencies.
+  - Recommended update frequency (when to re-calibrate as new data arrives).
+
+**FDA review gate:** If calibration uncovers financially material trade-offs (e.g.,
+"accepting 5% false-positive staleness detection to reduce missed-signal rate from 8% to 2%"),
+the calibration report is reviewed by the FDA before the calibrated values enter production.
+
+**Provisional status:** These parameters remain provisional until calibrated. The specification
+is a contract for *how* calibration will proceed, not a claim that the parameters are final.
+
+---
+
 ## 8. Open items
 
-- Concrete threshold values — `minimum_panel_depth`, `dispersion_threshold`,
-  `staleness_policy` — deliberately left unset. They should be calibrated against the
-  existing pair history rather than guessed.
-- Whether a stale member is **excluded** or **down-weighted**. Exclusion is simpler and more
-  honest; down-weighting preserves depth in a panel that is already thin early in history.
+- Dispersion metric choice: IQR, coefficient of variation, percentile spread, or other? The
+  calibration study (§8.5) will determine which metric best captures "members disagree about
+  the rate."
+- Staleness condition variants: Rolling recency (days since most recent observation), or
+  alternative signals (e.g., time since last print volume > threshold)? Calibration will
+  inform.
+- Context-dependent thresholds: Will a single `staleness_policy` and `dispersion_threshold`
+  apply across all pairs and eras, or will the calibration study reveal regime-specific
+  requirements?
 - How `relationship_type` interacts with panel composition: whether CEDEAR and dual-listing
   pairs may share one panel, given their different fee and ratio mechanics.

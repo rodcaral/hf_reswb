@@ -2627,6 +2627,54 @@ parameters to the financial advisor for domain review.
 
 ---
 
+### D-042 — Translate Q-061 FDA decisions into SPEC-panel-eligibility.md; three parameters specified as provisional, pending calibration
+
+*Decided 2026-08-17. Implements the specification work enabled by Q-061 resolution.*
+
+**Three inclusion-rule parameters now specified** in `SPEC-panel-eligibility.md` §8:
+
+1. **`include_delisted`** — Binary choice; defaults to `TRUE` for historical research context.
+   When true, a Series marked `DELISTED_OR_DISCONTINUED` retains its historical observations
+   and participates on dates where it would otherwise be eligible. When false, such Series are
+   excluded retroactively. No calibration needed — this is a binary analytical choice. The
+   field definition is authoritative; UI and documentation must make the choice explicit.
+
+2. **`staleness_policy`** — Time-local exclusion (novel framing, differs from prior open
+   question). Observations remain eligible **before** staleness is detected on date `D`; the
+   Series is excluded **from date D onward**, not retroactively for its entire history. Each
+   Series/pair pair contributes observations from its start until its staleness condition is
+   met. Staleness detection is conceptually separate from eligibility; the system detects and
+   records staleness metadata but does not alter the underlying observations. **Provisional
+   parameter:** the numerical value (calendar days) and condition (`max_consecutive_no_trade_days`
+   or alternative) are determined by calibration (§8.5).
+
+3. **`dispersion_threshold`** — Parameterized aggregate suppression, economically contextual.
+   When dispersion exceeds the threshold, the aggregate implied-FX rate is **suppressed**
+   (not published, not displayed with caveat). Underlying observations, per-member rates,
+   residuals, and diagnostics remain available for inspection. Suppression mechanics preserve
+   traceability and avoid false caveated numbers. Threshold values are not universal and
+   depend on currency pair, volatility regime, analytical intent, and panel depth. **Provisional
+   parameter:** determined by calibration (§8.5).
+
+**All three are marked explicitly provisional.** Numerical values are left unset. The spec
+includes a concrete calibration methodology (§8.5): (a) calibration inputs and approach per
+parameter; (b) validation procedure on out-of-sample data; (c) FDA review gate for financially
+material trade-offs. This is a contract for *how calibration will proceed*, not a claim that
+parameters are final.
+
+**Implementation is not blocked by this specification.** It is blocked by Tranche 2 schema
+(D-041): Workbench cannot build panel eligibility without the `provider.adjustment_basis`
+backfill and the missing provider-assignment availability marker. Once those land, the
+Workbench can implement panel eligibility against this spec, using provisional numerical
+values from calibration (or conservative defaults if calibration is delayed). The calibration
+study can proceed in parallel with implementation, and parameters updated as results arrive.
+
+**Observation-suitability contract unchanged.** The three new parameters operate at the
+aggregation layer, downstream of `classify_series()` / `derive_calendar()` / `apply_calendar()`.
+Those functions remain frozen and untouched.
+
+---
+
 ### Inherited principles (ratified, not re-decided)
 
 These come from the specification and are treated as binding constraints on all
@@ -3352,6 +3400,7 @@ Binding across spec, code and conversation.
 
 | Date | Change |
 |---|---|
+| 2026-08-17 | Q-061 resolved at financial-domain level → **D-042**: three inclusion-rule parameters specified in `SPEC-panel-eligibility.md` §8 with provisional status and calibration methodology. **`include_delisted`** (binary choice, defaults to inclusion for historical research). **`staleness_policy`** (time-local exclusion: eligible before staleness detected, excluded from date onward, not retroactive; detection separate from eligibility). **`dispersion_threshold`** (parameterized aggregate suppression, not deletion; underlying observations remain available; economically contextual, not universal). All three marked provisional with concrete calibration approach (§8.5): inputs, per-parameter methodology, validation procedure, FDA review gate for financially material trade-offs. No hard-coded thresholds in production until calibrated. Observation-suitability contract unchanged; the three new parameters operate downstream at the aggregation layer. Implementation stays blocked on Tranche 2 schema (D-041). Calibration study can proceed in parallel, updating parameters as results arrive. |
 | 2026-08-17 | Observation-suitability increment declared complete except defects → **D-040**. Verified live rather than assumed: **Tranche 2 is unresolved on both items** (`adjustment_basis` column exists, NULL for all three providers; the provider-assignment availability marker was never built at all — only the Catalog-side `provider_symbol` columns exist, a different gap). **Q-061 found internally inconsistent** — a stale strikethrough entry claims it closed via D-024, but D-024 closed a different part of the panel design; the live entry with its three unanswered inclusion-rule sub-questions is the real status. Flagged rather than picked one way (D-009b). Sequencing: next work follows whichever gate is ready first; neither is closer to done as of this decision. No financial-domain decision required unless one surfaces while resolving either gate. Q-067 explicitly **not** resolved by this freeze. The `classify_series`/`derive_calendar`/`apply_calendar` contract is not to change while either gate is worked. |
 | 2026-08-17 | Project owner reviewed D-038 directly and ratified it → **D-039**: proceed with the two-axis model, keep Q-067 explicitly provisional, no upstream row rewritten or deleted, the `NO_TRADE_REPORTED`/`TRADE_EVIDENCE_UNRESOLVED` distinction stays separately reportable for a future external-print revision. **Implemented** `SPEC-observation-suitability.md` §7 items 1–3 and the F-030 guard: `domain/suitability.py`, `application/suitability_service.py` (`classify_series` → `derive_calendar` → `apply_calendar`, three functions matching §3.3's ordering so it can't collapse into the cycle that section ruled out, plus `compute_no_trade_runs` and the `is_classifiable` F-030 guard), `persistence/schema.sql` extended with `calendar_derivation`/`suitability_run`/`observation_suitability`/`no_trade_run`, and `evidence_reference.calculation_id` loosened to nullable so this reuses F-009's pointer type rather than inventing a second one — verified not to affect F-009 (its 5 tests unchanged after the schema edit). **6 new tests, 11/11 passing overall**, including `test_ground_truth_against_real_production_series_11312` — the classifier run **read-only against the real production file** on the same ground truth (series 11312, Argentina's *feriados inamovibles*) D-038 validated by hand, now running as code rather than a one-off analysis. F-009's D-035 freeze untouched throughout. Q-067 remains open; `SPEC-panel-eligibility.md`'s other gates (Tranche 2, Q-061) remain independent and unaffected. |
 | 2026-08-17 | **F-026 investigated before treatment, per an explicit directive to define suitability before building `SPEC-panel-eligibility.md` → D-038.** Investigating the detection rule rather than accepting F-026's description changed the answer three times. **F-028 (H)**: F-026's own mitigation — *treat `volume = 0` as no observed trade* — is unsafe; **5,434 of 27,564 zero-volume bars (19.7%) in a 300-Series US sample carry a genuine intraday range** (series 118, 3–15% ranges), so `volume = 0` is usable only as one conjunct of three. The adopted rule is `volume = 0` **and** `open = high = low = value` **and** `value` = prior stored close at **exact** float equality (the closes are bit-identical because Yahoo echoes the same float; a tolerance buys nothing and admits real thin prints). Validated at 100% recall against ground truth independent of the store — Argentina's five *feriados inamovibles*, with 04-02 deliberately excluded because the store is *right* that the 2020 holiday moved. **The decisive finding: the venue calendar cannot be the detection rule.** 876 of 1,910 BYMA fills (46%) fall on dates another BYMA Series traded — 2026-07-06 is the clean case, seven of nine trading while `AAPL.BA` and `BIDU.BA` carry fills — and **all 19,883 US fills are on real sessions** (zero observations on any of six known NYSE closures across 300 Series). It is also unavailable where it is most needed (1,834 of 1,910 cases are in BYMA's *Unresolved* pre-2015 era) and **circular** (D-037 derives the calendar from the very bars in question). Resolved by an **ordering**: trade evidence (row-local) → calendar (quorum over **trade-bearing** dates) → session status. **F-029 (H)**: the mechanism is **live in 2026** — raw 156 vs trade-bearing 152 session dates, four real Argentine holidays each carrying fills on seven of nine Series — so D-037's *Reliable* rating for BYMA ~2019+ rests on a year it did not sample, and the derived calendar is threshold-sensitive at 7/9. All 6,624 rows of series 11312 spanning 2000–2026 came from **one** `import_run_id = 25552`, killing the rolling-window explanation and any era-boundary cleanup. **D-036's principle transfers; its softness does not** — D-036's third verdict exists to describe *evidence absence*, and the trade axis has none, being decided from two rows always present. So: no global gate and no read-layer suppression (a volume study and a data-quality panel both want these rows), but continuity-sensitive calculations exclude `NO_TRADE_REPORTED` **by default**, and inclusion must be declared in the calculation's own P3 provenance. `PHANTOM_FILL`/`LEGITIMATE_ZERO_VOLUME`/`AMBIGUOUS` **rejected** for collapsing two axes and calling a fill on a real session *legitimate* when it is exactly as unusable for a return as one on Christmas Day. Treatment is a **date removal upstream of D-037's pairwise intersection** — never a fill, never a zero: `PAMP.BA`'s unbroken 116-bar frozen run (2004-11-09→2005-04-19) becomes one labelled ~5.5-month multi-session return instead of 116 fabricated zeros. **F-030 (M)**: series 11311 holds 398 daily plus 72 five-minute bars in one Series, so `date(observed_at)` is not a session key for it, and it was one of D-037's nine quorum contributors. **F-031 (M)**: 11312's 10× step at 2001-12-12 sits entirely inside a carried-forward region, so F-009's detector would quarantine a span on two rows representing no trade — candidate generation must run on filtered rows; **the D-035 freeze holds.** Reference-by-key throughout with **no value copies**, and D-033's restate-your-own-arithmetic exception deliberately **not** extended (an equality relation is restatable from two named keys; ~750k value copies would be a shadow price store). `suitability_run` adopted so an absent classification is not ambiguous between *ordinary* and *never examined*. **Nothing deleted or rewritten upstream.** Needs nothing from HistFinTS. `SPEC-observation-suitability.md` written; **`SPEC-panel-eligibility.md` implementation gated on it**; **A-016 amended**, **A-017 queued**, **Q-067 raised**. F-026's Alpha Vantage/Stooq open item recorded as **untestable** — `provider` holds only `fred`/`yahoo_finance`/`byma` — not as clean (D-009). |
