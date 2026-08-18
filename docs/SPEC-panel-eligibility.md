@@ -529,16 +529,30 @@ domain implications, they are reviewed by the FDA.**
 - Measure the residual's **time signature** (D-017): does a persistent residual correlate
   with a period where the Series was stale? Do transient residuals appear during periods of
   normal recency?
-- Propose candidate thresholds (e.g., 5 days, 10 days, 15 days) and measure:
-  - **Specificity:** How many actual staleness-caused residuals does this threshold capture?
-  - **False-positive rate:** How many residuals attributed to stale observation were actually
-    real price moves?
-  - **Depth impact:** How many additional Series would be excluded at each threshold? (a
-    threshold too strict will empty early-history panels).
-- Choose the threshold that maximizes specificity while tolerating acceptable false positives.
-- Validate on the out-of-sample window.
+- **FDA directive (2026-08-18):** Compute **empirical tail and relationship diagnostics** for
+  candidate windows below the observed maximum, rather than selecting a numerical threshold at
+  this stage. Candidate window analysis should show:
+  - Fraction of observations excluded at each candidate window
+  - Which pairs are affected
+  - Distribution across time periods
+  - Co-occurrence patterns with dispersion elevation and evidence-quality events
+  - Relationship between staleness and ratio-change detection (tail behavior)
+- Do not promote a numerical staleness criterion to production until tail/relationship
+  diagnostics are complete and reviewed by the financial domain.
+- Validate on the out-of-sample window once a candidate is selected.
 
 **Dispersion calibration approach:**
+
+**Current provisional parameter (FDA directive 2026-08-18):** `dispersion_threshold = 0.167` (coefficient of variation).
+
+This parameter is **provisional and not a financially validated universal threshold.** It is set as an operational parameter for current use while calibration proceeds, with the following constraints:
+
+- **Provisional scope:** Applicable only to the PRIMARY cohort (CEDEAR ↔ foreign underlying pairs; currently 5 pairs, expanding to 12 pending schema resolution per F-032).
+- **Not universal:** The threshold must be recalibrated as the primary CEDEAR population expands, as evidence base improves, and as regime-specific analysis matures.
+- **Cohort separation (binding):** CEDEAR/foreign-underlying is the PRIMARY calibration cohort. ADR/ADS ↔ Argentine local-share pairs are a SECONDARY validation population. Do **not** pool cohorts for threshold calibration. Separate thresholds may emerge per cohort.
+- **Not financially sanctioned:** This parameter has not undergone financial-domain review for universal applicability. Decisions to suppress results based on this threshold remain analytical and provisional until reviewed by the FDA.
+
+**Calibration approach:**
 
 1. Compute dispersion metrics for every panel date in the calibration set using multiple
    candidates (IQR, coefficient of variation, 90th percentile of |residual|, etc.).
@@ -546,17 +560,19 @@ domain implications, they are reviewed by the FDA.**
    - Known ratio changes (did dispersion spike around announced changes?).
    - Currency regime shifts (did dispersion change across CCL-regime boundaries?).
    - Real FX moves (does high dispersion coincide with high-volatility periods?).
+   - Evidence-quality events (F-009 reconciliation gaps, F-017 import truncation, F-021 ratio steps, F-026 zero-volume carries).
 3. For each candidate metric and threshold:
    - Measure **suppression rate**: what % of panels would be suppressed?
    - Measure **false-suppression rate**: of suppressed panels, how many contained genuine
      market moves rather than ratio anomalies?
    - Measure **missed signals**: of non-suppressed panels, how many later turned out to
      reflect undetected ratio changes?
-4. Choose the metric and threshold combination that balances:
-   - Honest suppression when members genuinely disagree on the rate.
-   - Transparency (don't hide signals that later proved important).
-   - Practicality (don't suppress so often that the panel becomes unusable).
-5. Validate on the out-of-sample window.
+4. **Distribution analysis:** Show how observations above/below the threshold distribute across:
+   - Structural events (evidence-quality dimensions)
+   - Staleness states
+   - Time periods and market regimes
+   - Pair identity
+5. Validate on the out-of-sample window. Document any regime or pair-specific variations.
 
 **Validation procedure:**
 
@@ -573,34 +589,62 @@ domain implications, they are reviewed by the FDA.**
 
 **Output of calibration:**
 
-- Chosen values for `staleness_policy` (`value`, `condition`, possibly context-specific
-  variants).
-- Chosen value(s) for `dispersion_threshold` (scalar, or context-specific table).
+**Staleness:**
+- Empirical tail and relationship diagnostics for candidate windows below observed maximum.
+- Distribution of exclusions and co-occurrence patterns per FDA directive.
+- **No numerical criterion promoted to production** until tail/relationship analysis complete and
+  financially reviewed.
+
+**Dispersion:**
+- Current provisional parameter: `dispersion_threshold = 0.167` (coefficient of variation).
+- Distribution analysis across structural events, staleness states, time periods, and pair identity.
 - Calibration report documenting:
   - Methodology and candidate thresholds evaluated.
   - Validation results on out-of-sample data.
   - Known limitations and regime/pair dependencies.
-  - Recommended update frequency (when to re-calibrate as new data arrives).
+  - Cohort-specific thresholds if analysis reveals PRIMARY and SECONDARY populations require
+    different parameters.
+  - Recommended update frequency (when to re-calibrate as new data arrives or population expands).
 
-**FDA review gate:** If calibration uncovers financially material trade-offs (e.g.,
-"accepting 5% false-positive staleness detection to reduce missed-signal rate from 8% to 2%"),
-the calibration report is reviewed by the FDA before the calibrated values enter production.
+**FDA review gate:** 
+- **Staleness:** No promotion to production criterion until tail/relationship diagnostics reviewed
+  by financial domain.
+- **Dispersion:** Current provisional parameter (0.167) may proceed analytically without new
+  financial review, pending recalibration as PRIMARY cohort expands (F-032 resolution) and
+  SECONDARY cohort evidence matures. Financially material changes to thresholds require FDA review.
 
-**Provisional status:** These parameters remain provisional until calibrated. The specification
-is a contract for *how* calibration will proceed, not a claim that the parameters are final.
+**Provisional status:** Both parameters remain provisional. Staleness is uncalibrated and
+analytically non-committal. Dispersion has a provisional operational parameter that must be
+recalibrated as the population, evidence base, and understanding of regime dependencies improve.
+The specification is a contract for *how* calibration and validation will proceed.
 
 ---
 
 ## 8. Open items
 
-- Dispersion metric choice: IQR, coefficient of variation, percentile spread, or other? The
-  calibration study (§8.5) will determine which metric best captures "members disagree about
-  the rate."
-- Staleness condition variants: Rolling recency (days since most recent observation), or
-  alternative signals (e.g., time since last print volume > threshold)? Calibration will
-  inform.
-- Context-dependent thresholds: Will a single `staleness_policy` and `dispersion_threshold`
-  apply across all pairs and eras, or will the calibration study reveal regime-specific
-  requirements?
-- How `relationship_type` interacts with panel composition: whether CEDEAR and dual-listing
-  pairs may share one panel, given their different fee and ratio mechanics.
+**Staleness (awaiting tail/relationship diagnostics per FDA directive 2026-08-18):**
+- Empirical tail behavior below observed maximum across candidate windows [2d, 3d, 4d, 5d, 6d, 7d].
+- Relationship diagnostics: co-occurrence with dispersion elevation, evidence-quality events, and
+  ratio-change detection signals.
+- **Do not select a numerical staleness criterion** until these diagnostics are complete and
+  reviewed by the financial domain. No production use of staleness_policy until then.
+
+**Dispersion:**
+- Current provisional parameter (CV 0.167) sufficient for analytical use in PRIMARY cohort.
+- Recalibration required when:
+  - F-032 resolution expands PRIMARY cohort from 5 to 12 pairs (pending Phase 3 validation).
+  - SECONDARY cohort (ADR/local-share) evidence matures and separate thresholds may be warranted.
+  - Regime-dependent analysis reveals material differences across periods.
+- Dispersion metric choice remains open for future refinement (IQR, coefficient of variation,
+  percentile spread, or other).
+
+**Cohort interaction:**
+- Whether CEDEAR (PRIMARY) and dual-listing/ADR (SECONDARY) pairs may share one analysis
+  or require separate thresholds, given their different fee and ratio mechanics.
+- Confirmed: do **not** pool cohorts for threshold calibration per FDA ruling.
+
+**Context-dependent parameters:**
+- Will a single `staleness_policy` and `dispersion_threshold` apply across all pairs and eras,
+  or will calibration reveal regime-specific requirements?
+- Already confirmed: separate parameters likely for PRIMARY (CEDEAR/foreign) and SECONDARY
+  (ADR/local-share) cohorts.
