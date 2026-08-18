@@ -2729,6 +2729,32 @@ Filed: `TRANCHE2-VERIFICATION-2026-08-17.md` documenting the exact schema state,
 
 ---
 
+### D-045 — Tranche 2 validation complete; all gates passed; Workbench implementation gate cleared
+
+*Decided 2026-08-17. Final validation confirms Tranche 2 data is correct and usable.*
+
+**Validation Results (Production Database):**
+
+| Query | Status | Result |
+|-------|--------|--------|
+| 1: Adjustment basis | ✅ PASSED | All three providers populated (FRED/BYMA=UNADJUSTED, Yahoo=SPLIT_ADJUSTED) |
+| 2: Availability columns | ✅ PASSED | Both `first_available_date` and `last_available_date` exist and queryable |
+| 3: Coverage | ✅ PASSED | 11,248 of 11,321 assignments (99.36%) backfilled; 73 with NULL (legitimate: zero observations) |
+| 4: Consistency | ✅ PASSED | No inverted ranges, no partial NULL values, all ranges valid |
+| 5: Sample rows | ✅ PASSED | Representative assignments show reasonable date ranges spanning 2000–2026 |
+| 6: NULL semantics | ✅ PASSED | All 73 NULL assignments have zero observations (no backfill failures) |
+
+**Database State:**
+- Schema version: 14 (migrated from 10; 4 migrations applied)
+- All Tranche 2 items complete and verified
+- Data quality: consistent, no anomalies
+
+**Gate Status:** ✅ **ALL GATES PASSED — WORKBENCH MAY PROCEED**
+
+**Workbench panel-eligibility implementation is now unblocked.** Both upstream data dependencies (`provider.adjustment_basis` and `provider_assignment` availability markers) are complete, validated, and available for use.
+
+---
+
 ### Inherited principles (ratified, not re-decided)
 
 These come from the specification and are treated as binding constraints on all
