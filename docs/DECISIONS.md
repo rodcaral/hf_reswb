@@ -2837,7 +2837,20 @@ Integration points per SPEC §2.3:
 
 Test suite: 10 Phase 2 tests covering NO_TRADE_REPORTED filtering, session status visibility, coverage validation, parameter composition, and frozen upstream contract. All tests passing (regression verified: 28/28 tests passing = 6 observation-suitability + 7 Phase 1 + 10 Phase 2 + 5 reconciliation boundary). No HistFinTS mutations. Upstream contract (suitability_service) verified unmodified.
 
-Phase 3–5 (data constraints, testing, calibration) remain queued. Staleness and dispersion parameter calibration gated on domain review post-implementation.
+**Phase 3 Skeleton (2026-08-18):**
+
+Data constraint framework implemented with graceful Tranche 2 handling:
+- `application/data_constraints.py`: Coverage status detection (UNRESOLVED for NULL availability), adjustment basis checking (mixed bases, required-basis mismatch)
+- `application/panel_eligibility_service.py` updated: check_coverage, check_adjustment_basis, required_adjustment_basis parameters
+- Graceful fallback: All constraint functions check schema presence and return empty list if Tranche 2 (migrations 0011–0013) not deployed
+- Phase 1–2 tests (28/28 passing) unaffected by missing schema
+
+Blocked on Tranche 2 HistFinTS deployment: provider.adjustment_basis and provider_assignment.first/last_available_date columns. Once deployed:
+1. Remove graceful fallbacks from data_constraints.py
+2. Run full integration tests (1 placeholder test currently skipped)
+3. Validate against real adjustment_basis values and NULL availability cases
+
+Phase 4 (integration testing) and Phase 5 (calibration study) remain queued. Staleness and dispersion parameter calibration gated on domain review post-implementation.
 
 ---
 
