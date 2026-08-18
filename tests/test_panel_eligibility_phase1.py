@@ -197,6 +197,36 @@ class TestStalenessPolicy:
         finally:
             connection.close()
 
+    def test_staleness_resume_when_trade_resumes(self, histfints_copy, tmp_path):
+        """Series re-enters panel when trading resumes after staleness."""
+        series_id = _seed_series(histfints_copy, "SERIES_A", "ACTIVE")
+
+        # Observations: early data, then gap, then new observation
+        _insert_observation(histfints_copy, series_id, "2020-04-08", 100.0)
+        _insert_observation(histfints_copy, series_id, "2020-04-09", 101.0)
+        _insert_observation(histfints_copy, series_id, "2020-04-10", 102.0)
+        # Gap: 2020-04-11 to 2020-04-20 (10 days)
+        _insert_observation(histfints_copy, series_id, "2020-04-21", 105.0)  # Trading resumes
+
+        connection = connect(tmp_path / "workbench.db", histfints_copy, histfints_readonly=True)
+        try:
+            policy = StalenessPolicy(max_consecutive_no_trade_days=5)
+            params = PanelEligibilityParameters(staleness_policy=policy)
+
+            # On 2020-04-16, stale (6 days since last obs on 04-10)
+            membership_16 = compute_panel_eligibility(
+                connection, [series_id], "2020-04-16", params, validate_suitability=False, check_coverage=False, check_adjustment_basis=False
+            )
+            assert series_id not in membership_16.included_series_ids
+
+            # On 2020-04-21, trading has resumed (0 days since observation ON 04-21), should be included
+            membership_21 = compute_panel_eligibility(
+                connection, [series_id], "2020-04-21", params, validate_suitability=False, check_coverage=False, check_adjustment_basis=False
+            )
+            assert series_id in membership_21.included_series_ids
+        finally:
+            connection.close()
+
 
 class TestDispersionThreshold:
     """Test dispersion_threshold parameter (aggregate suppression)."""

@@ -43,7 +43,7 @@ def detect_stale_series(
         FROM histfints.series s
         LEFT JOIN histfints.observation o ON s.id = o.series_id
         WHERE s.id IN ({placeholders})
-          AND (o.observed_at IS NULL OR DATE(o.observed_at) < ?)
+          AND (o.observed_at IS NULL OR DATE(o.observed_at) <= ?)
         GROUP BY s.id
         """,
         (*series_ids, analysis_date),
