@@ -1,0 +1,68 @@
+{
+  "pairs_analyzed": 1,
+  "analysis_period": [
+    "2020-01-01",
+    "2026-08-18"
+  ],
+  "date_generated": "2026-08-18T11:10:43.201132",
+  "pair_statistics": {
+    "Apple CEDEAR": {
+      "cedear_stats": {
+        "count": 1616,
+        "min": 1,
+        "max": 7,
+        "median": 1.0,
+        "mean": 1.495049504950495,
+        "p25": 1,
+        "p75": 1,
+        "p95": 3
+      },
+      "underlying_stats": {
+        "count": 1662,
+        "min": 1,
+        "max": 4,
+        "median": 1.0,
+        "mean": 1.4536702767749698,
+        "p25": 1,
+        "p75": 1,
+        "p95": 3
+      },
+      "combined_stats": {
+        "count": 3278,
+        "min": 1,
+        "max": 7,
+        "median": 1.0,
+        "mean": 1.4740695546064673,
+        "p25": 1,
+        "p75": 1,
+        "p95": 3
+      },
+      "analysis_window": [
+        "2020-01-02",
+        "2026-08-14"
+      ]
+    }
+  },
+  "candidates": {
+    "staleness_thresholds_days": [
+      5,
+      10,
+      15,
+      20,
+      25
+    ],
+    "dispersion_percentiles": [
+      50,
+      75,
+      90,
+      95
+    ]
+  },
+  "known_exclusions": {
+    "F-009": "Evidence consumption incomplete",
+    "F-017": "Import truncation confirmed",
+    "F-021": "CEDEAR ratio change (AAPL 2024-01-24)",
+    "F-026": "Zero-volume carry-forwards",
+    "Metadata_Coverage": "8 of 9 CEDEARs lack complete relationship data"
+  }
+}
