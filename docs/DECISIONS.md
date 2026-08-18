@@ -2812,6 +2812,18 @@ After eligibility layer implementation and testing is complete:
 
 The F-009 reconciliation increment (D-035) and observation-suitability classification (D-039–D-040) are frozen except for defects. Panel-eligibility implementation does not alter this boundary.
 
+**Phase 1 Completion (2026-08-18):**
+
+Domain model and application-layer implementation delivered and tested:
+- `domain/panel.py`: Domain models (enums, dataclasses) with status properties marking numerical parameters PROVISIONAL
+- `application/staleness_detector.py`: Time-local staleness detection (detect_stale_series, get_staleness_exclusions) per SPEC §8.2
+- `application/dispersion_analyzer.py`: Dispersion metrics (CV, IQR, max absolute residual) per SPEC §8.3
+- `application/panel_eligibility_service.py`: Orchestrator (compute_panel_eligibility, compute_panel_result, format_provisional_status)
+
+Test suite: 7 tests covering include_delisted (TRUE/FALSE), staleness time-local semantics, dispersion suppression logic, provisional status marking, and traceability preservation. All tests passing (regression verified: 6 observation-suitability + 5 reconciliation boundary tests remain passing). No HistFinTS mutations.
+
+Phase 2 (integration with observation-suitability pipeline) and Phase 3–5 (data constraints, testing, calibration) remain queued. Staleness and dispersion parameter calibration gated on domain review post-implementation.
+
 ---
 
 ### Inherited principles (ratified, not re-decided)
