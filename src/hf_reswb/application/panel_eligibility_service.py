@@ -1,10 +1,14 @@
-"""Panel eligibility orchestrator (D-046, Phase 1–2).
+"""Panel eligibility orchestrator (D-046, Phase 1–3).
 
-Orchestrates four parameters per SPEC-panel-eligibility.md:
-- include_delisted: Boolean, default TRUE
-- staleness_policy: Time-local exclusion (provisional parameter)
-- dispersion_threshold: Aggregate suppression (provisional parameter)
+Orchestrates four inclusion-rule parameters per SPEC-panel-eligibility.md §8:
+- include_delisted: Boolean, default TRUE (Phase 1)
+- staleness_policy: Time-local exclusion (provisional parameter, Phase 1)
+- dispersion_threshold: Aggregate suppression (provisional parameter, Phase 1)
 - trade_evidence: Liquidity filter, excludes NO_TRADE_REPORTED by default (Phase 2)
+
+Handles data constraints per Phase 3:
+- Incomplete availability metadata (UNRESOLVED coverage status)
+- Adjustment basis mismatches (mixed bases or required-basis violation)
 
 Upstream contract (observation-suitability) is FROZEN — not modified here.
 All numerical thresholds marked PROVISIONAL; no hard-coded arbitrary values.
@@ -14,6 +18,10 @@ from __future__ import annotations
 import sqlite3
 from datetime import datetime, timezone
 
+from hf_reswb.application.data_constraints import (
+    get_adjustment_basis_mismatch_exclusions,
+    get_coverage_incomplete_exclusions,
+)
 from hf_reswb.application.dispersion_analyzer import (
     compute_dispersion_metrics,
     should_suppress_result,
@@ -41,14 +49,21 @@ def compute_panel_eligibility(
     analysis_date: str,
     parameters: PanelEligibilityParameters,
     validate_suitability: bool = True,
+    check_coverage: bool = True,
+    check_adjustment_basis: bool = True,
+    required_adjustment_basis: str | None = None,
 ) -> PanelMembershipSnapshot:
     """
-    Determine eligible Series for a panel date (D-046, Phase 1–2).
+    Determine eligible Series for a panel date (D-046, Phase 1–3).
 
     Integration with observation-suitability (Phase 2):
     - Requires trade evidence classification (Axis A) to be present
     - Excludes NO_TRADE_REPORTED by default (liquidity criterion per SPEC §8.2)
     - Uses session status (Axis B) as display context only (D-036)
+
+    Data constraints (Phase 3):
+    - Detects incomplete availability metadata (UNRESOLVED status)
+    - Detects adjustment basis mismatches (mixed bases or required-basis violation)
 
     Args:
         connection: HistFinTS read-only connection
@@ -56,6 +71,9 @@ def compute_panel_eligibility(
         analysis_date: Date in YYYY-MM-DD format
         parameters: include_delisted, staleness_policy, etc.
         validate_suitability: If True, require observation_suitability coverage (Phase 2)
+        check_coverage: If True, exclude UNRESOLVED availability metadata (Phase 3)
+        check_adjustment_basis: If True, exclude mixed adjustment bases (Phase 3)
+        required_adjustment_basis: If set, exclude Series not matching this basis (Phase 3)
 
     Returns:
         PanelMembershipSnapshot with included and excluded Series
@@ -120,7 +138,26 @@ def compute_panel_eligibility(
         )
         excluded.extend(trade_exclusions)
 
-    # 4. Final inclusion list
+    # 4. Phase 3: Coverage metadata constraints (incomplete availability)
+    remaining_ids = [s for s in series_ids if not any(e.series_id == s for e in excluded)]
+    if check_coverage and remaining_ids:
+        coverage_exclusions = get_coverage_incomplete_exclusions(
+            connection,
+            remaining_ids,
+        )
+        excluded.extend(coverage_exclusions)
+
+    # 5. Phase 3: Adjustment basis constraints (mixed bases or required-basis mismatch)
+    remaining_ids = [s for s in series_ids if not any(e.series_id == s for e in excluded)]
+    if check_adjustment_basis and remaining_ids:
+        basis_exclusions = get_adjustment_basis_mismatch_exclusions(
+            connection,
+            remaining_ids,
+            required_adjustment_basis,
+        )
+        excluded.extend(basis_exclusions)
+
+    # 6. Final inclusion list
     excluded_ids = {e.series_id for e in excluded}
     included = [s for s in series_ids if s not in excluded_ids]
 

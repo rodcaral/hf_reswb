@@ -1,3 +1,10 @@
+from hf_reswb.application.data_constraints import (
+    detect_mixed_adjustment_bases,
+    get_adjustment_basis,
+    get_adjustment_basis_mismatch_exclusions,
+    get_availability_status,
+    get_coverage_incomplete_exclusions,
+)
 from hf_reswb.application.discontinuity_detector import Boundary, DetectorParams, detect_boundaries
 from hf_reswb.application.dispersion_analyzer import (
     compute_dispersion_metrics,
@@ -36,4 +43,6 @@ __all__ = [
     "compute_dispersion_metrics", "should_suppress_result",
     "get_trade_evidence_exclusions", "get_trade_evidence_for_date",
     "get_session_status_for_date", "validate_suitability_coverage",
+    "get_availability_status", "get_coverage_incomplete_exclusions",
+    "get_adjustment_basis", "detect_mixed_adjustment_bases", "get_adjustment_basis_mismatch_exclusions",
 ]
