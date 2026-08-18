@@ -2701,6 +2701,34 @@ Filed: `TRANCHE2-VERIFICATION-2026-08-17.md` documenting the exact schema state,
 
 ---
 
+### D-044 — Tranche 2 implementation complete; both items deployed and verified in production
+
+*Decided 2026-08-17. HistFinTS SE completed both items; Workbench gates now cleared for panel-eligibility implementation.*
+
+**Item 1 (Migration 0011):** Deployed ✅
+- `provider.adjustment_basis` — observation adjustment semantics (populated for all three providers)
+- `provider_assignment.adjustment_basis_override` — per-assignment exceptions (ready for Workbench use)
+
+**Item 2 (Migration 0014):** Deployed ✅
+- `provider_assignment.first_available_date` — earliest observation in assignment history
+- `provider_assignment.last_available_date` — latest observation in assignment history
+
+**Backfill Results:**
+- 11,321 total assignments
+- 11,248 (99.4%) populated with date ranges spanning 2000–2026
+- 73 (0.6%) with NULL dates — all have zero observations (legitimate edge case)
+- Nullability semantics: NULL = "no data exists yet"
+- Data consistency: no inverted ranges, no partial NULL values
+- All ranges valid and consistent
+
+**Migration sequence:** Schema version progressed 10 → 14 (4 migrations applied)
+
+**Status:** Both Tranche 2 gates cleared. Workbench panel-eligibility implementation may proceed.
+
+**Next step for Workbench:** Validate the availability data against `SPEC-panel-eligibility.md` assumptions before proceeding to full panel eligibility implementation. Confirmation queries (availability ranges, observation coverage) should be run against the actual database to ensure assumptions hold.
+
+---
+
 ### Inherited principles (ratified, not re-decided)
 
 These come from the specification and are treated as binding constraints on all
