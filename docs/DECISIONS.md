@@ -2675,6 +2675,32 @@ Those functions remain frozen and untouched.
 
 ---
 
+### D-043 — Tranche 2 verification complete; both items confirmed unimplemented with clear remediation path
+
+*Decided 2026-08-17. Verification against live production database confirms the status reported in D-040/D-041.*
+
+**Item 1 — Adjustment Basis Population: NOT IMPLEMENTED**
+- `provider.adjustment_basis` column exists but is NULL for all three providers (FRED, Yahoo Finance, BYMA)
+- Backfill required: FRED→`UNADJUSTED`, Yahoo Finance→`SPLIT_ADJUSTED`, BYMA→`UNADJUSTED`
+- No schema migration; three straightforward UPDATE statements
+
+**Item 2 — Provider-Assignment Availability Marker: NOT IMPLEMENTED, STRUCTURAL GAP CONFIRMED**
+- `provider_assignment` has NO `first_available_date` or `last_available_date` columns
+- Those columns exist only on `provider_symbol`, which is Catalog-side and unreachable from the operational path (Series → ProviderAssignment)
+- **Structural issue:** `provider_symbol` links only to `provider.id`, not to `provider_assignment` or `series.id`. No join path exists.
+- **Impact:** The existing `provider_symbol` columns cannot substitute for the missing operational marker. A genuine schema addition to `provider_assignment` is required.
+
+**Required actions:**
+1. Schema migration: Add two TEXT columns to `provider_assignment` (`first_available_date`, `last_available_date`)
+2. Data backfill: Populate from observation data (deterministic per assignment)
+3. Verification: Run the operational queries (SPEC-panel-eligibility.md will use these once available)
+
+Both items are straightforward backfills of existing data. No architectural redesign required. The request (`REQUEST-tranche2-completion.md`) is factually correct and actionable.
+
+Filed: `TRANCHE2-VERIFICATION-2026-08-17.md` documenting the exact schema state, structural analysis, and verification queries that will confirm both items work once implemented.
+
+---
+
 ### Inherited principles (ratified, not re-decided)
 
 These come from the specification and are treated as binding constraints on all
