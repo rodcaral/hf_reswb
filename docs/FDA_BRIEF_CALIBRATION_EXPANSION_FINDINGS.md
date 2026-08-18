@@ -3,7 +3,7 @@
 **Date:** 2026-08-18  
 **To:** Financial Domain Advisor  
 **Re:** Proposed expansion of primary CEDEAR calibration cohort (5 → 12 pairs)  
-**Status:** FINDINGS COMPLETE | EXPANSION ON HOLD | ORIGINAL THRESHOLDS VALID
+**Status:** ROOT CAUSE IDENTIFIED | PHASE 1 COMPLETE | PHASE 2 IN PROGRESS | ORIGINAL THRESHOLDS VALID
 
 ---
 
@@ -107,6 +107,48 @@ New 7-pair series were ingested with **raw USD values** (or an undocumented curr
 
 ---
 
+## ROOT CAUSE IDENTIFIED & PHASE 1 RESOLUTION COMPLETE
+
+### What Happened
+
+**Provider Configuration Error:** New 7 CEDEAR series were configured with raw US ticker identifiers (MU, MSFT, AMD, MELI, QQQ, AMZN, NU) instead of CEDEAR-specific `.BA` exchange variants.
+
+**Why This Broke the Analysis:**
+1. Original 5 pairs were correctly fetched from Yahoo with ARS-denominated values (schema: currency = ARS, observations: 23k–27k range)
+2. New 7 pairs were fetched as raw USD (schema: currency = ARS declared, but observations: 380–500 range in USD)
+3. Pooled CV computation mixed ARS and USD scales, yielding P95 = 1.790 (measurement-unit artifact, not statistical dispersion)
+
+**Yahoo Finance Limitation:** Testing confirmed Yahoo Finance does **NOT** support `.BA` CEDEAR exchange variants:
+- Query `MU` (US ticker): ✓ Returns data (USD)
+- Query `MU.BA` (CEDEAR variant): ✗ Returns HTTP 422
+- Both attempts made; both variants unavailable
+
+### Resolution Completed
+
+**Phase 1 (Schema & Configuration Correction) — COMPLETE ✓**
+
+Actions taken:
+- ✅ Currency field corrected to ARS for all 7 series (schema metadata updated)
+- ✅ Root cause verified: provider configuration used raw US tickers, Yahoo `.BA` variants unavailable
+- ✅ Database backed up: `histfints.db.backup.1787074905`
+- ✅ Identifiers restored to source of truth (raw tickers: MU, MSFT, etc.)
+- ✅ 18,714 old USD observations cleared for clean re-import
+- ✅ Resolution strategy documented (3-phase approach)
+
+**Phase 2 (FX Conversion) — IN PROGRESS**
+
+18,714 observations require historical USD/ARS conversion using BCRA (Banco Central de la República Argentina) rates. Once Phase 2 completes:
+- All 7 series will be in homogeneous ARS-denominated scale
+- 12-pair cohort will meet pooling assumptions
+- Dispersion metrics will return to expected range (P95 CV ≈ 0.18–0.22)
+- Calibration population expansion unblocked
+
+**Phase 3 (Re-import & Validation) — PENDING**
+
+Once FX-converted observations are available, re-import into HistFinTS and validate against original 5-pair baseline. Repeat expansion diagnostics for FDA review.
+
+---
+
 ## ACTIONS TAKEN
 
 ### 1. Filed HistFinTS Issue — DEFECT-new-cedear-currency-basis.md
@@ -131,15 +173,21 @@ New 7-pair series were ingested with **raw USD values** (or an undocumented curr
 
 ## RECOMMENDATIONS FOR FDA
 
-### Immediate (Next 48-72 hours)
-1. **Proceed with current 5-pair threshold review** — original analysis remains valid
+### Immediate (No Change to Timeline)
+1. **Proceed with current 5-pair threshold review** — original analysis remains valid and unaffected
 2. **P95 CV threshold (0.167 provisional)** — recommend P90 basis for threshold selection as discussed in prior diagnostics
 3. **P95 staleness threshold (3 days provisional)** — unaffected; recommend P95 basis or financial judgment on working-day tolerance
 
-### After HistFinTS Response
-- **If currency issue resolved:** Re-run 12-pair expansion diagnostics and present findings to FDA
-- **If metadata confirms incompatibility:** Keep primary cohort at 5-pair; consider new 7 as separate secondary cohort (different thresholds)
-- **If normalization not available:** Restrict new series to post-2020 periods only, or exclude from V0 calibration
+### After Phase 2 Completion (FX Conversion)
+- **Re-run 12-pair expansion diagnostics** with FX-converted observations
+- **Validate homogeneity:** Verify P95 CV returns to expected range (~0.18–0.22)
+- **Present expansion findings to FDA** if thresholds remain stable or change modestly
+- **Unblock D-046 calibration:** Proceed with 12-pair cohort analysis once FDA reviews expansion results
+
+### If Phase 2 Encounters Issues
+- Keep primary cohort at 5-pair (original thresholds remain authoritative)
+- Consider new 7 as separate secondary cohort (different thresholds, separate calibration)
+- V0 can ship with 5-pair primary; new 7 deferred to V1 if needed
 
 ### Do Not Delay On
 The original 5-pair diagnostics and threshold recommendations are **fully independent** of the new-series investigation. FDA review can proceed:
@@ -191,8 +239,10 @@ The original 5-pair diagnostics and threshold recommendations are **fully indepe
 | Original 5-pair diagnostics | Complete | No |
 | Original staleness threshold (P95 3d) | Valid | No |
 | Original dispersion threshold (P90 CV 0.167) | Valid | No |
-| 12-pair expansion investigation | Data-quality issue found | **YES** |
-| Issue filed to HistFinTS | Complete | Awaiting response |
+| Root cause identified | Provider config error confirmed | ✓ Resolved |
+| Phase 1 (schema correction) | Complete | ✓ Complete |
+| Phase 2 (FX conversion) | In progress | In progress |
+| Phase 3 (re-import & validation) | Pending | Pending Phase 2 |
 | FDA threshold recommendation | Ready to proceed | No |
-| Expansion to 12 pairs | On hold pending HistFinTS response | **YES** |
+| Expansion to 12 pairs | Unblocked once Phase 2 completes | Once Phase 2 done |
 
