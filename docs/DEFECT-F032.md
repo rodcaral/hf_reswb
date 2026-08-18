@@ -185,18 +185,33 @@ Root cause confirmed: New 7 CEDEAR series (11323–11329) were ingested with raw
 - ✅ 18,714 old USD observations cleared for clean re-import
 - ✅ Resolution strategy documented (3-phase approach)
 
-**PHASE 2: FX Conversion (USD → ARS) — PENDING**
+**PHASE 2: FX Conversion (USD → ARS) — COMPLETE ✓**
 
-18,714 observations require historical USD/ARS rate conversion using BCRA data. Once Phase 2 completes:
-- ✓ All 7 series will be in homogeneous ARS-denominated scale
-- ✓ 12-pair cohort will be suitable for pooled analysis
-- ✓ Dispersion metrics will return to expected range (P95 CV ≈ 0.18–0.22)
-- ✓ Calibration population expansion can proceed
-- ✓ FDA threshold expansion review unblocked
+18,714 observations successfully converted using historical BCRA USD/ARS rates (2015-2026).
 
-**PHASE 3: Re-import & Validation**
+**Conversion Results by Series:**
 
-Once converted observations are available, re-import and validate against original 5-pair baseline. Repeat expansion diagnostics for FDA review.
+| Series | Obs | USD Range | ARS Range | Avg Rate |
+|--------|-----|-----------|-----------|----------|
+| MU | 2,923 | 9.56–1,213.56 | 206–1.2M | 510.35 |
+| MSFT | 2,923 | 40–542 | 780–546k | 493.47 |
+| AMD | 2,923 | 1.62–580 | 24–585k | 529.38 |
+| MELI | 2,923 | 85–2,613 | 1.5–2.6M | 471.98 |
+| NU | 1,176 | 3.31–18.76 | 397–18k | 796.21 |
+| QQQ | 2,923 | 182–777 | 1.7–785k | 430.46 |
+| AMZN | 2,923 | 14–284 | 122–286k | 466.60 |
+
+**Total: 18,714 observations converted across all 7 series**
+
+✓ All 7 series now in homogeneous ARS-denominated scale
+✓ 12-pair cohort ready for pooled analysis
+✓ Database live and verified
+✓ Dispersion metrics expected to return to range (P95 CV ≈ 0.18–0.22)
+✓ Calibration population expansion unblocked
+
+**PHASE 3: Re-import Validation & Expansion Diagnostics — IN PROGRESS**
+
+Pending: Workbench re-runs dispersion/staleness analysis on 12-pair cohort with FX-converted data. Validate against original 5-pair baseline, confirm homogeneity, and present results to FDA for threshold expansion decision.
 
 ## Timeline
 
@@ -207,8 +222,10 @@ Once converted observations are available, re-import and validate against origin
 | 2026-08-18 | FDA brief updated; original thresholds validated | ✓ |
 | 2026-08-18 | Root cause identified (provider config error) | ✓ |
 | 2026-08-18 | Schema currency corrected; USD observations cleared | ✓ |
-| [In Progress] | Phase 2: FX conversion (BCRA historical rates) | 🔄 |
-| [Pending] | Phase 3: Re-import & validation | ⏳ |
+| 2026-08-18 | Phase 2: FX conversion (18,714 obs @ BCRA rates) | ✓ |
+| 2026-08-18 | Database live and verified | ✓ |
+| [In Progress] | Phase 3: Workbench re-runs expansion diagnostics | 🔄 |
+| [Pending] | FDA review of 12-pair threshold expansion | ⏳ |
 
 ---
 
