@@ -80,4 +80,6 @@ See `ACTION-TRANCHE2-IMPLEMENTATION.md` → "Questions for HistFinTS SE" section
 | REQUEST-tranche2-completion.md | Initial requirements filing | 2026-08-17 | Filed |
 | TRANCHE2-VERIFICATION-2026-08-17.md | Live DB verification + analysis | 2026-08-17 | Complete |
 | ACTION-TRANCHE2-IMPLEMENTATION.md | Concrete implementation spec | 2026-08-17 | Ready for SE |
-| README.md | This file | 2026-08-17 | Current |
+| DEFECT-new-cedear-currency-basis.md | New 7-pair CEDEAR currency/scale incompatibility | 2026-08-18 | Filed; Phase 1–2 addressed by SDT (F-032) |
+| DEFECT-F033-shared-driver-mechanism.md | Same 7 series: day-over-day return correlation still +1.00 after F-032 fix — shared-driver mechanism, not a ratio/metadata gap | 2026-08-19 | Filed; awaiting HistFinTS pipeline audit |
+| README.md | This file | 2026-08-19 | Current |
