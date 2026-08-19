@@ -108,6 +108,37 @@ having been corrected or randomized without changing the shared-input dependency
 serving one series' price update to multiple `provider_assignment` records under different
 per-series scale transforms.
 
+---
+
+## Addendum (2026-08-19): the transition event is directly visible in the data
+
+Subsequent investigation found the old-scale → new-scale transition captured explicitly for
+all seven series, at the same date, one calendar day apart in import time. For each of the
+seven series, **2026-08-18 carries two observations from two different import runs on the
+same `provider_assignment`, at two irreconcilable scales**:
+
+- One observation at 13:30 UTC, from an import run created 2026-08-18 16:25–16:26 UTC
+  (`trigger_type = MANUAL`), at the old (large) scale.
+- Six further observations at 14:00–19:00 UTC, from a *different* import run created
+  2026-08-19 13:04–13:05 UTC (`trigger_type = SCHEDULED`), at a new, smaller scale.
+
+Both rows remain in the table; neither superseded the other. Per-pair magnitude of the jump is
+**not uniform** — AMZN ~92×, MELI ~77×, QQQ ~13.7×, MSFT ~19.2×, AMD ~6.4×, MU ~3.2×, NU
+~1.26× — which is more consistent with each series carrying its own per-series scale factor
+(as this filing's shared-input hypothesis already proposed) than with a single uniform
+currency/units correction. **Checked against six other CEDEAR series in the same database
+(BABA, BIDU, UBER, GLD, AZN, BBD): none show this same-date dual-import-run pattern** — each
+has exactly one value regime on 2026-08-18, confirming this is confined to the seven series
+already flagged above.
+
+This raises a second, related question for HistFinTS beyond the shared-driver mechanism
+itself: **whether `MANUAL` and `SCHEDULED` import runs against the same `provider_assignment`
+are expected to coexist for the same calendar date without reconciliation.** A downstream
+consumer that does not explicitly select "most recent import run per date" would silently mix
+an old-scale and new-scale observation for the same nominal date.
+
+Full evidence: `SAME_DATE_SCALE_DISCONTINUITY_2026-08-18.md` (Workbench repository).
+
 Workbench does not have enough visibility to distinguish these, or rule out a third
 explanation. This section states hypotheses, not conclusions.
 
