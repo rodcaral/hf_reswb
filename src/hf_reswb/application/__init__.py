@@ -10,6 +10,20 @@ from hf_reswb.application.dispersion_analyzer import (
     compute_dispersion_metrics,
     should_suppress_result,
 )
+from hf_reswb.application.independence_detector import (
+    MACHINE_EPSILON_RELATIVE_TOLERANCE,
+    IndependenceFlag,
+    IndependenceReport,
+    PairwiseIdentityResult,
+    classify_cohort_independence,
+    day_over_day_returns,
+    relative_range,
+)
+from hf_reswb.application.provenance_guard import (
+    ProvenanceCheckResult,
+    ProvenanceVerdict,
+    verify_fk_target,
+)
 from hf_reswb.application.panel_eligibility_service import (
     compute_panel_eligibility,
     compute_panel_result,
@@ -45,4 +59,7 @@ __all__ = [
     "get_session_status_for_date", "validate_suitability_coverage",
     "get_availability_status", "get_coverage_incomplete_exclusions",
     "get_adjustment_basis", "detect_mixed_adjustment_bases", "get_adjustment_basis_mismatch_exclusions",
+    "MACHINE_EPSILON_RELATIVE_TOLERANCE", "IndependenceFlag", "IndependenceReport",
+    "PairwiseIdentityResult", "classify_cohort_independence", "day_over_day_returns", "relative_range",
+    "ProvenanceCheckResult", "ProvenanceVerdict", "verify_fk_target",
 ]

@@ -25,6 +25,15 @@ class ExclusionReason(str, Enum):
     ADJUSTMENT_BASIS_MISMATCH = "ADJUSTMENT_BASIS_MISMATCH"
     COVERAGE_INCOMPLETE = "COVERAGE_INCOMPLETE"
     DELISTED = "DELISTED"
+    NON_INDEPENDENT_SOURCE = "NON_INDEPENDENT_SOURCE"
+    """F-033 pattern: values or returns locked to another cohort member to within machine
+    precision — a shared computed origin, not independent market observation. See
+    `application.independence_detector`."""
+    PROVENANCE_UNVERIFIED = "PROVENANCE_UNVERIFIED"
+    """A referenced series (e.g. `underlying_series_id`) has not passed the duplicate-of-
+    source / plausible-range check. See `application.provenance_guard`. Distinct from
+    NON_INDEPENDENT_SOURCE: this flags an unverified reference, not a confirmed shared
+    origin between panel members."""
 
 
 @dataclass(frozen=True)
