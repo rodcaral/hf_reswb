@@ -17,6 +17,7 @@ future calibration attempt does not have to rediscover the pattern from scratch.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime
 from enum import Enum
 
 from hf_reswb.application.independence_detector import (
@@ -152,7 +153,10 @@ def verify_fk_target(
 # now at PRAGMA user_version = 15) in response to the mutability issue in
 # `PROVENANCE_INTEGRITY_import_run_id_mutability.md`: the existing `import_run_id` column
 # is overwritten on `ON CONFLICT DO UPDATE`, so it names the *last* writer, not the
-# original one. `origin_import_run_id` is intended to be set once and never overwritten.
+# original one. `origin_import_run_id` is not overwritten by the current application write
+# path — this is an application-level guarantee, not a database-enforced one; no trigger
+# or constraint in the schema prevents a future UPDATE from mutating it. Do not represent
+# this field as immutable in an absolute sense in any downstream use.
 #
 # The epoch below (2026-08-20T12:08:12 UTC) is empirically observed against the live
 # database at the time this module was written — the first `created_at` carrying a
@@ -186,6 +190,13 @@ class OriginProvenanceVerdict(str, Enum):
     observations in the live database matched this case — it is currently a theoretical
     classification, not one with an observed instance."""
 
+    UNPARSEABLE_TIMESTAMP = "UNPARSEABLE_TIMESTAMP"
+    """`created_at` or `epoch` could not be parsed as a temporal value, or the two values
+    use incomparable representations (e.g. one timezone-aware, one naive) such that a
+    temporal ordering cannot be established. A distinct diagnostic condition — never
+    silently defaulted to HISTORICAL_NULL_ORIGIN or ORIGIN_MISSING_POST_EPOCH, since either
+    default would misrepresent an unknown as a known classification."""
+
 
 @dataclass(frozen=True)
 class OriginProvenanceCheckResult:
@@ -194,6 +205,17 @@ class OriginProvenanceCheckResult:
     epoch: str
     verdict: OriginProvenanceVerdict
     origin_import_run_id: int | None
+    detail: str = ""
+
+
+def _parse_timestamp(value: str) -> datetime | None:
+    """`datetime.fromisoformat`, tolerant of a `Z` UTC suffix. Returns `None` rather than
+    raising — parse failure is data for the caller to classify, not an exception to catch."""
+    try:
+        normalized = value.replace("Z", "+00:00") if value.endswith("Z") else value
+        return datetime.fromisoformat(normalized)
+    except (ValueError, TypeError, AttributeError):
+        return None
 
 
 def classify_origin_provenance(
@@ -207,23 +229,58 @@ def classify_origin_provenance(
 
     Args:
         observation_id: for traceability in the result only; not looked up.
-        created_at: the observation's `created_at`, ISO 8601, lexicographically comparable
-            to `epoch` (both must use the same format/timezone convention — this function
-            does no timezone-aware parsing, only string comparison, matching how the epoch
-            cutover was originally verified against the live database).
+        created_at: the observation's `created_at`, ISO 8601. Compared to `epoch` as parsed
+            datetimes (temporal comparison), not as strings — two ISO 8601 strings that
+            differ in timezone offset, `Z`-vs-`+00:00` suffix, or fractional-second digit
+            count are not guaranteed to sort correctly as strings even though both are
+            valid and refer to unambiguous instants.
         origin_import_run_id: the observation's `origin_import_run_id`, or `None`.
         epoch: caller-supplied cutover timestamp. Required, no default — see module-level
             note on why this project's currently-known epoch should not be hardcoded here.
 
     Returns:
-        OriginProvenanceCheckResult with a verdict distinguishing the three cases.
+        OriginProvenanceCheckResult with a verdict distinguishing the four cases (including
+        UNPARSEABLE_TIMESTAMP, returned rather than raised, when either timestamp cannot be
+        parsed or the two are not comparable — e.g. one naive, one timezone-aware).
     """
     if origin_import_run_id is not None:
-        verdict = OriginProvenanceVerdict.ORIGIN_RECORDED
-    elif created_at < epoch:
-        verdict = OriginProvenanceVerdict.HISTORICAL_NULL_ORIGIN
-    else:
-        verdict = OriginProvenanceVerdict.ORIGIN_MISSING_POST_EPOCH
+        return OriginProvenanceCheckResult(
+            observation_id=observation_id,
+            created_at=created_at,
+            epoch=epoch,
+            verdict=OriginProvenanceVerdict.ORIGIN_RECORDED,
+            origin_import_run_id=origin_import_run_id,
+        )
+
+    created_dt = _parse_timestamp(created_at)
+    epoch_dt = _parse_timestamp(epoch)
+
+    if created_dt is None or epoch_dt is None:
+        detail = "created_at could not be parsed" if created_dt is None else "epoch could not be parsed"
+        return OriginProvenanceCheckResult(
+            observation_id=observation_id,
+            created_at=created_at,
+            epoch=epoch,
+            verdict=OriginProvenanceVerdict.UNPARSEABLE_TIMESTAMP,
+            origin_import_run_id=origin_import_run_id,
+            detail=detail,
+        )
+
+    if (created_dt.tzinfo is None) != (epoch_dt.tzinfo is None):
+        return OriginProvenanceCheckResult(
+            observation_id=observation_id,
+            created_at=created_at,
+            epoch=epoch,
+            verdict=OriginProvenanceVerdict.UNPARSEABLE_TIMESTAMP,
+            origin_import_run_id=origin_import_run_id,
+            detail="created_at and epoch mix naive and timezone-aware timestamps; not safely comparable",
+        )
+
+    verdict = (
+        OriginProvenanceVerdict.HISTORICAL_NULL_ORIGIN
+        if created_dt < epoch_dt
+        else OriginProvenanceVerdict.ORIGIN_MISSING_POST_EPOCH
+    )
 
     return OriginProvenanceCheckResult(
         observation_id=observation_id,

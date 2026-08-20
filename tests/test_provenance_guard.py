@@ -162,3 +162,73 @@ class TestClassifyOriginProvenance:
 
         sig = inspect.signature(classify_origin_provenance)
         assert sig.parameters["epoch"].default is inspect.Parameter.empty
+
+    def test_comparison_is_temporal_not_lexical(self):
+        """The regression this fix exists for: a created_at that is lexically 'later' than
+        the epoch string but temporally earlier once timezone offsets are resolved. A
+        string comparison would misclassify this as post-epoch; a correct implementation
+        must not."""
+        epoch = "2026-08-20T12:08:12+00:00"
+        # +14:00 offset: local clock reads next calendar day, but the instant is
+        # 2026-08-20T12:00:00 UTC -- eight minutes *before* epoch.
+        created_at = "2026-08-21T02:00:00+14:00"
+
+        result = classify_origin_provenance(
+            observation_id=1,
+            created_at=created_at,
+            origin_import_run_id=None,
+            epoch=epoch,
+        )
+
+        assert result.verdict == OriginProvenanceVerdict.HISTORICAL_NULL_ORIGIN
+
+    def test_z_suffix_and_offset_suffix_compare_correctly(self):
+        """A Z-suffixed timestamp one second after an offset-suffixed epoch must classify
+        as post-epoch -- exercises fromisoformat's Z handling, not just offset arithmetic."""
+        result = classify_origin_provenance(
+            observation_id=2,
+            created_at="2026-08-20T12:08:13Z",
+            origin_import_run_id=None,
+            epoch="2026-08-20T12:08:12.982123+00:00",
+        )
+        assert result.verdict == OriginProvenanceVerdict.ORIGIN_MISSING_POST_EPOCH
+
+    def test_garbage_created_at_is_unparseable_not_defaulted(self):
+        result = classify_origin_provenance(
+            observation_id=3,
+            created_at="not-a-timestamp",
+            origin_import_run_id=None,
+            epoch=OBSERVED_EPOCH,
+        )
+        assert result.verdict == OriginProvenanceVerdict.UNPARSEABLE_TIMESTAMP
+
+    def test_garbage_epoch_is_unparseable_not_defaulted(self):
+        result = classify_origin_provenance(
+            observation_id=4,
+            created_at="2026-08-20T12:08:13+00:00",
+            origin_import_run_id=None,
+            epoch="also-not-a-timestamp",
+        )
+        assert result.verdict == OriginProvenanceVerdict.UNPARSEABLE_TIMESTAMP
+
+    def test_naive_vs_aware_mismatch_is_unparseable_not_guessed(self):
+        """A naive created_at compared against a timezone-aware epoch (or vice versa)
+        cannot be safely ordered -- must be flagged, not silently coerced."""
+        result = classify_origin_provenance(
+            observation_id=5,
+            created_at="2026-08-20T12:08:13",  # no timezone
+            origin_import_run_id=None,
+            epoch=OBSERVED_EPOCH,  # timezone-aware
+        )
+        assert result.verdict == OriginProvenanceVerdict.UNPARSEABLE_TIMESTAMP
+
+    def test_populated_origin_short_circuits_before_any_parsing(self):
+        """ORIGIN_RECORDED must not depend on created_at being parseable at all -- the
+        origin_import_run_id check happens first."""
+        result = classify_origin_provenance(
+            observation_id=6,
+            created_at="not-a-timestamp",
+            origin_import_run_id=42,
+            epoch=OBSERVED_EPOCH,
+        )
+        assert result.verdict == OriginProvenanceVerdict.ORIGIN_RECORDED
