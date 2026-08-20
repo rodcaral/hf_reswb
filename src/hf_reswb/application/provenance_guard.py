@@ -138,3 +138,97 @@ def verify_fk_target(
         dates_checked=len(common_dates),
         detail=f"distinct from source on all {len(common_dates)} common dates checked",
     )
+
+
+# ---------------------------------------------------------------------------
+# Row-level write provenance (observation.origin_import_run_id)
+#
+# A second, distinct provenance axis from verify_fk_target() above. That function asks
+# "does this series reference point somewhere independent"; this one asks "do we know,
+# immutably, which import run first wrote this observation row." They answer different
+# questions and are not substitutes for each other.
+#
+# `origin_import_run_id` was added to `observation` by HistFinTS on 2026-08-20 (schema
+# now at PRAGMA user_version = 15) in response to the mutability issue in
+# `PROVENANCE_INTEGRITY_import_run_id_mutability.md`: the existing `import_run_id` column
+# is overwritten on `ON CONFLICT DO UPDATE`, so it names the *last* writer, not the
+# original one. `origin_import_run_id` is intended to be set once and never overwritten.
+#
+# The epoch below (2026-08-20T12:08:12 UTC) is empirically observed against the live
+# database at the time this module was written — the first `created_at` carrying a
+# non-NULL `origin_import_run_id`, with a clean cutover (zero post-epoch NULLs, zero
+# pre-epoch non-NULLs, verified at the time of writing). It is NOT sourced from an
+# authoritative HistFinTS migration record or filing. See "Dependency on HistFinTS
+# verification" in this module's accompanying documentation before relying on it as a
+# stable constant — HistFinTS has not confirmed whether this cutover is guaranteed
+# monotonic going forward, whether a historical backfill of `origin_import_run_id` is
+# planned (which would silently invalidate any hardcoded epoch), or whether the value
+# is authoritative rather than incidental to when the column was first observed. Callers
+# should treat the epoch as a required, caller-supplied argument — never a module default.
+# ---------------------------------------------------------------------------
+
+
+class OriginProvenanceVerdict(str, Enum):
+    ORIGIN_RECORDED = "ORIGIN_RECORDED"
+    """`origin_import_run_id` is populated. Says nothing about whether the referenced
+    import run itself is trustworthy — only that the immutable-origin field is present."""
+
+    HISTORICAL_NULL_ORIGIN = "HISTORICAL_NULL_ORIGIN"
+    """`origin_import_run_id` is NULL and the row's `created_at` predates the epoch at
+    which the column started being populated. Expected, not anomalous — the column did
+    not exist when this row was written. As of 2026-08-20, this is true for 27,949,974 of
+    27,961,375 observations (99.96%) in the live database."""
+
+    ORIGIN_MISSING_POST_EPOCH = "ORIGIN_MISSING_POST_EPOCH"
+    """`origin_import_run_id` is NULL on a row created at or after the epoch — the column
+    is expected to be populated for rows this recent. Distinct from HISTORICAL_NULL_ORIGIN:
+    this is a candidate anomaly, not an expected historical gap. As of 2026-08-20, zero
+    observations in the live database matched this case — it is currently a theoretical
+    classification, not one with an observed instance."""
+
+
+@dataclass(frozen=True)
+class OriginProvenanceCheckResult:
+    observation_id: int
+    created_at: str
+    epoch: str
+    verdict: OriginProvenanceVerdict
+    origin_import_run_id: int | None
+
+
+def classify_origin_provenance(
+    observation_id: int,
+    created_at: str,
+    origin_import_run_id: int | None,
+    *,
+    epoch: str,
+) -> OriginProvenanceCheckResult:
+    """Classify one observation's origin-tracking state.
+
+    Args:
+        observation_id: for traceability in the result only; not looked up.
+        created_at: the observation's `created_at`, ISO 8601, lexicographically comparable
+            to `epoch` (both must use the same format/timezone convention — this function
+            does no timezone-aware parsing, only string comparison, matching how the epoch
+            cutover was originally verified against the live database).
+        origin_import_run_id: the observation's `origin_import_run_id`, or `None`.
+        epoch: caller-supplied cutover timestamp. Required, no default — see module-level
+            note on why this project's currently-known epoch should not be hardcoded here.
+
+    Returns:
+        OriginProvenanceCheckResult with a verdict distinguishing the three cases.
+    """
+    if origin_import_run_id is not None:
+        verdict = OriginProvenanceVerdict.ORIGIN_RECORDED
+    elif created_at < epoch:
+        verdict = OriginProvenanceVerdict.HISTORICAL_NULL_ORIGIN
+    else:
+        verdict = OriginProvenanceVerdict.ORIGIN_MISSING_POST_EPOCH
+
+    return OriginProvenanceCheckResult(
+        observation_id=observation_id,
+        created_at=created_at,
+        epoch=epoch,
+        verdict=verdict,
+        origin_import_run_id=origin_import_run_id,
+    )

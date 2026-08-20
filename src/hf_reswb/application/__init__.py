@@ -20,8 +20,11 @@ from hf_reswb.application.independence_detector import (
     relative_range,
 )
 from hf_reswb.application.provenance_guard import (
+    OriginProvenanceCheckResult,
+    OriginProvenanceVerdict,
     ProvenanceCheckResult,
     ProvenanceVerdict,
+    classify_origin_provenance,
     verify_fk_target,
 )
 from hf_reswb.application.panel_eligibility_service import (
@@ -62,4 +65,5 @@ __all__ = [
     "MACHINE_EPSILON_RELATIVE_TOLERANCE", "IndependenceFlag", "IndependenceReport",
     "PairwiseIdentityResult", "classify_cohort_independence", "day_over_day_returns", "relative_range",
     "ProvenanceCheckResult", "ProvenanceVerdict", "verify_fk_target",
+    "OriginProvenanceCheckResult", "OriginProvenanceVerdict", "classify_origin_provenance",
 ]

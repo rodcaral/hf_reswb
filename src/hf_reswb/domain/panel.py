@@ -31,9 +31,19 @@ class ExclusionReason(str, Enum):
     `application.independence_detector`."""
     PROVENANCE_UNVERIFIED = "PROVENANCE_UNVERIFIED"
     """A referenced series (e.g. `underlying_series_id`) has not passed the duplicate-of-
-    source / plausible-range check. See `application.provenance_guard`. Distinct from
-    NON_INDEPENDENT_SOURCE: this flags an unverified reference, not a confirmed shared
-    origin between panel members."""
+    source / plausible-range check. See `application.provenance_guard.verify_fk_target`.
+    Series-level reference provenance only — distinct from ORIGIN_PROVENANCE_MISSING below,
+    which is row-level write provenance. Distinct from NON_INDEPENDENT_SOURCE: this flags an
+    unverified reference, not a confirmed shared origin between panel members."""
+    ORIGIN_PROVENANCE_MISSING = "ORIGIN_PROVENANCE_MISSING"
+    """`observation.origin_import_run_id` is NULL on a row created at or after the epoch at
+    which that column started being populated (2026-08-20, `PRAGMA user_version = 15`) — a
+    candidate anomaly, not the expected historical gap that predates the column's existence.
+    See `application.provenance_guard.classify_origin_provenance`. Deliberately does NOT
+    cover the historical-NULL case (`OriginProvenanceVerdict.HISTORICAL_NULL_ORIGIN`), which
+    is expected for 99.96% of the live database as of 2026-08-20 and is not a defect — no
+    ExclusionReason is assigned for it. Proposed 2026-08-20; not yet assigned by any
+    production code path."""
 
 
 @dataclass(frozen=True)
