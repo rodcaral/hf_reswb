@@ -19,6 +19,15 @@ from hf_reswb.application.independence_detector import (
     day_over_day_returns,
     relative_range,
 )
+from hf_reswb.application.class_e_identity_signal import (
+    DEFAULT_VENUE_SUFFIXES,
+    IdentityCandidate,
+    IdentityVerdict,
+    ProviderAssignmentSnapshot,
+    SeriesIdentitySnapshot,
+    detect_identity_candidates,
+    normalize_label,
+)
 from hf_reswb.application.provenance_guard import (
     OriginProvenanceCheckResult,
     OriginProvenanceVerdict,
@@ -66,4 +75,7 @@ __all__ = [
     "PairwiseIdentityResult", "classify_cohort_independence", "day_over_day_returns", "relative_range",
     "ProvenanceCheckResult", "ProvenanceVerdict", "verify_fk_target",
     "OriginProvenanceCheckResult", "OriginProvenanceVerdict", "classify_origin_provenance",
+    "DEFAULT_VENUE_SUFFIXES", "IdentityCandidate", "IdentityVerdict",
+    "ProviderAssignmentSnapshot", "SeriesIdentitySnapshot", "detect_identity_candidates",
+    "normalize_label",
 ]
