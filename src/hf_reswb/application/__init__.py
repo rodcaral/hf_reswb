@@ -19,6 +19,24 @@ from hf_reswb.application.independence_detector import (
     day_over_day_returns,
     relative_range,
 )
+from hf_reswb.application.acquisition_quality_capability import (
+    CadenceCapabilityAssessment,
+    CadenceCapabilityVerdict,
+    FailureDiagnosticQualifier,
+    FallbackCandidateEvidence,
+    FallbackConsiderationResult,
+    FallbackConsiderationVerdict,
+    IdentifierCompatibilityAssessment,
+    IdentifierCompatibilityVerdict,
+    NeverStateReason,
+    RunOutcome,
+    assess_cadence_capability,
+    assess_identifier_compatibility,
+    classify_never_state,
+    consider_fallback,
+    looks_like_non_production_fixture,
+    qualify_failure_diagnostic,
+)
 from hf_reswb.application.class_e_identity_signal import (
     DEFAULT_VENUE_SUFFIXES,
     IdentityCandidate,
@@ -93,4 +111,10 @@ __all__ = [
     "MANDATORY_DIMENSIONS", "DimensionAssessment", "DimensionEvaluation", "DimensionStatus",
     "EvidenceGatedAssessment", "EvidenceTier", "FinancialIdentityConclusion", "IdentityDimension",
     "RelationshipEvidence", "evaluate_financial_identity",
+    "CadenceCapabilityAssessment", "CadenceCapabilityVerdict", "FailureDiagnosticQualifier",
+    "FallbackCandidateEvidence", "FallbackConsiderationResult", "FallbackConsiderationVerdict",
+    "IdentifierCompatibilityAssessment", "IdentifierCompatibilityVerdict", "NeverStateReason",
+    "RunOutcome", "assess_cadence_capability", "assess_identifier_compatibility",
+    "classify_never_state", "consider_fallback", "looks_like_non_production_fixture",
+    "qualify_failure_diagnostic",
 ]
