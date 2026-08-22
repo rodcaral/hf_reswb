@@ -170,13 +170,71 @@ class FinancialIdentityConclusion(str, Enum):
 
 
 @dataclass(frozen=True)
+class DimensionEvaluation:
+    """One row of the inspectable evidence matrix — the per-dimension state actually used (or
+    found missing) in reaching a conclusion, independent of whether that conclusion was
+    `UNRESOLVED`. Always populated for all seven `IdentityDimension` members, so a human
+    reviewing an `UNRESOLVED` result can see exactly which dimension(s) were insufficient
+    without re-deriving it from the `reason` string alone."""
+
+    dimension: IdentityDimension
+    tier: EvidenceTier | None
+    status: DimensionStatus
+    source_description: str
+    effective_from: date | None
+    effective_to: date | None
+    is_stale_as_of_evaluation: bool
+    is_mandatory: bool
+
+
+@dataclass(frozen=True)
 class EvidenceGatedAssessment:
     series_a: int
     series_b: int
     conclusion: FinancialIdentityConclusion
     reason: str
     automatic_resolution_was_enabled: bool
+    evidence_matrix: tuple[DimensionEvaluation, ...] = field(default_factory=tuple)
     contradictions: tuple[str, ...] = field(default_factory=tuple)
+
+
+def _build_evidence_matrix(
+    dimension_assessments: dict[IdentityDimension, DimensionAssessment], as_of: date
+) -> tuple[DimensionEvaluation, ...]:
+    """Build the inspectable evidence matrix — one row per `IdentityDimension`, always all
+    seven, regardless of which dimensions the caller actually supplied. A dimension absent
+    from `dimension_assessments` is represented as `UNKNOWN` with no tier, not omitted."""
+    rows = []
+    for dim in IdentityDimension:
+        assessment = dimension_assessments.get(dim)
+        if assessment is None:
+            rows.append(
+                DimensionEvaluation(
+                    dimension=dim,
+                    tier=None,
+                    status=DimensionStatus.UNKNOWN,
+                    source_description="no evidence supplied",
+                    effective_from=None,
+                    effective_to=None,
+                    is_stale_as_of_evaluation=False,
+                    is_mandatory=dim in MANDATORY_DIMENSIONS,
+                )
+            )
+        else:
+            rows.append(
+                DimensionEvaluation(
+                    dimension=dim,
+                    tier=assessment.tier,
+                    status=assessment.status,
+                    source_description=assessment.source_description,
+                    effective_from=assessment.effective_from,
+                    effective_to=assessment.effective_to,
+                    is_stale_as_of_evaluation=assessment.status != DimensionStatus.UNKNOWN
+                    and assessment.is_stale(as_of),
+                    is_mandatory=dim in MANDATORY_DIMENSIONS,
+                )
+            )
+    return tuple(rows)
 
 
 def evaluate_financial_identity(
@@ -213,6 +271,8 @@ def evaluate_financial_identity(
             the module-level disabled-by-default gate (G1/G9 §11), and no caller in this
             codebase sets it to `True`.
     """
+    evidence_matrix = _build_evidence_matrix(dimension_assessments, as_of)
+
     if not automatic_resolution_enabled:
         return EvidenceGatedAssessment(
             series_a=series_a,
@@ -223,6 +283,7 @@ def evaluate_financial_identity(
                 "candidate signal alone never enables it"
             ),
             automatic_resolution_was_enabled=False,
+            evidence_matrix=evidence_matrix,
         )
 
     if contradictory_dimensions:
@@ -232,6 +293,7 @@ def evaluate_financial_identity(
             conclusion=FinancialIdentityConclusion.UNRESOLVED,
             reason="authoritative evidence conflicts and cannot be resolved by effective date/version (G1/G9 §3, §7)",
             automatic_resolution_was_enabled=True,
+            evidence_matrix=evidence_matrix,
             contradictions=tuple(d.value for d in sorted(contradictory_dimensions, key=lambda d: d.value)),
         )
 
@@ -243,6 +305,7 @@ def evaluate_financial_identity(
             conclusion=FinancialIdentityConclusion.UNRESOLVED,
             reason="security identity cannot be independently established (G1/G9 §7)",
             automatic_resolution_was_enabled=True,
+            evidence_matrix=evidence_matrix,
         )
     if issuer.tier == EvidenceTier.TIER_3_PROVIDER_OPERATIONAL or issuer.tier == EvidenceTier.TIER_4_ANALYTICAL_INFERENCE:
         return EvidenceGatedAssessment(
@@ -254,6 +317,7 @@ def evaluate_financial_identity(
                 "evidence, which cannot substitute for authoritative Tier 1/2 support (G1/G9 §5, §7)"
             ),
             automatic_resolution_was_enabled=True,
+            evidence_matrix=evidence_matrix,
         )
 
     if depositary_context_plausible:
@@ -265,6 +329,7 @@ def evaluate_financial_identity(
                 conclusion=FinancialIdentityConclusion.UNRESOLVED,
                 reason="ADR/ADS/CEDEAR/depositary status is unresolved where it matters (G1/G9 §7)",
                 automatic_resolution_was_enabled=True,
+                evidence_matrix=evidence_matrix,
             )
 
     for dim, assessment in dimension_assessments.items():
@@ -275,6 +340,7 @@ def evaluate_financial_identity(
                 conclusion=FinancialIdentityConclusion.UNRESOLVED,
                 reason=f"evidence for {dim.value} has an unknown effective period (G1/G9 §7)",
                 automatic_resolution_was_enabled=True,
+                evidence_matrix=evidence_matrix,
             )
         if assessment.status != DimensionStatus.UNKNOWN and assessment.is_stale(as_of):
             return EvidenceGatedAssessment(
@@ -283,6 +349,7 @@ def evaluate_financial_identity(
                 conclusion=FinancialIdentityConclusion.UNRESOLVED,
                 reason=f"evidence for {dim.value} is stale as of {as_of.isoformat()} (G1/G9 §3, §7)",
                 automatic_resolution_was_enabled=True,
+                evidence_matrix=evidence_matrix,
             )
 
     same_instrument_ok = True
@@ -309,6 +376,7 @@ def evaluate_financial_identity(
                 "Tier 1/2 evidence, no contradictions, no stale/unbounded evidence (G1/G9 §5)"
             ),
             automatic_resolution_was_enabled=True,
+            evidence_matrix=evidence_matrix,
         )
 
     if relationship_evidence is not None and relationship_evidence.established and relationship_evidence.tier in (
@@ -335,6 +403,7 @@ def evaluate_financial_identity(
                     "reverse the conclusion (G1/G9 §6)"
                 ),
                 automatic_resolution_was_enabled=True,
+                evidence_matrix=evidence_matrix,
             )
 
     return EvidenceGatedAssessment(
@@ -346,4 +415,5 @@ def evaluate_financial_identity(
             + "; ".join(same_instrument_reasons)
         ),
         automatic_resolution_was_enabled=True,
+        evidence_matrix=evidence_matrix,
     )

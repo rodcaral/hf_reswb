@@ -359,3 +359,50 @@ class TestBoundaryStructure:
 
     def test_all_seven_dimensions_defined(self) -> None:
         assert len(list(IdentityDimension)) == 7
+
+
+class TestEvidenceMatrix:
+    """The inspectable evidence matrix (SE's next-stage instruction, 2026-08-21): a human
+    reviewing any result -- including UNRESOLVED -- must be able to see the per-dimension
+    state without re-deriving it from the reason string."""
+
+    def test_matrix_always_has_seven_rows_regardless_of_input(self) -> None:
+        result = evaluate_financial_identity(1, 2, {}, as_of=AS_OF, automatic_resolution_enabled=True)
+        assert len(result.evidence_matrix) == 7
+        assert {row.dimension for row in result.evidence_matrix} == set(IdentityDimension)
+
+    def test_missing_dimension_appears_as_unknown_with_no_tier(self) -> None:
+        evidence = _complete_authoritative_evidence()
+        del evidence[IdentityDimension.CURRENCY_DENOMINATION]
+        result = evaluate_financial_identity(1, 2, evidence, as_of=AS_OF, automatic_resolution_enabled=True)
+        row = next(r for r in result.evidence_matrix if r.dimension == IdentityDimension.CURRENCY_DENOMINATION)
+        assert row.status == DimensionStatus.UNKNOWN
+        assert row.tier is None
+
+    def test_matrix_populated_even_when_automatic_resolution_disabled(self) -> None:
+        result = evaluate_financial_identity(1, 2, _complete_authoritative_evidence(), as_of=AS_OF)
+        assert result.conclusion == FinancialIdentityConclusion.UNRESOLVED
+        assert len(result.evidence_matrix) == 7
+
+    def test_matrix_flags_mandatory_dimensions(self) -> None:
+        result = evaluate_financial_identity(
+            1, 2, _complete_authoritative_evidence(), as_of=AS_OF, automatic_resolution_enabled=True
+        )
+        provider_row = next(r for r in result.evidence_matrix if r.dimension == IdentityDimension.PROVIDER_IDENTIFIER)
+        issuer_row = next(r for r in result.evidence_matrix if r.dimension == IdentityDimension.ISSUER_SECURITY_IDENTITY)
+        assert provider_row.is_mandatory is False
+        assert issuer_row.is_mandatory is True
+
+    def test_matrix_flags_staleness_per_row(self) -> None:
+        evidence = _complete_authoritative_evidence()
+        evidence[IdentityDimension.ISSUER_SECURITY_IDENTITY] = DimensionAssessment(
+            dimension=IdentityDimension.ISSUER_SECURITY_IDENTITY,
+            tier=EvidenceTier.TIER_1_PRIMARY,
+            status=DimensionStatus.ESTABLISHED_EQUIVALENT,
+            source_description="lapsed documentation",
+            effective_from=date(2015, 1, 1),
+            effective_to=date(2020, 1, 1),
+        )
+        result = evaluate_financial_identity(1, 2, evidence, as_of=AS_OF, automatic_resolution_enabled=True)
+        row = next(r for r in result.evidence_matrix if r.dimension == IdentityDimension.ISSUER_SECURITY_IDENTITY)
+        assert row.is_stale_as_of_evaluation is True
