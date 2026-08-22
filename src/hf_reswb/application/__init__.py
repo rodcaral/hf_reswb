@@ -28,6 +28,17 @@ from hf_reswb.application.class_e_identity_signal import (
     detect_identity_candidates,
     normalize_label,
 )
+from hf_reswb.application.evidence_gated_identity_evaluator import (
+    MANDATORY_DIMENSIONS,
+    DimensionAssessment,
+    DimensionStatus,
+    EvidenceGatedAssessment,
+    EvidenceTier,
+    FinancialIdentityConclusion,
+    IdentityDimension,
+    RelationshipEvidence,
+    evaluate_financial_identity,
+)
 from hf_reswb.application.provenance_guard import (
     OriginProvenanceCheckResult,
     OriginProvenanceVerdict,
@@ -78,4 +89,7 @@ __all__ = [
     "DEFAULT_VENUE_SUFFIXES", "IdentityCandidate", "IdentityVerdict",
     "ProviderAssignmentSnapshot", "SeriesIdentitySnapshot", "detect_identity_candidates",
     "normalize_label",
+    "MANDATORY_DIMENSIONS", "DimensionAssessment", "DimensionStatus", "EvidenceGatedAssessment",
+    "EvidenceTier", "FinancialIdentityConclusion", "IdentityDimension", "RelationshipEvidence",
+    "evaluate_financial_identity",
 ]
