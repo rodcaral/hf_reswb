@@ -213,15 +213,141 @@ def classify_never_state(
 
 
 # ---------------------------------------------------------------------------------------------
+# D3 continued -- formal population semantics and exclusion mechanism (SR-approved increment)
+#
+# "Exclusion" here is a read-only reporting-layer concept only: which rows a metrics view
+# includes or omits. Nothing in this section deletes, archives, or otherwise mutates a Series —
+# there is no database access anywhere in this module, and confirmation is a caller-supplied,
+# attributable fact (who, when, why), never inferred or silently applied.
+# ---------------------------------------------------------------------------------------------
+
+
+class NonProductionFixtureStatus(str, Enum):
+    NOT_A_FIXTURE = "NOT_A_FIXTURE"
+    """No fixture heuristic matched — treated as ordinary financial-acquisition population."""
+
+    CANDIDATE_UNCONFIRMED = "CANDIDATE_UNCONFIRMED"
+    """`looks_like_non_production_fixture()` matched, but no human confirmation is on record.
+    **Errs toward inclusion**: a candidate stays in the reported population (flagged for
+    review) until explicitly confirmed — silent exclusion on a heuristic alone is exactly what
+    D3's "explicit" wording was read as prohibiting."""
+
+    CONFIRMED_FIXTURE = "CONFIRMED_FIXTURE"
+    """A human has explicitly confirmed this Series is a non-production artifact (an attributed
+    `FixtureConfirmation` is on record). Only this status is eligible for exclusion from
+    acquisition-quality metrics."""
+
+
+@dataclass(frozen=True)
+class FixtureConfirmation:
+    """An explicit, attributable confirmation — never inferred. `confirmed_by` and
+    `confirmed_at` exist so a confirmed exclusion is itself auditable, the same standard this
+    project has applied to every other disposition this session (e.g. the 11345/11346
+    disposition's retained history)."""
+
+    confirmed_by: str
+    confirmed_at: object  # date | datetime — left loosely typed to avoid importing datetime twice
+    reason: str
+
+
+def determine_fixture_status(
+    *, candidate_flag: bool, confirmation: FixtureConfirmation | None
+) -> NonProductionFixtureStatus:
+    """`candidate_flag` is typically `looks_like_non_production_fixture()`'s output.
+    `confirmation`, if present, is what actually authorizes exclusion — the flag alone never
+    does."""
+    if confirmation is not None:
+        return NonProductionFixtureStatus.CONFIRMED_FIXTURE
+    if candidate_flag:
+        return NonProductionFixtureStatus.CANDIDATE_UNCONFIRMED
+    return NonProductionFixtureStatus.NOT_A_FIXTURE
+
+
+class AcquisitionQualityPopulationMembership(str, Enum):
+    """The formal population semantics D3 asked for: which reported metric bucket a Series
+    belongs in, distinct from (but derived from) its raw `ImportState`/`NeverStateReason`."""
+
+    INCLUDED_ACQUISITION_CANDIDATE = "INCLUDED_ACQUISITION_CANDIDATE"
+    """A real financial Series whose acquisition state (FAILED/STALE/NEVER/OK/etc.) should be
+    reported in acquisition-quality metrics."""
+
+    INCLUDED_PENDING_FIXTURE_REVIEW = "INCLUDED_PENDING_FIXTURE_REVIEW"
+    """Flagged as a possible fixture but not yet confirmed — still counted, but distinguishable
+    in a report so a reviewer can act on it, rather than either silently counting it as a real
+    gap or silently dropping it."""
+
+    EXCLUDED_CONFIRMED_FIXTURE = "EXCLUDED_CONFIRMED_FIXTURE"
+    """Confirmed non-production artifact — the only membership value a metrics view may omit
+    from its financial-acquisition-quality counts."""
+
+
+def classify_population_membership(
+    fixture_status: NonProductionFixtureStatus,
+) -> AcquisitionQualityPopulationMembership:
+    """Pure mapping — no other input needed, since fixture status alone determines reporting
+    membership under this design. A Series' `NeverStateReason`/`ImportState` still applies
+    independently for included rows; this function only decides in/out/pending."""
+    if fixture_status == NonProductionFixtureStatus.CONFIRMED_FIXTURE:
+        return AcquisitionQualityPopulationMembership.EXCLUDED_CONFIRMED_FIXTURE
+    if fixture_status == NonProductionFixtureStatus.CANDIDATE_UNCONFIRMED:
+        return AcquisitionQualityPopulationMembership.INCLUDED_PENDING_FIXTURE_REVIEW
+    return AcquisitionQualityPopulationMembership.INCLUDED_ACQUISITION_CANDIDATE
+
+
+@dataclass(frozen=True)
+class PopulationRow:
+    """One Series, carrying just enough for the exclusion mechanism to decide membership —
+    a minimal, presentation-agnostic shape, not tied to any particular UI or query."""
+
+    series_id: int
+    fixture_status: NonProductionFixtureStatus
+
+
+@dataclass(frozen=True)
+class PopulationFilterResult:
+    included: tuple[int, ...]
+    pending_review: tuple[int, ...]
+    excluded: tuple[int, ...]
+
+
+def filter_for_acquisition_quality_metrics(rows: list[PopulationRow]) -> PopulationFilterResult:
+    """The exclusion mechanism itself: a pure, in-memory partition. No schema, query, or
+    storage change is implied or required to use this — a caller (e.g. a future read-only
+    reporting view) would build `PopulationRow`s from its own already-fetched data and get back
+    which series ids to report, review, or omit. `pending_review` is never silently merged into
+    either `included` or `excluded` — a report using this result must surface it as its own
+    category, or the whole point of D3's "explicit" requirement is lost."""
+    included: list[int] = []
+    pending: list[int] = []
+    excluded: list[int] = []
+    for row in rows:
+        membership = classify_population_membership(row.fixture_status)
+        if membership == AcquisitionQualityPopulationMembership.INCLUDED_ACQUISITION_CANDIDATE:
+            included.append(row.series_id)
+        elif membership == AcquisitionQualityPopulationMembership.INCLUDED_PENDING_FIXTURE_REVIEW:
+            pending.append(row.series_id)
+        else:
+            excluded.append(row.series_id)
+    return PopulationFilterResult(
+        included=tuple(included), pending_review=tuple(pending), excluded=tuple(excluded)
+    )
+
+
+# ---------------------------------------------------------------------------------------------
 # D4 -- Conditional fallback-provider consideration
 # ---------------------------------------------------------------------------------------------
 
 
 @dataclass(frozen=True)
 class FallbackCandidateEvidence:
-    """All six adequacy dimensions D4 names, supplied by the caller — this module does not
-    infer any of them. Absence of a dimension (`None`) means "not evidenced," never "assumed
-    acceptable.\""""
+    """The adequacy dimensions D4 names, supplied by the caller — this module does not infer
+    any of them. Absence of a dimension (`None`) means "not evidenced," never "assumed
+    acceptable." `comparability_acceptable` was added per SR's 2026-08-22 conditional-approval
+    message, which named financial identity, adjustment basis, provenance, coverage/quality,
+    and comparability explicitly — comparability (can the fallback's values be meaningfully
+    compared against the primary's, e.g. consistent units/timing/methodology) is distinct from
+    raw `coverage_adequate` (does the fallback have data at all) and is tracked separately
+    rather than folded into it."""
 
     identity_compatible: bool | None
     history_available: bool | None
@@ -229,6 +355,7 @@ class FallbackCandidateEvidence:
     coverage_adequate: bool | None
     provenance_acceptable: bool | None
     quality_acceptable: bool | None
+    comparability_acceptable: bool | None = None
 
     def is_fully_adequate(self) -> bool:
         values = (
@@ -238,6 +365,7 @@ class FallbackCandidateEvidence:
             self.coverage_adequate,
             self.provenance_acceptable,
             self.quality_acceptable,
+            self.comparability_acceptable,
         )
         return all(v is True for v in values)
 
@@ -249,6 +377,7 @@ class FallbackCandidateEvidence:
             "coverage_adequate": self.coverage_adequate,
             "provenance_acceptable": self.provenance_acceptable,
             "quality_acceptable": self.quality_acceptable,
+            "comparability_acceptable": self.comparability_acceptable,
         }
         return tuple(name for name, v in fields_.items() if v is not True)
 
@@ -279,25 +408,99 @@ class FallbackConsiderationResult:
     unresolved_dimensions: tuple[str, ...] = field(default_factory=tuple)
 
 
+_ALL_FALLBACK_DIMENSIONS: tuple[str, ...] = (
+    "identity_compatible", "history_available", "adjustment_convention_documented",
+    "coverage_adequate", "provenance_acceptable", "quality_acceptable", "comparability_acceptable",
+)
+
+
 def consider_fallback(
     *, material_impact: bool | None, candidate_evidence: FallbackCandidateEvidence | None
 ) -> FallbackConsiderationResult:
     """D4's gate, exactly as specified: materiality first, then per-candidate adequacy across
-    all six named dimensions. Returns no verdict implying any Series *should* have a fallback
+    all seven named dimensions. Returns no verdict implying any Series *should* have a fallback
     configured — this classifies one candidate for one already-identified incompatibility, not
     a coverage policy (D4: "do not require universal multi-provider coverage")."""
     if material_impact is not True:
         return FallbackConsiderationResult(verdict=FallbackConsiderationVerdict.MATERIALITY_UNKNOWN)
     if candidate_evidence is None or not candidate_evidence.is_fully_adequate():
-        unresolved = candidate_evidence.unresolved_dimensions() if candidate_evidence else (
-            "identity_compatible", "history_available", "adjustment_convention_documented",
-            "coverage_adequate", "provenance_acceptable", "quality_acceptable",
+        unresolved = (
+            candidate_evidence.unresolved_dimensions()
+            if candidate_evidence
+            else _ALL_FALLBACK_DIMENSIONS
         )
         return FallbackConsiderationResult(
             verdict=FallbackConsiderationVerdict.WARRANTED_CANDIDATE_INADEQUATE,
             unresolved_dimensions=unresolved,
         )
     return FallbackConsiderationResult(verdict=FallbackConsiderationVerdict.WARRANTED_CANDIDATE_ADEQUATE)
+
+
+class FallbackActivationVerdict(str, Enum):
+    """The activation-gate outcome — layered on top of `consider_fallback()`'s adequacy
+    assessment, exactly as `evaluate_financial_identity()` layers `automatic_resolution_enabled`
+    on top of its own predicates. Distinguishes "this candidate is adequate" from "this
+    capability may actually be used," per SR's "unblocks the next technical design increment...
+    but not activation.\""""
+
+    DISABLED_BY_DEFAULT = "DISABLED_BY_DEFAULT"
+    """`fallback_activation_enabled=False` (the default) — no fallback is ever activated
+    regardless of evidence. No caller in this codebase sets this to `True`."""
+
+    ELIGIBLE_PENDING_ACTIVATION = "ELIGIBLE_PENDING_ACTIVATION"
+    """Materiality asserted and the candidate is fully adequate on all seven dimensions, but the
+    activation gate is off — reported so a reviewer can see the capability *would* qualify,
+    without it taking effect. Distinct from `DISABLED_BY_DEFAULT` alone so "gate is closed" and
+    "gate is closed but nothing would happen anyway" are not conflated."""
+
+    NOT_ELIGIBLE = "NOT_ELIGIBLE"
+    """Even with the gate open, the underlying `consider_fallback()` result is not
+    `WARRANTED_CANDIDATE_ADEQUATE` (materiality unknown or the candidate is inadequate) — the
+    gate being open would not matter here."""
+
+    ACTIVATED = "ACTIVATED"
+    """`fallback_activation_enabled=True`, materiality asserted, and the candidate is fully
+    adequate on all seven dimensions. **No caller in this codebase sets the gate to `True`** —
+    this value exists so the function has a real "on" state to test against, not because
+    anything in this repository currently reaches it."""
+
+
+@dataclass(frozen=True)
+class FallbackActivationResult:
+    verdict: FallbackActivationVerdict
+    underlying: FallbackConsiderationResult
+
+
+def evaluate_fallback_activation(
+    *,
+    material_impact: bool | None,
+    candidate_evidence: FallbackCandidateEvidence | None,
+    fallback_activation_enabled: bool = False,
+) -> FallbackActivationResult:
+    """The evidence-gated fallback capability SR's message asked for: D4's activation must stay
+    gated on financial identity, adjustment basis, provenance, coverage/quality, and
+    comparability evidence — enforced by requiring `consider_fallback()`'s full seven-dimension
+    adequacy result — **and** on an explicit activation flag that defaults to `False` and is
+    never set `True` anywhere in this codebase, mirroring
+    `evidence_gated_identity_evaluator.evaluate_financial_identity()`'s
+    `automatic_resolution_enabled` gate exactly. This function performs no action regardless of
+    its output — it classifies, and returns.
+    """
+    underlying = consider_fallback(material_impact=material_impact, candidate_evidence=candidate_evidence)
+    is_adequate = underlying.verdict == FallbackConsiderationVerdict.WARRANTED_CANDIDATE_ADEQUATE
+
+    if not fallback_activation_enabled:
+        verdict = (
+            FallbackActivationVerdict.ELIGIBLE_PENDING_ACTIVATION
+            if is_adequate
+            else FallbackActivationVerdict.DISABLED_BY_DEFAULT
+        )
+        return FallbackActivationResult(verdict=verdict, underlying=underlying)
+
+    if not is_adequate:
+        return FallbackActivationResult(verdict=FallbackActivationVerdict.NOT_ELIGIBLE, underlying=underlying)
+
+    return FallbackActivationResult(verdict=FallbackActivationVerdict.ACTIVATED, underlying=underlying)
 
 
 # ---------------------------------------------------------------------------------------------

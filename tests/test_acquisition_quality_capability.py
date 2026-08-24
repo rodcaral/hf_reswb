@@ -10,17 +10,26 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 
 from hf_reswb.application.acquisition_quality_capability import (
+    AcquisitionQualityPopulationMembership,
     CadenceCapabilityVerdict,
     FailureDiagnosticQualifier,
+    FallbackActivationVerdict,
     FallbackCandidateEvidence,
     FallbackConsiderationVerdict,
+    FixtureConfirmation,
     IdentifierCompatibilityVerdict,
     NeverStateReason,
+    NonProductionFixtureStatus,
+    PopulationRow,
     RunOutcome,
     assess_cadence_capability,
     assess_identifier_compatibility,
     classify_never_state,
+    classify_population_membership,
     consider_fallback,
+    determine_fixture_status,
+    evaluate_fallback_activation,
+    filter_for_acquisition_quality_metrics,
     looks_like_non_production_fixture,
     qualify_failure_diagnostic,
 )
@@ -125,6 +134,112 @@ class TestD3NeverState:
         assert "label" not in sig.parameters
 
 
+class TestD3PopulationSemanticsAndExclusion:
+    """SR-approved D3 increment: formal population semantics and the (read-only, in-memory)
+    exclusion mechanism for confirmed test/non-production fixtures."""
+
+    def test_no_confirmation_stays_unconfirmed_even_with_candidate_flag(self) -> None:
+        status = determine_fixture_status(candidate_flag=True, confirmation=None)
+        assert status == NonProductionFixtureStatus.CANDIDATE_UNCONFIRMED
+
+    def test_confirmation_present_is_confirmed_fixture(self) -> None:
+        confirmation = FixtureConfirmation(
+            confirmed_by="SE", confirmed_at="2026-08-22", reason="known smoke-test artifact"
+        )
+        status = determine_fixture_status(candidate_flag=True, confirmation=confirmation)
+        assert status == NonProductionFixtureStatus.CONFIRMED_FIXTURE
+
+    def test_no_flag_no_confirmation_is_not_a_fixture(self) -> None:
+        status = determine_fixture_status(candidate_flag=False, confirmation=None)
+        assert status == NonProductionFixtureStatus.NOT_A_FIXTURE
+
+    def test_unconfirmed_candidate_stays_included_pending_review(self) -> None:
+        # The core D3 guarantee: a heuristic match alone never excludes a Series.
+        membership = classify_population_membership(NonProductionFixtureStatus.CANDIDATE_UNCONFIRMED)
+        assert membership == AcquisitionQualityPopulationMembership.INCLUDED_PENDING_FIXTURE_REVIEW
+
+    def test_confirmed_fixture_is_the_only_excludable_status(self) -> None:
+        membership = classify_population_membership(NonProductionFixtureStatus.CONFIRMED_FIXTURE)
+        assert membership == AcquisitionQualityPopulationMembership.EXCLUDED_CONFIRMED_FIXTURE
+
+    def test_filter_partitions_real_inventory_shape(self) -> None:
+        # Mirrors the real 2026-08-22 inventory: 11344/11347 (real, not fixtures, zero
+        # assignment) alongside the six confirmed test-fixture series ids.
+        rows = [
+            PopulationRow(series_id=11344, fixture_status=NonProductionFixtureStatus.NOT_A_FIXTURE),
+            PopulationRow(series_id=11347, fixture_status=NonProductionFixtureStatus.NOT_A_FIXTURE),
+            PopulationRow(series_id=11304, fixture_status=NonProductionFixtureStatus.CONFIRMED_FIXTURE),
+            PopulationRow(series_id=11306, fixture_status=NonProductionFixtureStatus.CANDIDATE_UNCONFIRMED),
+        ]
+        result = filter_for_acquisition_quality_metrics(rows)
+        assert result.included == (11344, 11347)
+        assert result.pending_review == (11306,)
+        assert result.excluded == (11304,)
+
+    def test_filter_touches_no_database(self) -> None:
+        import inspect
+
+        assert "connection" not in inspect.signature(filter_for_acquisition_quality_metrics).parameters
+
+
+class TestD4EvidenceGatedFallbackActivation:
+    """SR-approved D4 increment: activation must stay gated on financial identity, adjustment
+    basis, provenance, coverage/quality, and comparability evidence, and on an explicit,
+    default-off activation flag mirroring the G1/G9 evaluator's pattern."""
+
+    _adequate_evidence = FallbackCandidateEvidence(
+        identity_compatible=True, history_available=True,
+        adjustment_convention_documented=True, coverage_adequate=True,
+        provenance_acceptable=True, quality_acceptable=True, comparability_acceptable=True,
+    )
+
+    def test_disabled_by_default_even_with_no_evidence(self) -> None:
+        result = evaluate_fallback_activation(material_impact=None, candidate_evidence=None)
+        assert result.verdict == FallbackActivationVerdict.DISABLED_BY_DEFAULT
+
+    def test_eligible_pending_activation_when_adequate_but_gate_closed(self) -> None:
+        result = evaluate_fallback_activation(
+            material_impact=True, candidate_evidence=self._adequate_evidence
+        )
+        assert result.verdict == FallbackActivationVerdict.ELIGIBLE_PENDING_ACTIVATION
+
+    def test_activated_only_when_gate_open_and_fully_adequate(self) -> None:
+        result = evaluate_fallback_activation(
+            material_impact=True,
+            candidate_evidence=self._adequate_evidence,
+            fallback_activation_enabled=True,
+        )
+        assert result.verdict == FallbackActivationVerdict.ACTIVATED
+
+    def test_not_eligible_when_gate_open_but_inadequate(self) -> None:
+        inadequate = FallbackCandidateEvidence(
+            identity_compatible=True, history_available=True,
+            adjustment_convention_documented=None, coverage_adequate=True,
+            provenance_acceptable=True, quality_acceptable=True, comparability_acceptable=True,
+        )
+        result = evaluate_fallback_activation(
+            material_impact=True, candidate_evidence=inadequate, fallback_activation_enabled=True
+        )
+        assert result.verdict == FallbackActivationVerdict.NOT_ELIGIBLE
+
+    def test_gate_open_but_materiality_unknown_never_activates(self) -> None:
+        result = evaluate_fallback_activation(
+            material_impact=None,
+            candidate_evidence=self._adequate_evidence,
+            fallback_activation_enabled=True,
+        )
+        assert result.verdict == FallbackActivationVerdict.NOT_ELIGIBLE
+
+    def test_module_never_calls_itself_with_activation_enabled(self) -> None:
+        # The only occurrence of "evaluate_fallback_activation(" in the module's own source is
+        # its own `def` line -- it never invokes itself, so it cannot be the source of a True
+        # activation anywhere in this codebase.
+        import inspect
+        import hf_reswb.application.acquisition_quality_capability as module
+
+        assert inspect.getsource(module).count("evaluate_fallback_activation(") == 1
+
+
 class TestD4ConditionalFallback:
     def test_materiality_unknown_when_not_asserted(self) -> None:
         result = consider_fallback(material_impact=None, candidate_evidence=None)
@@ -137,15 +252,28 @@ class TestD4ConditionalFallback:
         result = consider_fallback(material_impact=False, candidate_evidence=None)
         assert result.verdict == FallbackConsiderationVerdict.MATERIALITY_UNKNOWN
 
-    def test_warranted_adequate_when_all_six_dimensions_true(self) -> None:
+    def test_warranted_adequate_when_all_seven_dimensions_true(self) -> None:
         evidence = FallbackCandidateEvidence(
             identity_compatible=True, history_available=True,
             adjustment_convention_documented=True, coverage_adequate=True,
             provenance_acceptable=True, quality_acceptable=True,
+            comparability_acceptable=True,
         )
         result = consider_fallback(material_impact=True, candidate_evidence=evidence)
         assert result.verdict == FallbackConsiderationVerdict.WARRANTED_CANDIDATE_ADEQUATE
         assert result.unresolved_dimensions == ()
+
+    def test_comparability_missing_alone_makes_candidate_inadequate(self) -> None:
+        # SR's 2026-08-22 message named comparability explicitly, distinct from coverage.
+        evidence = FallbackCandidateEvidence(
+            identity_compatible=True, history_available=True,
+            adjustment_convention_documented=True, coverage_adequate=True,
+            provenance_acceptable=True, quality_acceptable=True,
+            comparability_acceptable=None,
+        )
+        result = consider_fallback(material_impact=True, candidate_evidence=evidence)
+        assert result.verdict == FallbackConsiderationVerdict.WARRANTED_CANDIDATE_INADEQUATE
+        assert result.unresolved_dimensions == ("comparability_acceptable",)
 
     def test_warranted_inadequate_when_one_dimension_missing(self) -> None:
         # SLV/UBER/URA-style: a second provider assignment exists (Twelve Data) but its
@@ -159,10 +287,10 @@ class TestD4ConditionalFallback:
         assert result.verdict == FallbackConsiderationVerdict.WARRANTED_CANDIDATE_INADEQUATE
         assert "adjustment_convention_documented" in result.unresolved_dimensions
 
-    def test_no_candidate_evidence_lists_all_six_unresolved(self) -> None:
+    def test_no_candidate_evidence_lists_all_seven_unresolved(self) -> None:
         result = consider_fallback(material_impact=True, candidate_evidence=None)
         assert result.verdict == FallbackConsiderationVerdict.WARRANTED_CANDIDATE_INADEQUATE
-        assert len(result.unresolved_dimensions) == 6
+        assert len(result.unresolved_dimensions) == 7
 
     def test_does_not_assert_universal_coverage(self) -> None:
         # Calling consider_fallback for one Series says nothing about any other Series --
