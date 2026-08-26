@@ -182,6 +182,68 @@ class TestD3PopulationSemanticsAndExclusion:
         assert "connection" not in inspect.signature(filter_for_acquisition_quality_metrics).parameters
 
 
+class TestSupersededExclusionFromNeedsAttention:
+    """SE directive 2026-08-26: acquisition-quality needs-attention aggregates must exclude
+    SUPERSEDED. Unlike the fixture heuristic, this is a non-heuristic, authoritative exclusion
+    -- `Series.status` requires no human confirmation, so there is no pending-review state."""
+
+    def test_superseded_takes_priority_in_never_state_classification(self) -> None:
+        reason = classify_never_state(
+            has_provider_assignment=False, fixture_candidate=False, is_superseded=True
+        )
+        assert reason == NeverStateReason.SUPERSEDED_NOT_CURRENT_ATTRIBUTION
+
+    def test_superseded_overrides_fixture_candidate_flag(self) -> None:
+        # Status is authoritative; a coincidental heuristic match must not override it.
+        reason = classify_never_state(
+            has_provider_assignment=True, fixture_candidate=True, is_superseded=True
+        )
+        assert reason == NeverStateReason.SUPERSEDED_NOT_CURRENT_ATTRIBUTION
+
+    def test_not_superseded_falls_through_to_existing_reasons(self) -> None:
+        reason = classify_never_state(
+            has_provider_assignment=False, fixture_candidate=False, is_superseded=False
+        )
+        assert reason == NeverStateReason.NO_PROVIDER_ASSIGNMENT
+
+    def test_population_membership_excludes_superseded_unconditionally(self) -> None:
+        membership = classify_population_membership(
+            NonProductionFixtureStatus.NOT_A_FIXTURE, is_superseded=True
+        )
+        assert membership == AcquisitionQualityPopulationMembership.EXCLUDED_SUPERSEDED
+
+    def test_population_membership_superseded_has_no_pending_review_state(self) -> None:
+        # Even a candidate-unconfirmed fixture flag doesn't produce a pending state once
+        # is_superseded is True -- status is authoritative, not a heuristic needing review.
+        membership = classify_population_membership(
+            NonProductionFixtureStatus.CANDIDATE_UNCONFIRMED, is_superseded=True
+        )
+        assert membership == AcquisitionQualityPopulationMembership.EXCLUDED_SUPERSEDED
+
+    def test_filter_excludes_superseded_from_needs_attention(self) -> None:
+        # Real cases: 11345/11346 are SUPERSEDED with zero provider assignment -- would
+        # otherwise resolve to NOT_A_FIXTURE/included without this exclusion.
+        rows = [
+            PopulationRow(series_id=11344, fixture_status=NonProductionFixtureStatus.NOT_A_FIXTURE),
+            PopulationRow(
+                series_id=11345,
+                fixture_status=NonProductionFixtureStatus.NOT_A_FIXTURE,
+                is_superseded=True,
+            ),
+            PopulationRow(
+                series_id=11346,
+                fixture_status=NonProductionFixtureStatus.NOT_A_FIXTURE,
+                is_superseded=True,
+            ),
+        ]
+        result = filter_for_acquisition_quality_metrics(rows)
+        assert result.included == (11344,)
+        assert result.pending_review == ()
+        assert 11345 not in result.included and 11345 not in result.pending_review
+        assert 11346 not in result.included and 11346 not in result.pending_review
+        assert result.excluded == (11345, 11346)
+
+
 class TestD4EvidenceGatedFallbackActivation:
     """SR-approved D4 increment: activation must stay gated on financial identity, adjustment
     basis, provenance, coverage/quality, and comparability evidence, and on an explicit,

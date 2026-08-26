@@ -185,6 +185,14 @@ class NeverStateReason(str, Enum):
     automatically, per D3's "exclude explicit test/non-production fixtures" wording (an
     explicit exclusion, not an inferred one)."""
 
+    SUPERSEDED_NOT_CURRENT_ATTRIBUTION = "SUPERSEDED_NOT_CURRENT_ATTRIBUTION"
+    """`series.status = 'SUPERSEDED'` (SE directive 2026-08-26): "retained for historical/
+    provenance purposes; no longer the current attribution." Unlike
+    `NON_PRODUCTION_FIXTURE_CANDIDATE`, this is **not a heuristic requiring confirmation** —
+    `Series.status` is an authoritative, already-established fact, so a SUPERSEDED Series is
+    unconditionally excluded from acquisition-quality "needs attention" aggregates the moment
+    its status is known, with no pending-review state."""
+
 
 _FIXTURE_MARKERS = ("smoke test", "duplicate warning test", "test series", "bulk-verify", "-test")
 """A narrow, explicit, inspectable list — not a general fuzzy-match. Extending it is a product
@@ -199,12 +207,16 @@ def looks_like_non_production_fixture(label: str, provider_identifier: str | Non
 
 
 def classify_never_state(
-    *, has_provider_assignment: bool, fixture_candidate: bool
+    *, has_provider_assignment: bool, fixture_candidate: bool, is_superseded: bool = False
 ) -> NeverStateReason:
     """Classify why a Series has no `import_run` at all. `fixture_candidate` is supplied by the
     caller (typically from `looks_like_non_production_fixture()`, itself confirmed by a human
     before being trusted) — this function does not compute it itself, keeping the heuristic and
-    the state classification separately inspectable."""
+    the state classification separately inspectable. `is_superseded` is checked first: unlike
+    the fixture heuristic, `Series.status = 'SUPERSEDED'` is an authoritative fact requiring no
+    confirmation, so it takes priority over a mere candidate flag."""
+    if is_superseded:
+        return NeverStateReason.SUPERSEDED_NOT_CURRENT_ATTRIBUTION
     if fixture_candidate:
         return NeverStateReason.NON_PRODUCTION_FIXTURE_CANDIDATE
     if not has_provider_assignment:
@@ -277,16 +289,26 @@ class AcquisitionQualityPopulationMembership(str, Enum):
     gap or silently dropping it."""
 
     EXCLUDED_CONFIRMED_FIXTURE = "EXCLUDED_CONFIRMED_FIXTURE"
-    """Confirmed non-production artifact — the only membership value a metrics view may omit
+    """Confirmed non-production artifact — a membership value a metrics view may omit
     from its financial-acquisition-quality counts."""
+
+    EXCLUDED_SUPERSEDED = "EXCLUDED_SUPERSEDED"
+    """`series.status = 'SUPERSEDED'` (SE directive 2026-08-26) — unconditionally excluded from
+    acquisition-quality "needs attention" aggregates, with no pending-review state, since
+    `Series.status` is already authoritative and requires no human confirmation the way the
+    fixture heuristic does."""
 
 
 def classify_population_membership(
-    fixture_status: NonProductionFixtureStatus,
+    fixture_status: NonProductionFixtureStatus, *, is_superseded: bool = False
 ) -> AcquisitionQualityPopulationMembership:
-    """Pure mapping — no other input needed, since fixture status alone determines reporting
+    """Pure mapping — fixture status plus the authoritative SUPERSEDED fact determine reporting
     membership under this design. A Series' `NeverStateReason`/`ImportState` still applies
-    independently for included rows; this function only decides in/out/pending."""
+    independently for included rows; this function only decides in/out/pending.
+    `is_superseded` is checked first: it is an already-established fact, not a heuristic, so it
+    takes priority over fixture status regardless of what the latter says."""
+    if is_superseded:
+        return AcquisitionQualityPopulationMembership.EXCLUDED_SUPERSEDED
     if fixture_status == NonProductionFixtureStatus.CONFIRMED_FIXTURE:
         return AcquisitionQualityPopulationMembership.EXCLUDED_CONFIRMED_FIXTURE
     if fixture_status == NonProductionFixtureStatus.CANDIDATE_UNCONFIRMED:
@@ -301,6 +323,7 @@ class PopulationRow:
 
     series_id: int
     fixture_status: NonProductionFixtureStatus
+    is_superseded: bool = False
 
 
 @dataclass(frozen=True)
@@ -321,7 +344,9 @@ def filter_for_acquisition_quality_metrics(rows: list[PopulationRow]) -> Populat
     pending: list[int] = []
     excluded: list[int] = []
     for row in rows:
-        membership = classify_population_membership(row.fixture_status)
+        membership = classify_population_membership(
+            row.fixture_status, is_superseded=row.is_superseded
+        )
         if membership == AcquisitionQualityPopulationMembership.INCLUDED_ACQUISITION_CANDIDATE:
             included.append(row.series_id)
         elif membership == AcquisitionQualityPopulationMembership.INCLUDED_PENDING_FIXTURE_REVIEW:

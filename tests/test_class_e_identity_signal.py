@@ -138,3 +138,31 @@ class TestOutputIsCandidateListNotPopulation:
         candidates = detect_identity_candidates([current_target, proposed_target, unrelated])
         assert len(candidates) == 1
         assert {candidates[0].series_a, candidates[0].series_b} == {11342, 6672}
+
+
+class TestSupersededNonRegression:
+    """SE directive 2026-08-26: class_e_identity_signal remains unchanged by the SUPERSEDED
+    UI/consumer work. This module reasons over provider/label evidence only -- it has no
+    concept of Series.status and must not gain one as a side effect of other modules' changes."""
+
+    def test_snapshot_type_has_no_status_field(self) -> None:
+        import dataclasses
+
+        field_names = {f.name for f in dataclasses.fields(SeriesIdentitySnapshot)}
+        assert "status" not in field_names
+        assert field_names == {"series_id", "label", "assignments"}
+
+    def test_detect_identity_candidates_signature_unchanged(self) -> None:
+        import inspect
+
+        params = set(inspect.signature(detect_identity_candidates).parameters)
+        assert "status" not in params
+        assert "is_superseded" not in params
+        assert params == {"series", "venue_suffixes"}
+
+    def test_superseded_series_11345_11346_style_pair_unaffected(self) -> None:
+        # 11345/11346 (real, SUPERSEDED, zero provider assignment) still resolve exactly as
+        # before -- no candidate at all, since this module never inspects status.
+        superseded_a = snap(11345, "Alibaba Group Holding Limited - ADS (NYSE)")
+        superseded_b = snap(11346, "Baidu Inc. - ADS (NASDAQ)")
+        assert detect_identity_candidates([superseded_a, superseded_b]) == []

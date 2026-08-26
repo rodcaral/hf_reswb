@@ -117,6 +117,49 @@ def compute_panel_eligibility(
                 )
             )
 
+    # 1b. include_superseded: default-excluded, opt-in (SE directive 2026-08-26). Reverse
+    # default of include_delisted -- SUPERSEDED means "not the current attribution," a stronger
+    # default-exclusion signal than "the instrument stopped trading."
+    superseded_included: list[int] = []
+    if not parameters.include_superseded:
+        remaining_ids = [s for s in series_ids if not any(e.series_id == s for e in excluded)]
+        if remaining_ids:
+            placeholders = ",".join("?" for _ in remaining_ids)
+            superseded = connection.execute(
+                f"""
+                SELECT id FROM histfints.series
+                WHERE id IN ({placeholders})
+                  AND status = 'SUPERSEDED'
+                """,
+                (*remaining_ids,),
+            ).fetchall()
+
+            for row in superseded:
+                excluded.append(
+                    ExclusionRecord(
+                        series_id=row["id"],
+                        reason=ExclusionReason.SUPERSEDED,
+                        detail="status = SUPERSEDED",
+                    )
+                )
+    else:
+        # Opted in: track which of the still-candidate Series are actually SUPERSEDED, so the
+        # snapshot (and downstream PanelResult) can carry a visible qualification rather than
+        # silently including historical/superseded data indistinguishably from current
+        # attribution.
+        remaining_ids = [s for s in series_ids if not any(e.series_id == s for e in excluded)]
+        if remaining_ids:
+            placeholders = ",".join("?" for _ in remaining_ids)
+            superseded_rows = connection.execute(
+                f"""
+                SELECT id FROM histfints.series
+                WHERE id IN ({placeholders})
+                  AND status = 'SUPERSEDED'
+                """,
+                (*remaining_ids,),
+            ).fetchall()
+            superseded_included = [row["id"] for row in superseded_rows]
+
     # 2. staleness_policy: Time-local exclusion
     remaining_ids = [s for s in series_ids if not any(e.series_id == s for e in excluded)]
     if parameters.staleness_policy and remaining_ids:
@@ -161,10 +204,17 @@ def compute_panel_eligibility(
     excluded_ids = {e.series_id for e in excluded}
     included = [s for s in series_ids if s not in excluded_ids]
 
+    # superseded_included may have been narrowed by later exclusion steps (staleness, trade
+    # evidence, coverage, adjustment basis) since it was computed at step 1b -- re-intersect
+    # against the final included list so the qualification only reflects Series that actually
+    # made it into this result.
+    superseded_included = [s for s in superseded_included if s in included]
+
     return PanelMembershipSnapshot(
         date=analysis_date,
         included_series_ids=included,
         excluded_records=excluded,
+        superseded_included_series_ids=superseded_included,
     )
 
 
@@ -211,6 +261,17 @@ def compute_panel_result(
 
     result_status = ResultStatus.SUPPRESSED if is_suppressed else ResultStatus.PUBLISHED
 
+    # Visible qualification whenever a SUPERSEDED Series was explicitly opted into this result
+    # (SE directive 2026-08-26) -- the approved status meaning, verbatim, not a new claim.
+    historical_evidence_qualification = None
+    if membership.superseded_included_series_ids:
+        ids = ", ".join(str(i) for i in membership.superseded_included_series_ids)
+        historical_evidence_qualification = (
+            f"Includes {len(membership.superseded_included_series_ids)} superseded Series "
+            f"(id: {ids}) — retained for historical/provenance purposes; no longer the current "
+            f"attribution."
+        )
+
     # Build result
     return PanelResult(
         date=membership.date,
@@ -229,6 +290,7 @@ def compute_panel_result(
         membership=membership,
         adjustment_basis=adjustment_basis,
         coverage_status=coverage_status,
+        historical_evidence_qualification=historical_evidence_qualification,
     )
 
 
@@ -242,6 +304,7 @@ def format_provisional_status(parameters: PanelEligibilityParameters) -> str:
     lines = ["Panel Eligibility Parameters (provisional):"]
 
     lines.append(f"  include_delisted: {parameters.include_delisted}")
+    lines.append(f"  include_superseded: {parameters.include_superseded}")
 
     if parameters.staleness_policy:
         lines.append(

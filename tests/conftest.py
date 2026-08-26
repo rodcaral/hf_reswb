@@ -31,6 +31,15 @@ MIGRATIONS_DIR = HISTFINTS_PERSISTENCE_DIR / "migrations"
 # database up to exactly this point — from the real schema.sql plus the real migration
 # files, never a hand-typed reconstruction (D-009b) — matches production's actual schema
 # without needing to copy its 5+ GB data file.
+#
+# Re-verified live 2026-08-26: production has since advanced to user_version=17 (migrations
+# 0011-0017, including 0017's SUPERSEDED status support) — deliberately NOT bumped here, since
+# doing so broke multiple unrelated existing tests (test_reconciliation_boundary.py,
+# panel-eligibility phase1/phase2 delisted/trade-evidence cases) that assume the v10 schema
+# shape. Bumping this shared constant is a separate, cross-cutting infrastructure decision with
+# its own blast radius — out of scope for one feature's tests. SUPERSEDED-specific tests use
+# their own isolated, explicitly-versioned fixture instead (see
+# tests/test_panel_eligibility_superseded.py's `_histfints_copy_v17`).
 PRODUCTION_USER_VERSION = 10
 
 
@@ -78,6 +87,17 @@ def histfints_copy_migrated(tmp_path) -> Path:
     the `explained` verdict, which SPEC §6 states can only be tested against a migrated
     fixture, never against production as it stands today."""
     return _build_histfints_db(tmp_path / "histfints_copy_migrated.db", up_to_version=13)
+
+
+@pytest.fixture
+def histfints_copy_v17(tmp_path) -> Path:
+    """The real schema through migration 0017 (`series.status = 'SUPERSEDED'` support,
+    2026-08-26) — isolated from the shared `PRODUCTION_USER_VERSION`/`histfints_copy` fixture
+    deliberately, since bumping that shared constant to 17 broke multiple unrelated existing
+    tests that assume the v10 schema shape. Use this fixture only for tests that specifically
+    need SUPERSEDED (or another 0011-0017 migration) support; everything else should keep using
+    `histfints_copy`."""
+    return _build_histfints_db(tmp_path / "histfints_copy_v17.db", up_to_version=17)
 
 
 @pytest.fixture

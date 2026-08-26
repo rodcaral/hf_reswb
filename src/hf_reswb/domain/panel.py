@@ -44,6 +44,15 @@ class ExclusionReason(str, Enum):
     is expected for 99.96% of the live database as of 2026-08-20 and is not a defect — no
     ExclusionReason is assigned for it. Proposed 2026-08-20; not yet assigned by any
     production code path."""
+    SUPERSEDED = "SUPERSEDED"
+    """`series.status = 'SUPERSEDED'` (DFA-approved general definition, 2026-08-26): "retained
+    for historical/provenance purposes; no longer the current attribution." Excluded by default,
+    mirroring `DELISTED`'s pattern, but opt-in via `PanelEligibilityParameters.include_superseded`
+    rather than opt-out (default `False`, not `True`) — SUPERSEDED asserts the Series is not the
+    current attribution for its history, a stronger default-exclusion signal than DELISTED's
+    "the instrument stopped trading." Not a financial-validity claim by itself; see
+    `SeriesStatus.SUPERSEDED`'s own docstring in `histfints-v3` for what it does and does not
+    mean."""
 
 
 @dataclass(frozen=True)
@@ -69,8 +78,12 @@ class DispersionThreshold:
 
 @dataclass(frozen=True)
 class PanelEligibilityParameters:
-    """Three inclusion-rule parameters per D-046."""
+    """Four inclusion-rule parameters (three per D-046, plus include_superseded 2026-08-26)."""
     include_delisted: bool = True  # Default: inclusion for historical research
+    include_superseded: bool = False
+    """Shared semantic name for the "include superseded/historical" rule across Workbench
+    surfaces (SE directive 2026-08-26). Default `False` — excluded unless explicitly opted in,
+    the reverse default of `include_delisted`. See `ExclusionReason.SUPERSEDED`."""
     staleness_policy: Optional[StalenessPolicy] = None  # Provisional; set before panel computation
     dispersion_threshold: Optional[DispersionThreshold] = None  # Provisional; set before result suppression
 
@@ -103,6 +116,12 @@ class PanelMembershipSnapshot:
     date: str
     included_series_ids: list[int]
     excluded_records: list[ExclusionRecord] = field(default_factory=list)
+    superseded_included_series_ids: list[int] = field(default_factory=list)
+    """Subset of `included_series_ids` that are `status = 'SUPERSEDED'` and were included only
+    because `include_superseded=True` was explicitly set. Non-empty here is what drives
+    `PanelResult.historical_evidence_qualification` — an opted-in analytical output must carry
+    a visible qualification (SE directive 2026-08-26), not silently include historical/
+    superseded data indistinguishably from current attribution."""
 
     @property
     def total_eligible(self) -> int:
@@ -142,6 +161,13 @@ class PanelResult:
 
     adjustment_basis: Optional[str] = None  # Which basis was enforced (SPLIT_ADJUSTED, UNADJUSTED)
     coverage_status: Optional[str] = None  # Availability metadata status
+
+    historical_evidence_qualification: Optional[str] = None
+    """Set (non-None) whenever `membership.superseded_included_series_ids` is non-empty — a
+    visible qualification on this specific result, not merely at the selection step (SE
+    directive 2026-08-26: "any explicitly opted-in analytical output must carry a visible
+    superseded/historical-evidence qualification"). `None` when no SUPERSEDED Series was
+    opted into this result."""
 
     @property
     def is_suppressed(self) -> bool:
