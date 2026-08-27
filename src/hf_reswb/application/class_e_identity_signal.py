@@ -1,6 +1,6 @@
 """Class-E identity-detection signal: provider identity + provider-side symbol.
 
-Disposition-framework element 5 (`CLASS_E_FULL_IDENTITY_MATRIX_2026-08-20.md` §"Minimum
+Disposition-framework element 5 (`CLASS_E_FULL_IDENTITY_MATRIX_2026-08-20.md`, docs/evidence/, §"Minimum
 Class-E disposition framework", item 5) — a corrected candidate-discovery signal, replacing
 reliance on label-normalization alone, which was demonstrated (3 of 11 candidates checked:
 BIDU, MELI, AMZN) to miss a duplicate relationship on a single comma's presence or absence.

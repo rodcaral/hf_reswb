@@ -1,6 +1,6 @@
 """Evidence-gated financial-identity evaluator — G1/G9 Final Domain Ruling implementation.
 
-Implements `docs/G1_G9_Final_Domain_Ruling.md`'s evidence-gated identity model as read-only,
+Implements `docs/evidence/G1_G9_Final_Domain_Ruling.md`'s evidence-gated identity model as read-only,
 DB-free infrastructure, following the same conventions as `class_e_identity_signal.py`,
 `independence_detector.py`, and `provenance_guard.py`: frozen dataclasses, `str, Enum` types
 with per-member docstrings, pure functions with no database access.

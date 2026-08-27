@@ -15,6 +15,14 @@ separately unvalidated; step threshold is a candidate filter, not a financial de
 > **Frozen except defects (D-035)** until Stage 2 (real 0011–0013 evidence) runs and Q-066
 > (whether this verdict vocabulary actually serves V0's research questions) is answered. Do
 > not expand scope on the strength of this note alone.
+>
+> **Distinct from defect closure (added 2026-08-27, additive):** this spec is the
+> Workbench-side evidence-consumption and reconciliation *mitigation/detection* mechanism —
+> it lets Workbench classify what evidence exists for a discontinuity, it does not fix the
+> underlying import/scale-discontinuity behavior F-009 describes. `DEFECT-F009.md`
+> (`docs/histfints-requests/`) remains a separate, active, unresolved filing to the HistFinTS
+> team — its status line still reads "dormant, not yet observed in production." Do not cite
+> this spec's implementation as evidence that F-009 itself is closed.
 
 ---
 

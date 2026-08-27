@@ -4,7 +4,7 @@ Fixtures are grounded in real cases established during this session's Class-E wo
 synthetic data: the MU current-target/proposed-target pair (identical Yahoo Finance symbol,
 Groups 5-11 pattern), the MU referrer-CEDEAR/current-target pair (`.BA`-suffix relation), and
 the three demonstrated punctuation-normalization misses (BIDU, MELI, AMZN — see
-`CLASS_E_FULL_IDENTITY_MATRIX_2026-08-20.md`).
+`CLASS_E_FULL_IDENTITY_MATRIX_2026-08-20.md`, docs/evidence/).
 """
 from __future__ import annotations
 

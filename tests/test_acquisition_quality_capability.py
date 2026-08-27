@@ -1,6 +1,6 @@
 """Tests for the D1-D5 acquisition-quality capability model.
 
-Fixtures grounded in real cases from ACQUISITION_QUALITY_INVENTORY_2026-08-22.md: the 32-Series
+Fixtures grounded in real cases from ACQUISITION_QUALITY_INVENTORY_2026-08-22.md (docs/evidence/): the 32-Series
 1h cadence gap (D1), the 61-Series .{dollar} identifier-format failures and the SLV/UBER/URA
 dual-path-failing pattern (D2/D5), the two NEVER sub-populations including the test fixtures
 (D3), and the already-documented Class-C orphans (D3, not reinterpreted).
@@ -102,7 +102,7 @@ class TestD2IdentifierCompatibility:
 class TestD3NeverState:
     def test_class_c_orphan_pattern_classified_no_provider_assignment(self) -> None:
         # 11344/11347: zero provider_assignment, not a fixture -- not reinterpreted from
-        # CLASS_C_EVIDENCE_PACKAGE_2026-08-20.md.
+        # CLASS_C_EVIDENCE_PACKAGE_2026-08-20.md (docs/evidence/).
         result = classify_never_state(has_provider_assignment=False, fixture_candidate=False)
         assert result == NeverStateReason.NO_PROVIDER_ASSIGNMENT
 

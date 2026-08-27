@@ -1,5 +1,11 @@
 # Validation Checklist — Tranche 2 Data Assumptions (Pre-Implementation)
 
+> **Closed 2026-08-27.** This checklist's gate is cleared: D-044 authorized it, and
+> `TRANCHE2_AND_MIGRATIONS_STATUS_2026-08-19.md` (also in `docs/evidence/`) is the completed
+> run reporting the results. The "Gate: ...blocked" line below is retained as originally
+> written and is no longer current — read it as historical, not a live blocker. No other
+> content on this page has been edited.
+
 **Date:** 2026-08-17  
 **Status:** Tranche 2 migrations deployed (D-044)  
 **Gate:** Panel-eligibility implementation blocked until these validations pass  

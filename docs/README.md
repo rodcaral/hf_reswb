@@ -26,11 +26,20 @@ evidence packages, design increments, closure records. It is not indexed separat
 list; find it by filename/date or by what `DECISIONS.md` links to when describing the work
 that produced it.
 
+**`docs/evidence/`** holds durable-evidence and closed-historical documents that have been
+migrated out of `docs/` root per `DOCUMENTATION_MIGRATION_PLAN_2026-08-27.md` — dated,
+retained material that is explicitly not current. `EVIDENCE_LOG.md` is the pointer register
+for that folder (filename, class, retention rationale, and what supersedes it where
+applicable). Migration is incremental and in progress; most dated `docs/` root files have not
+moved yet — their absence from `evidence/` is not a signal of anything.
+
 **Resolved 2026-08-26** (was flagged here as a known gap when this file was first written):
 `CLAUDE.md`'s "Where things are" table used to name `docs/KB-argentine-instruments.md`, which
 was deleted in commit `8ba5a207` (2026-08-17, confirmed via `git log --diff-filter=D`) and
-never restored — see `CLAUDE_MD_STALE_REFERENCE_INVESTIGATION_2026-08-26.md` for the full
-investigation. Since the file's deletion has stood for over a week with no follow-up recreating
+never restored — see
+[`evidence/CLAUDE_MD_STALE_REFERENCE_INVESTIGATION_2026-08-26.md`](evidence/CLAUDE_MD_STALE_REFERENCE_INVESTIGATION_2026-08-26.md)
+(moved there 2026-08-27, migration batch 5 — closed-historical, per `EVIDENCE_LOG.md`) for the
+full investigation. Since the file's deletion has stood for over a week with no follow-up recreating
 it, the dangling `CLAUDE.md` row is treated as accepted rather than incidental, and has been
 removed. The standing Argentine-market-structure background knowledge that file once held is
 **not** currently reproduced anywhere else in this repository — if it is needed again, it must

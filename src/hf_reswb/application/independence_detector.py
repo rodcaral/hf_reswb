@@ -32,7 +32,7 @@ MACHINE_EPSILON_RELATIVE_TOLERANCE = 1e-8
 noise (true epsilon ~2.22e-16; this tolerance is set two orders of magnitude looser to absorb
 ordinary floating-point arithmetic drift across different computation paths, while remaining
 many orders of magnitude tighter than any real bid/ask spread, quote-timing difference, or
-market microstructure effect). See DEFECT-F033.md and RATIO_DIAGNOSIS_2026-08-19.md for the
+market microstructure effect). See DEFECT-F033.md and RATIO_DIAGNOSIS_2026-08-19.md (docs/evidence/) for the
 empirical basis: real independent CEDEARs showed relative ranges of 1-91%; the circular ones
 showed 2.25e-16."""
 

@@ -1,7 +1,7 @@
 """Acquisition-quality capability model — D1-D5 (DFA-approved next increment).
 
 Read-only, DB-free evidence classifiers for the four acquisition-quality domains DFA approved
-(`ACQUISITION_QUALITY_INVENTORY_2026-08-22.md`'s follow-up items), plus D5 as a diagnostic-only
+(`ACQUISITION_QUALITY_INVENTORY_2026-08-22.md`, docs/evidence/, follow-up items), plus D5 as a diagnostic-only
 qualifier. Follows the established conventions of `class_e_identity_signal.py` and
 `evidence_gated_identity_evaluator.py`: frozen dataclasses, `str, Enum` types with per-member
 docstrings, pure functions, no database access, no action performed by any function here.
@@ -172,7 +172,7 @@ class NeverStateReason(str, Enum):
     """No `provider_assignment` exists for this Series — structurally cannot be imported.
     The existing Class-C orphan targets (11344, 11347) fall here; this module does not
     reinterpret or move them — it applies the same rule uniformly, and their prior
-    classification (`CLASS_C_EVIDENCE_PACKAGE_2026-08-20.md`) stands unchanged."""
+    classification (`CLASS_C_EVIDENCE_PACKAGE_2026-08-20.md`, docs/evidence/) stands unchanged."""
 
     ASSIGNED_NOT_YET_RUN = "ASSIGNED_NOT_YET_RUN"
     """A `provider_assignment` exists but no `import_run` has ever been attempted — a

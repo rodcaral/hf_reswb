@@ -1,5 +1,11 @@
 # Proposal: Documentation Reorganization
 
+**Superseded on adoption by `DOCUMENTATION_MIGRATION_PLAN_2026-08-27.md`, executed
+2026-08-27 (`docs/EVIDENCE_LOG.md` is the resulting register).** This file is retained per
+the shared standard's §7 (fails "no inbound dependency" — `DECISIONS.md` and the executed
+migration plan cite it by name) and classified **closed historical** — kept for narrative/
+audit continuity, not edited further beyond this notice.
+
 **Date:** 2026-08-18
 **Status:** PROPOSAL — not adopted, no files moved
 **Origin:** Evaluation of a supplied generic "Documentation Reorganization Guide" template

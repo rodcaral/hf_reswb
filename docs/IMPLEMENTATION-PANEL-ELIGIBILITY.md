@@ -1,5 +1,21 @@
 # Implementation Roadmap — Panel Eligibility (D-046)
 
+> **Status update, 2026-08-27 (additive — the roadmap below is unedited).** Verified directly
+> against `src/hf_reswb/application/`: **Phases 1–4 are implemented** —
+> `panel_eligibility_service.py`, `staleness_detector.py`, `dispersion_analyzer.py`, and
+> `panel_integration.py` all exist, with `test_panel_eligibility_phase1/2/3.py` and
+> `test_panel_eligibility_integration.py` passing (35/35, 1 skipped). **Phase 5 (calibration
+> study) has also been executed** — `calibration_analyzer.py` exists and the calibration
+> evidence runs are captured in `docs/evidence/` (the `CALIBRATION_*` cluster) — but its
+> output remains **explicitly PROVISIONAL** in the code itself
+> (`panel.py`: `"PROVISIONAL — awaiting calibration (D-042 §8.5)"`;
+> `calibration_analyzer.py`: `"PROVISIONAL — awaiting domain review and financial advisor
+> approval"`). **Phase 5.3's Domain Review Gate (financial-advisor approval of candidate
+> thresholds) has not been recorded as passed.** This document therefore stays **current**,
+> not evidence: the numerical thresholds it describes as provisional are still provisional,
+> and the "Gate for Implementation Complete" checklist at the bottom of this file has not
+> been re-verified against this finding — do not read it as satisfied without checking.
+
 **Authorization:** D-046  
 **Date:** 2026-08-17  
 **Gate:** Upstream validation complete (D-045)  
