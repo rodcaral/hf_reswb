@@ -35,13 +35,20 @@ or "this file follows this exact template."
 
 | Role | Canonical name | Required from day one? | Purpose |
 |---|---|---|---|
-| Decision/continuity ledger | `DECISIONS.md` | **Yes** | Append-only, dated, prose entries: what happened, why, evidence. The project's actual cross-session continuity mechanism — the single highest-value practice observed across every project checked. |
+| Decision/continuity ledger | `DECISIONS.md` (default implementation) | **A continuity mechanism is required from day one — not specifically this file.** | Whatever lets a later session reconstruct what happened and why without the original conversation. `DECISIONS.md` (append-only, dated, prose) is the default and the single highest-value practice observed across every project checked, but it is not the only validated implementation — see the note below. |
 | Reading-order entry point | `README.md` | Once doc count exceeds what a newcomer can skim in under a minute | A short (3–7 item), human, current-state-only pointer. Never a history; never duplicates the ledger. |
-| Machine-readable index | `PROJECT_INDEX.yaml` | Only once multiple genuinely different entry points/components exist that prose can't concisely enumerate | No mandated internal schema — a structural map in one project, a living status/gate tracker in another are both legitimate uses of the same name. Sharing the name promises a *location*, not a *shape*. |
-| Evidence register | `EVIDENCE_LOG.md` | Only once dated evidence/investigation documents are numerous enough that the ledger and entry point alone can't answer "is this still trustworthy" | A pointer-list only. Never owns or duplicates evidence content — classifies and links to documents that live wherever they already are. |
+| Machine-readable index | `PROJECT_INDEX.yaml` | Only once multiple genuinely different entry points/components exist that prose can't concisely enumerate | Standardizes *location and name only, not schema* — a structural map in one project, a living status/gate tracker in another are both legitimate uses of the same name. **Consumers must not assume identical internal structure across projects**; reading one project's `PROJECT_INDEX.yaml` does not tell you the shape of another's. |
+| Evidence register | `EVIDENCE_LOG.md` | Only once dated evidence/investigation documents are numerous enough that the ledger and entry point alone can't answer "is this still trustworthy" | Covers **durable evidence, reusable method/capability, and closed historical** records where applicable — not durable-evidence/reusable-method only, and not a bare filename list. Each entry carries a concise retention/dependency rationale (why it's kept, what depends on it, or why it's excluded from the current-reference set) — not just a pointer. Still never owns or duplicates the underlying document's content. |
 
-A project with only a `DECISIONS.md` and nothing else is fully compliant with this discipline
-at its current scale.
+**Validated alternative to `DECISIONS.md` specifically**: a project may satisfy the continuity-
+mechanism requirement with well-formed Git commit history (one logical decision per commit,
+descriptive messages) plus a pointer-style project-memory layer that indexes *into* that
+history, rather than a standalone prose ledger file — this has been independently validated in
+this ecosystem (HistFinTS's own memory layer takes this shape) and is not a lesser substitute,
+provided it actually delivers the same reconstruction capability a fresh session needs.
+
+A project with only a continuity mechanism (in either validated form) and nothing else is fully
+compliant with this discipline at its current scale.
 
 ---
 
@@ -82,6 +89,17 @@ specific agent should behave going forward, it belongs in that agent's own memor
 duplicated into the repository — a repository changelog entry may *note that* such a rule was
 established on a given date, without becoming the rule's canonical location.
 
+**Memory may hold compact retrieval pointers or summaries of repository-canonical facts** —
+this is not a boundary violation, provided two conditions both hold: the memory entry is
+explicitly marked non-authoritative (a cache/index, not a source), and it names or links the
+canonical repository location the fact actually lives at. This is exactly the shape HistFinTS's
+own memory layer already uses successfully (e.g. a pointer noting where the related-repos
+reference lives, rather than re-stating the reference's full content) and is the intended,
+supported use of memory alongside repository documentation, not a workaround to be discouraged.
+What memory must not do is *originate* a fact about the system with no repository-side source —
+that content belongs in repository documentation from the start, with memory holding at most a
+pointer to it.
+
 ---
 
 ## 4. Indexing and discoverability
@@ -93,11 +111,16 @@ established on a given date, without becoming the rule's canonical location.
 - Only once plural, differently-shaped entry points or components exist that a short prose list
   can't concisely enumerate: a `PROJECT_INDEX.yaml`, with whatever internal shape suits that
   project.
-- Never introduce a third parallel index without retiring or explicitly subordinating one of
-  the existing two — every project checked that has three indexing mechanisms (a ledger, a
-  README, and a machine index) carries a real, observed risk of the three drifting out of sync
-  with each other. If a third is added, one of the others should state which is authoritative
-  for what.
+- `README.md`, `PROJECT_INDEX.yaml`, and `EVIDENCE_LOG.md` may coexist — three indexes with
+  three **distinct, non-overlapping** canonical roles (human reading-order; machine-readable
+  structure/status; evidence retention register) is not itself a problem, and is not what §1's
+  activation thresholds are warning against.
+- What to actually guard against is **overlapping or redundant** indexing — two files that could
+  answer the same question and might drift apart on it (e.g. a README that also tries to track
+  evidence status, or a machine index that duplicates the ledger's decision history). If two
+  indexing mechanisms would ever need to agree on the same fact, one of them should state
+  outright that it defers to the other for that fact, rather than both maintaining it
+  independently.
 
 ---
 
@@ -120,17 +143,30 @@ must be re-verified — not assumed — before being trusted again in a later se
 
 ## 6. Supersession and correction
 
-- A dated document is a point-in-time record. It is never edited after the fact to make it
-  "currently true" — its content stays exactly as originally written.
-- When new information corrects or supersedes an earlier document, write a **new** dated
-  document. Link in one or both directions with a single explicit line — the new document
-  states what it supersedes and on which specific point (not "supersedes everything," which
-  invites over-broad dismissal of still-valid content); the old document may, if convenient,
-  receive a one-line "superseded on [specific point] by [new document]" note at its top. Adding
-  this one line is linking, not rewriting history.
+**Immutability applies to durable-evidence and closed-historical records** (§2). A dated
+document in either of those two classes is a point-in-time record: it is never edited after the
+fact to make it "currently true" — its content stays exactly as originally written.
+
+- When new information corrects or supersedes a durable-evidence or closed-historical document,
+  write a **new** dated document. Link in one or both directions with a single explicit line —
+  the new document states what it supersedes and on which specific point (not "supersedes
+  everything," which invites over-broad dismissal of still-valid content); the old document may,
+  if convenient, receive a one-line "superseded on [specific point] by [new document]" note at
+  its top. Adding this one line is linking, not rewriting history.
 - Never retrofit an old document to match a labeling scheme, terminology, or convention
   established after it was written. If the scheme matters enough to apply retroactively, that's
   a deliberate, separate migration decision — not a side effect of writing something new.
+
+**Reusable method/capability documents (§2) are the deliberate exception.** A document
+describing a living, still-in-use technique or capability may be maintained and corrected in
+place, the same way current-state reference material is — it is not a point-in-time record of
+one investigation, and freezing it at its original text would make it progressively less useful
+as the capability it describes evolves. The one requirement: corrections must be **explicit**,
+not silent — a maintained-in-place document should show that it was updated (a short "updated
+[date]: [what changed]" note is enough), so a reader can tell the difference between "this has
+always said this" and "this used to say something else." This is narrower than current-state
+documents' own update discipline only in that explicit correction marking is required here,
+where it's optional for pure current-state material.
 
 ---
 
@@ -157,7 +193,7 @@ something (§8) — not speculatively, ahead of any concrete need.
 |---|---|
 | `README.md` reading-order entry point | Doc count exceeds what a newcomer can skim in under a minute without one |
 | `PROJECT_INDEX.yaml` machine-readable index | Multiple genuinely different entry points/components exist |
-| `EVIDENCE_LOG.md` evidence register + formal four-class tagging | Dated evidence/investigation documents are numerous enough that "is this still load-bearing" stops being answerable by skimming |
+| `EVIDENCE_LOG.md` evidence register (covering durable-evidence, reusable-method, and closed-historical records, each with a retention/dependency rationale) | Dated evidence/investigation documents are numerous enough that "is this still load-bearing" stops being answerable by skimming |
 | Physical archive/closed-historical folders | Closed-historical documents numerically dominate the listing enough to obscure current-reference ones at a glance |
 | Full-history extraction into a separate branch/tag | The documentation itself becomes a strictly sequential, self-superseding numbered series (not every dated-topic-name growth pattern has this shape, and may never need this regardless of volume) |
 | A formally enforced five-condition deletion gate (§7) | Someone actually proposes deleting a specific document |
