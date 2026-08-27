@@ -31,10 +31,12 @@ displayed value must be traceable).
 ## Documentation lifecycle (structural changes only)
 
 Before creating, classifying, reorganizing, archiving, registering, or otherwise structurally
-changing project documentation, consult and follow
-`.claude/skills/documentation-lifecycle/SKILL.md` — the canonical procedural source for this
-work in this repository. This is a pointer, not a copy; the skill itself is not restated here
-and this section must not grow into a second version of it.
+changing project documentation, consult and follow the discovered **`documentation-lifecycle`**
+skill — the canonical procedural source for this work, no longer stored in this repository.
+It is now cross-project: canonical text lives in `_shared-standards/skills/documentation-
+lifecycle/SKILL.md` (its own git repository), discovered here via a native user-level skill
+(no project-local copy, no path to hard-code). This is a pointer, not a copy; the skill itself
+is not restated here and this section must not grow into a second version of it.
 
 Applying it in Workbench means, at minimum:
 - Classify before any structural change — never move, archive, or register a file on the
