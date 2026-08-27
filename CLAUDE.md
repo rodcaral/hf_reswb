@@ -25,8 +25,35 @@ displayed value must be traceable).
 | `docs/DECISIONS.md` | The full specification and reasoning log. Every architectural decision (`D-###`), open question (`Q-###`), known defect (`F-###`), and queued spec amendment (`A-###`), each with evidence. Read before implementing anything touching identity, adjustment, currency, or panels — the brief gives you the facts, this gives you why. |
 | `docs/SPEC-panel-eligibility.md` | Converged spec for panel-derived analytics (implied FX, cross-section screening). Status: design-complete, gated on Q-027 (trading calendar) and the HistFinTS Tranche 2 migration. |
 | `docs/SPEC-f009-evidence-consumption.md` | Design note for the Workbench-side F-009 evidence-consumption/reconciliation capability (D-032–D-034). Reference-by-key evidence model, three-verdict reconciler (`explained` / `not explained` / `insufficient evidence`), full traceability chain. `explained by captured evidence` is structurally unreachable against the live database until HistFinTS migrations 0011–0013 are applied — read §8 before assuming otherwise. |
-| `docs/histfints-requests/` | Filings sent to (or pending for) the HistFinTS team: `DEFECT-F009.md`, `REQUEST-tranche2-migration.md`, `REQUEST-event-capture.md`, `REQUEST-apply-migrations-0011-0013.md`. Track their status in `DECISIONS.md`'s Tranche table before assuming any of them have landed. |
+| `docs/histfints-requests/` | Filings sent to (or pending for) the HistFinTS team: `DEFECT-F009.md` (still active — dormant, unresolved), `REQUEST-event-capture.md`, `REQUEST-apply-migrations-0011-0013.md`. Track their status in `DECISIONS.md`'s Tranche table before assuming any of them have landed. (`REQUEST-tranche2-migration.md` landed — confirmed via D-044 — and now lives in `docs/evidence/` as closed historical, not here.) |
 | `.claude/agents/spec-interrogator.md` | Subagent for continuing the requirements-interrogation process (one question at a time, verify-before-log, D-009/D-009b discipline). Use it when a design question needs the same rigor as the original review, not for routine coding. |
+
+## Documentation lifecycle (structural changes only)
+
+Before creating, classifying, reorganizing, archiving, registering, or otherwise structurally
+changing project documentation, consult and follow
+`.claude/skills/documentation-lifecycle/SKILL.md` — the canonical procedural source for this
+work in this repository. This is a pointer, not a copy; the skill itself is not restated here
+and this section must not grow into a second version of it.
+
+Applying it in Workbench means, at minimum:
+- Classify before any structural change — never move, archive, or register a file on the
+  strength of its filename, date, or apparent completeness alone.
+- Preserve the skill's bucket distinctions (Current / Evidence / Active request / Memory
+  candidate / Rule-D / HOLD) rather than collapsing them into an ad hoc scheme.
+- Never infer closure from age, a filename pattern, the word "implemented," or the existence of
+  a downstream mitigation — "implemented" is not "integrated," and a mitigation is not the
+  closure of the defect it mitigates.
+- When a file's lifecycle status is genuinely ambiguous, leave it HOLD and route the question
+  per the skill's §5 — never resolve it by guess.
+- Update the applicable index/register (`docs/README.md`'s reading order, `docs/EVIDENCE_LOG.md`,
+  and/or `docs/DECISIONS.md`'s changelog, as applicable) in the *same* change as any structural
+  move — never leave an index stale even briefly.
+- Use Workbench's own established placement convention — a single flat `docs/evidence/` folder
+  with `docs/EVIDENCE_LOG.md` as its pointer register (see `DOCUMENTATION_MIGRATION_PLAN_2026-08-27.md`)
+  — rather than importing another repository's folder taxonomy or naming.
+- After any structural documentation change, validate discoverability, references, counts, and
+  tests per the skill's §10/§11 — not just that the move itself succeeded.
 
 ## Non-negotiable constraints, extracted for quick reference
 
