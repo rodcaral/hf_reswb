@@ -1,5 +1,11 @@
 # General Documentation Discipline (Draft)
 
+**Superseded on adoption by `Proyectos/_shared-standards/GENERAL_DOCUMENTATION_DISCIPLINE.md`
+(2026-08-26, PO-approved).** This file is retained per the standard's own §7 (fails two of the
+five deletion conditions: `DECISIONS.md` cites it by name in three changelog entries, and it is
+the authoritative record of how the standard reached its adopted text) and classified
+**closed historical** under §2 — kept for narrative/audit continuity, not edited further.
+
 **Date:** 2026-08-26
 **From:** SDT Workbench
 **To:** SE / PO

@@ -54,3 +54,11 @@ per-document annotation, not a new index, schema, or directory: nothing else abo
 
 Documents written before this convention was established are not retrofitted — apply it going
 forward.
+
+## Cross-project standard
+
+This project's documentation practices follow the shared **General Documentation Discipline**
+at `../../_shared-standards/GENERAL_DOCUMENTATION_DISCIPLINE.md` — the canonical copy; not
+duplicated here. `DECISIONS.md` above is this project's continuity-mechanism implementation
+under that standard (§1); the numbered items in `docs/` are this project's durable-evidence and
+closed-historical record under the standard's four-class lens (§2).
