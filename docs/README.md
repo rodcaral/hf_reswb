@@ -26,10 +26,16 @@ evidence packages, design increments, closure records. It is not indexed separat
 list; find it by filename/date or by what `DECISIONS.md` links to when describing the work
 that produced it.
 
-**Known gap, not fixed here**: `CLAUDE.md`'s own "Where things are" table names
-`docs/KB-argentine-instruments.md`, which does not exist under that filename in the current
-tree — flagged for whoever next touches that table, not corrected as part of this
-documentation-entry-point change (out of scope for a minimal addition).
+**Resolved 2026-08-26** (was flagged here as a known gap when this file was first written):
+`CLAUDE.md`'s "Where things are" table used to name `docs/KB-argentine-instruments.md`, which
+was deleted in commit `8ba5a207` (2026-08-17, confirmed via `git log --diff-filter=D`) and
+never restored — see `CLAUDE_MD_STALE_REFERENCE_INVESTIGATION_2026-08-26.md` for the full
+investigation. Since the file's deletion has stood for over a week with no follow-up recreating
+it, the dangling `CLAUDE.md` row is treated as accepted rather than incidental, and has been
+removed. The standing Argentine-market-structure background knowledge that file once held is
+**not** currently reproduced anywhere else in this repository — if it is needed again, it must
+be re-authored (with its FX-rate figures re-verified as of the current date), not restored
+verbatim from the 2026-08-15 original without review.
 
 ## Convention — marking evidence anchored to a sibling repository
 

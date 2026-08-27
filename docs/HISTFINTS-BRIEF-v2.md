@@ -181,8 +181,13 @@ whether it held on that date.**
 **Regulatory context** (CNV Normas, Título II, Cap. VIII, as substituted by RG 1142/2026):
 conversion ratios are reported quarterly and change by formal dated Prospectus Supplement.
 Three distinct relationship kinds exist — CEDEAR, ADR, Doble Listado — with different
-mechanics; `SET_UNDERLYING` currently models only one edge shape for all three. Full detail
-in `docs/KB-argentine-instruments.md`.
+mechanics; `SET_UNDERLYING` currently models only one edge shape for all three. **The standing
+background-knowledge document this section used to point to (`docs/KB-argentine-instruments.md`)
+was deleted from this repository on 2026-08-17 and has not been restored or re-authored — see
+`CLAUDE_MD_STALE_REFERENCE_INVESTIGATION_2026-08-26.md`.** No consolidated market-structure
+reference currently exists in this repository beyond the summary above and the scattered
+CEDEAR/BYMA/MEP decisions in `DECISIONS.md`; `docs/KB-argentine-instruments.md` should not be
+cited by any new document until it is re-created.
 
 **Providers do not appear to rebase CEDEAR history for ratio changes.** The 2024-01-24 step
 is visible, unmarked, in the stored data — consistent with the *issuer* absorbing the
