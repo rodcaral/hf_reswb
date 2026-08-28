@@ -1,12 +1,6 @@
-# Generated via: .venv/Scripts/python.exe -m pip freeze, from a venv created fresh
-# via `python -m venv .venv && pip install -e .` against this repo's own
-# pyproject.toml (2026-08-28).
-#
-# Empty below by design, not by omission: pyproject.toml declares zero
-# dependencies (no [project] dependencies, no extras, no dependency-groups).
-# This lock file is therefore an accurate reflection of a real gap, not a
-# broken freeze -- pytest and anything else this project actually needs at
-# runtime/test-time has never been declared and must be added to
-# pyproject.toml's own dependency list before this lock file can define a
-# working environment. Not fixed here: the correct dependency list needs
-# verifying against actual imports, not guessed.
+colorama==0.4.6
+iniconfig==2.3.0
+packaging==26.3
+pluggy==1.6.0
+Pygments==2.21.0
+pytest==9.1.1
