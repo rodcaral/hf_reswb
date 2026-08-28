@@ -4,3 +4,7 @@ __pycache__/
 *.egg-info/
 .venv/
 *.db
+
+# Machine-specific Claude Code config (moved from ~/.config/git/ignore, P1-10)
+.claude/settings.local.json
+.claude/launch.json
