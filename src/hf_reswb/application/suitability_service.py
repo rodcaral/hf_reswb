@@ -1,6 +1,6 @@
 """Observation suitability classification.
 
-SPEC-observation-suitability.md, D-038. Three ordered steps (§3.3), each its own function
+SPEC_OBSERVATION_SUITABILITY.md, D-038. Three ordered steps (§3.3), each its own function
 here so the ordering can't collapse into a cycle:
 
     1. classify_series()   -- Axis A, row-local, no calendar input
@@ -15,7 +15,7 @@ date -- date(observed_at) is not a valid session key otherwise (series 11311).
 Governs suitability, not permission (D-036's principle, §4): there is no global gate here.
 This module only classifies and records; a continuity-sensitive calculation is what
 excludes NO_TRADE_REPORTED / TRADE_EVIDENCE_UNRESOLVED by default (§4, point 2/3) -- that
-consuming logic lives with whatever builds on this (e.g. SPEC-panel-eligibility.md), not
+consuming logic lives with whatever builds on this (e.g. SPEC_PANEL_ELIGIBILITY.md), not
 here.
 """
 from __future__ import annotations

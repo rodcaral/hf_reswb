@@ -1,6 +1,6 @@
 """A pointer into HistFinTS, never a copy of its data.
 
-D-033 / SPEC-f009-evidence-consumption.md §2.2: the Workbench references upstream evidence
+D-033 / SPEC_F009_EVIDENCE_CONSUMPTION.md §2.2: the Workbench references upstream evidence
 by key and re-resolves it at read time. `TABLE_ABSENT` is a first-class state, not an error
 — it is the normal state for `PROVIDER_EVENT` and `OBSERVATION_CORRECTION` against today's
 production database (D-032).

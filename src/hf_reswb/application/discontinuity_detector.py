@@ -1,4 +1,4 @@
-"""Minimal boundary detector (SPEC-f009-evidence-consumption.md §4.2 step 1).
+"""Minimal boundary detector (SPEC_F009_EVIDENCE_CONSUMPTION.md §4.2 step 1).
 
 Deliberately simple: a single-step move beyond `step_threshold` that persists through both
 horizons without reverting. Trading-calendar-aware persistence is blocked on Q-027 (open) —

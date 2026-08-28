@@ -1,7 +1,7 @@
 """Data constraint handling for panel eligibility (D-046, Phase 3).
 
 Handles incomplete availability metadata and adjustment basis constraints
-per SPEC-panel-eligibility.md §5A and §7.
+per SPEC_PANEL_ELIGIBILITY.md §5A and §7.
 
 Constraints:
 - Availability status: KNOWN | UNRESOLVED (for NULL availability_date assignments)

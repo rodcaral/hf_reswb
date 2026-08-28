@@ -1,5 +1,5 @@
 """Fixtures for testing the real read-only HistFinTS ATTACH boundary (D-001), never a
-hand-built schema (SPEC-f009-evidence-consumption.md §6, D-009b: a fixture schema would
+hand-built schema (SPEC_F009_EVIDENCE_CONSUMPTION.md §6, D-009b: a fixture schema would
 silently pass tests the real boundary fails).
 """
 from __future__ import annotations

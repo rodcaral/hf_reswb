@@ -1,7 +1,7 @@
 """The one reconciliation capability this increment builds.
 
 Detect -> resolve evidence -> classify -> record. Nothing else: no repair, no HistFinTS
-writes, no vocabulary beyond the three verdicts in SPEC-f009-evidence-consumption.md §4.3.
+writes, no vocabulary beyond the three verdicts in SPEC_F009_EVIDENCE_CONSUMPTION.md §4.3.
 
 Governing decisions: D-032 (what upstream actually holds today), D-033 (reference-by-key,
 three verdicts), D-034 (proceed against the current, unmigrated schema). Findings F-023

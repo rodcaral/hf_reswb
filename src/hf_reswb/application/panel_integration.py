@@ -1,7 +1,7 @@
 """Panel eligibility integration with observation-suitability (D-046, Phase 2).
 
 Bridges frozen observation-suitability layer (classify_series → derive_calendar → apply_calendar)
-to panel eligibility decisions. Operates downstream per SPEC-panel-eligibility.md §2.3.
+to panel eligibility decisions. Operates downstream per SPEC_PANEL_ELIGIBILITY.md §2.3.
 
 Integration points:
 - Trade evidence: Exclude NO_TRADE_REPORTED by default (liquidity criterion per SPEC §8.2)

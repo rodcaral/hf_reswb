@@ -1,6 +1,6 @@
 """Panel eligibility orchestrator (D-046, Phase 1–3).
 
-Orchestrates four inclusion-rule parameters per SPEC-panel-eligibility.md §8:
+Orchestrates four inclusion-rule parameters per SPEC_PANEL_ELIGIBILITY.md §8:
 - include_delisted: Boolean, default TRUE (Phase 1)
 - staleness_policy: Time-local exclusion (provisional parameter, Phase 1)
 - dispersion_threshold: Aggregate suppression (provisional parameter, Phase 1)

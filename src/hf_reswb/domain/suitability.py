@@ -1,6 +1,6 @@
 """Row-local trade evidence and calendar-derived session status.
 
-SPEC-observation-suitability.md, D-038. Two orthogonal axes: `TradeEvidence` is decided
+SPEC_OBSERVATION_SUITABILITY.md, D-038. Two orthogonal axes: `TradeEvidence` is decided
 from a row and its predecessor alone, no calendar input, and governs suitability for
 continuity-sensitive calculations. `SessionStatus` is downstream of a derived venue
 calendar and governs nothing — display only (§2.1, §4).

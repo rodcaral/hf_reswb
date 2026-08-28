@@ -27,7 +27,7 @@
 
 ### 1.1 `include_delisted` Parameter
 
-**Specification:** SPEC-panel-eligibility.md §8.1
+**Specification:** SPEC_PANEL_ELIGIBILITY.md §8.1
 
 **Implementation:**
 - Boolean parameter, defaults to TRUE
@@ -45,7 +45,7 @@
 
 ### 1.2 `staleness_policy` Parameter — Time-Local Exclusion
 
-**Specification:** SPEC-panel-eligibility.md §8.2–8.3
+**Specification:** SPEC_PANEL_ELIGIBILITY.md §8.2–8.3
 
 **Implementation:**
 - **Provisional numerical parameter:** `max_consecutive_no_trade_days` (integer, default TBD pending calibration)
@@ -85,7 +85,7 @@ for date in analysis_window:
 
 ### 1.3 `dispersion_threshold` Parameter — Aggregate Suppression
 
-**Specification:** SPEC-panel-eligibility.md §8.3–8.4
+**Specification:** SPEC_PANEL_ELIGIBILITY.md §8.3–8.4
 
 **Implementation:**
 - **Provisional numerical parameter:** `dispersion_threshold` (dimensionless, default TBD pending calibration)
@@ -214,7 +214,7 @@ observation_suitability ──→ panel_eligibility ──→ panel_result
 **All NULL cases:** Assignments with zero observations (legitimate edge case).
 
 **Implementation:**
-- Apply SPEC-panel-eligibility.md's coverage rule: assignments with NULL availability are marked with coverage status `UNRESOLVED`
+- Apply SPEC_PANEL_ELIGIBILITY.md's coverage rule: assignments with NULL availability are marked with coverage status `UNRESOLVED`
 - Do not silently treat as complete or incomplete
 - Report affected count and impact on panel depth
 - Make the 0.64% visible in diagnostic output (not hidden)
@@ -354,7 +354,7 @@ tests/
 
 ## Gate for Implementation Complete
 
-✅ All three parameters implemented per SPEC-panel-eligibility.md  
+✅ All three parameters implemented per SPEC_PANEL_ELIGIBILITY.md  
 ✅ Integrated with observation-suitability (upstream contract unchanged)  
 ✅ Traceability preserved (panel → eligibility → observations)  
 ✅ Numerical parameters marked provisional  

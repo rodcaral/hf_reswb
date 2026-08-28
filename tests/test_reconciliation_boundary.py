@@ -1,5 +1,5 @@
 """Acceptance tests for the F-009 evidence-consumption increment
-(SPEC-f009-evidence-consumption.md §6).
+(SPEC_F009_EVIDENCE_CONSUMPTION.md §6).
 
 Every test here exercises the real read-only ATTACH boundary (D-001) against a disposable
 copy of the actual production database file — never a hand-built fixture schema (D-009b).

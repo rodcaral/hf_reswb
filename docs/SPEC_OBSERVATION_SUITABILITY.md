@@ -15,9 +15,9 @@ F-028 · F-029 · F-030 · F-031
 > calculation's obligation (§4), not built here.
 
 > **Why this is a separate document rather than a section of
-> `SPEC-panel-eligibility.md`.** The classification specified here is consumed by three
-> different capabilities — panel/implied-FX return series (`SPEC-panel-eligibility.md`), the
-> F-009 discontinuity detector (`SPEC-f009-evidence-consumption.md` §4, per F-031), and
+> `SPEC_PANEL_ELIGIBILITY.md`.** The classification specified here is consumed by three
+> different capabilities — panel/implied-FX return series (`SPEC_PANEL_ELIGIBILITY.md`), the
+> F-009 discontinuity detector (`SPEC_F009_EVIDENCE_CONSUMPTION.md` §4, per F-031), and
 > D-037's own venue-calendar derivation. It cannot live inside any one of its consumers
 > without one of the other two acquiring a dependency on a document about something else.
 > A-016's calendar-and-alignment section stays where it was queued; this is the per-row
@@ -345,7 +345,7 @@ from 12-12 onward. Every one of those bars is `volume = 0`, OHLC-collapsed and
 carried-forward — the step sits **inside** a `NO_TRADE_REPORTED` region on both sides. The
 F-009 detector, run on raw rows, would generate this as a 10× candidate and — the legacy
 `correction` table holding nothing — return *not explained by captured evidence*
-(`SPEC-f009-evidence-consumption.md` §4.3), quarantining a span on the strength of two rows
+(`SPEC_F009_EVIDENCE_CONSUMPTION.md` §4.3), quarantining a span on the strength of two rows
 that represent no trade. Raised as **F-031**.
 
 **Rule:** candidate generation runs on the filtered series. A boundary whose endpoints are
@@ -417,7 +417,7 @@ a stored answer — `rule_version` plus the run's date range make the invalidati
 | 1 | Axis A over a Series and range | **Implemented** — `application/suitability_service.py:classify_series()`. No HistFinTS change. |
 | 2 | `calendar_derivation` over `TRADE_OBSERVED` dates | **Implemented** — `derive_calendar()`, quorum filtered to trade-bearing dates per §3.3. Confidence band is caller-supplied (not re-derived per era in code); the era-confidence findings from D-037(f)/D-038 remain the source for what value to pass. |
 | 3 | Axis B | **Implemented** — `apply_calendar()`. Follows 2. |
-| 4 | `SPEC-panel-eligibility.md` implementation | **Unblocked by D-039** for this gate specifically. Tranche 2 and Q-061 remain independent gates — see `SPEC-panel-eligibility.md` header. |
+| 4 | `SPEC_PANEL_ELIGIBILITY.md` implementation | **Unblocked by D-039** for this gate specifically. Tranche 2 and Q-061 remain independent gates — see `SPEC_PANEL_ELIGIBILITY.md` header. |
 | 5 | F-009 candidate generation on filtered rows (§5.1) | Specification only; **D-035 freeze holds.** Not implemented — out of scope for D-039. |
 | 6 | F-030 (series 11311 mixed interval) | **Guarded, not fixed** — `is_classifiable()` refuses classification and calendar-quorum participation for any Series failing the daily/unique-date check. Series 11311 itself is untouched upstream. |
 | 7 | Alpha Vantage / Stooq behaviour (§1.7) | Not testable; open, not clean. |

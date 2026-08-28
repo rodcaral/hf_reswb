@@ -7,7 +7,7 @@ Provides calibration utilities for:
 - Sensitivity analysis (panel depth, membership, suppression rates)
 - Candidate parameter recommendation
 
-Per SPEC-panel-eligibility.md §8.5 and D-046, all calibration results are recommendations
+Per SPEC_PANEL_ELIGIBILITY.md §8.5 and D-046, all calibration results are recommendations
 only. Final values require domain review and financial advisor approval before production.
 """
 from __future__ import annotations

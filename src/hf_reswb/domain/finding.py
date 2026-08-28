@@ -1,6 +1,6 @@
 """The Workbench's own calculation and its verdict.
 
-SPEC-f009-evidence-consumption.md §2.2, §3, §4.3. Both types are P4 `Calculated` — never
+SPEC_F009_EVIDENCE_CONSUMPTION.md §2.2, §3, §4.3. Both types are P4 `Calculated` — never
 `Asserted` (only a human writes a Research Conclusion, and the system never auto-promotes
 a finding into one; D-033).
 """

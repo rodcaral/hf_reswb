@@ -13,9 +13,9 @@ lived here stays exactly where it is; this file only adds a reading order and on
    evidence, in reverse-chronological order. This is the project's actual continuity
    mechanism across sessions — when in doubt about *why* something is the way it is, this is
    where the answer lives.
-3. [`SPEC-panel-eligibility.md`](SPEC-panel-eligibility.md) — the converged spec for
+3. [`SPEC_PANEL_ELIGIBILITY.md`](SPEC_PANEL_ELIGIBILITY.md) — the converged spec for
    panel-derived analytics.
-4. [`SPEC-f009-evidence-consumption.md`](SPEC-f009-evidence-consumption.md) — the design note
+4. [`SPEC_F009_EVIDENCE_CONSUMPTION.md`](SPEC_F009_EVIDENCE_CONSUMPTION.md) — the design note
    for the F-009 evidence-consumption/reconciliation capability.
 5. [`histfints-requests/`](histfints-requests/) — filings sent to (or pending for) the
    HistFinTS team, and cross-repository review/status reports. Each filing is independently

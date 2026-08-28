@@ -1,4 +1,4 @@
-"""Tests for SPEC-observation-suitability.md / D-038.
+"""Tests for SPEC_OBSERVATION_SUITABILITY.md / D-038.
 
 Constructed fixtures against HistFinTS's real schema (via the `histfints_copy` fixture,
 built from the actual schema.sql + migrations, not a hand-rolled one) -- matching this
@@ -159,7 +159,7 @@ def test_f030_guard_refuses_non_daily_series(histfints_copy, tmp_path):
 
 
 def test_ground_truth_against_real_production_series_11312(real_production_db_readonly_path, tmp_path):
-    """Same ground truth SPEC-observation-suitability.md §1.3 validated against: series
+    """Same ground truth SPEC_OBSERVATION_SUITABILITY.md §1.3 validated against: series
     11312 (YPF CEDEAR), Argentina's *feriados inamovibles* 2000-12-25 and 2001-01-01.
     Read-only against the real production file -- no copy, no fixture."""
     connection = connect(tmp_path / "workbench.db", real_production_db_readonly_path, histfints_readonly=True)

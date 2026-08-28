@@ -11,13 +11,13 @@
 > the FDA. Implementation stays blocked on Tranche 2 schema (Workbench cannot proceed without `provider.adjustment_basis` 
 > backfill and the missing provider-assignment availability marker).
 
-> **Update 2026-08-17 — D-039: the `SPEC-observation-suitability.md` gate is cleared.**
+> **Update 2026-08-17 — D-039: the `SPEC_OBSERVATION_SUITABILITY.md` gate is cleared.**
 > Items 1–3 (trade-evidence classification, trade-filtered calendar derivation, session
 > status) are implemented and tested (`src/hf_reswb/application/suitability_service.py`,
 > 6/6 passing). This spec's **other** two gates — Tranche 2 migration (`minimum_coverage`,
 > `adjustment_policy`) and Q-061 (inclusion rules) — are independent and still stand; see
 > §7 below. Nothing here may be implemented against raw `observation` rows without routing
-> through `classify_series()`/`apply_calendar()` first, per SPEC-observation-suitability.md
+> through `classify_series()`/`apply_calendar()` first, per SPEC_OBSERVATION_SUITABILITY.md
 > §5's treatment rule (date removal upstream of the pairwise intersection).
 
 > **Update 2026-08-17 — D-037 removes Q-027 as a gate on this spec.** Cross-Series alignment is
@@ -30,7 +30,7 @@
 > zero-volume carried-forward phantom bars in Yahoo's deep `.BA` history will generate false
 > ratio-change candidates on the longest-history pairs unless excluded from return series.
 
-> ### Update 2026-08-17 — **implementation of this spec is GATED on `SPEC-observation-suitability.md`** (D-038)
+> ### Update 2026-08-17 — **implementation of this spec is GATED on `SPEC_OBSERVATION_SUITABILITY.md`** (D-038)
 >
 > Per an explicit directive, no part of this spec is to be implemented until observation
 > suitability lands. The gate is not procedural. F-026's phantom bars include an unbroken
@@ -44,7 +44,7 @@
 >
 > 1. **F-026's mitigation is withdrawn (F-028).** Do **not** treat `volume = 0` as no observed
 >    trade: 19.7% of zero-volume bars in a 300-Series US sample carry a genuine intraday range.
->    Use the conjunctive rule in `SPEC-observation-suitability.md` §2.1.
+>    Use the conjunctive rule in `SPEC_OBSERVATION_SUITABILITY.md` §2.1.
 > 2. **The calendar quorum must run over trade-bearing dates, not raw dates,** and D-037's
 >    BYMA ~2019+ *Reliable* rating holds only in that filtered form — the unfiltered
 >    derivation admits four 2026 Argentine holidays at 7-of-9 participation (F-029).
@@ -359,14 +359,14 @@ these two parameters activate when the upstream migration lands.**
 
 **Superseding gate (D-038).** The sentence above is about *upstream* blockers and still holds.
 Independently of it, **implementation of any part of this spec is gated on
-`SPEC-observation-suitability.md` items 1–3** (trade-evidence classification, the trade-filtered
+`SPEC_OBSERVATION_SUITABILITY.md` items 1–3** (trade-evidence classification, the trade-filtered
 calendar derivation, session status). Those three need nothing from HistFinTS and are buildable
 today; they are simply not built yet. Nothing here may be implemented against raw
 `observation` rows.
 
 | Additional blocker | Blocked on |
 |---|---|
-| Any return, volatility, correlation or implied-FX series | `trade_evidence` classification (`SPEC-observation-suitability.md` §2.1, §5) |
+| Any return, volatility, correlation or implied-FX series | `trade_evidence` classification (`SPEC_OBSERVATION_SUITABILITY.md` §2.1, §5) |
 | interior-gap detection *and* the derived calendar it now rests on | the calendar quorum being filtered to trade-bearing dates (F-029) |
 | Series 11311 (`GLD.BA`) participating in any panel or quorum | **F-030** — mixed daily/5-minute bars in one Series |
 
