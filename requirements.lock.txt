@@ -1,25 +1,12 @@
-blinker==1.9.0
-click==8.4.2
-colorama==0.4.6
-et_xmlfile==2.0.0
-filelock==3.32.2
-Flask==3.1.3
--e git+https://github.com/rodcaral/histfints.git@8d33ffcbac95831ab95fc2290bdee3fac795edd4#egg=histfints&subdirectory=..\..\..\histfints-v3
-iniconfig==2.3.0
-itsdangerous==2.2.0
-jaraco.classes==3.4.0
-jaraco.context==6.1.2
-jaraco.functools==4.6.0
-Jinja2==3.1.6
-keyring==25.7.0
-MarkupSafe==3.0.3
-more-itertools==11.1.0
-openpyxl==3.1.5
-packaging==26.2
-platformdirs==4.11.0
-pluggy==1.6.0
-Pygments==2.20.0
-pytest==9.1.1
-pywin32-ctypes==0.2.3
-PyYAML==6.0.3
-Werkzeug==3.1.8
+# Generated via: .venv/Scripts/python.exe -m pip freeze, from a venv created fresh
+# via `python -m venv .venv && pip install -e .` against this repo's own
+# pyproject.toml (2026-08-28).
+#
+# Empty below by design, not by omission: pyproject.toml declares zero
+# dependencies (no [project] dependencies, no extras, no dependency-groups).
+# This lock file is therefore an accurate reflection of a real gap, not a
+# broken freeze -- pytest and anything else this project actually needs at
+# runtime/test-time has never been declared and must be added to
+# pyproject.toml's own dependency list before this lock file can define a
+# working environment. Not fixed here: the correct dependency list needs
+# verifying against actual imports, not guessed.
