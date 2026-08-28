@@ -12,18 +12,23 @@ from pathlib import Path
 
 import pytest
 
-PRODUCTION_DB_PATH = Path(
-    os.environ.get(
-        "HISTFINTS_DB_PATH",
-        r"C:\Users\CarlonTinto\AppData\Local\histfints\histfints\histfints.db",
-    )
-)
-HISTFINTS_PERSISTENCE_DIR = Path(
-    os.environ.get(
-        "HISTFINTS_PERSISTENCE_DIR",
-        r"E:\Carlos\Documents\Mi Software\Proyectos\histfints-v3\src\histfints\persistence",
-    )
-)
+def _require_env(name: str) -> Path:
+    """No fallback, by design (restructure Decision 5b): a wrong silent default is worse
+    than a loud failure naming exactly what's missing and how to set it."""
+    value = os.environ.get(name)
+    if not value:
+        raise RuntimeError(
+            f"{name} is not set. This test suite reads HistFinTS's real database and "
+            f"source tree directly (D-001) and has no hardcoded fallback path -- set "
+            f"{name} explicitly, e.g.:\n"
+            f'  $env:{name} = "C:\\path\\to\\target"   (PowerShell)\n'
+            f"  export {name}=/path/to/target           (bash)"
+        )
+    return Path(value)
+
+
+PRODUCTION_DB_PATH = _require_env("HISTFINTS_DB_PATH")
+HISTFINTS_PERSISTENCE_DIR = _require_env("HISTFINTS_PERSISTENCE_DIR")
 SCHEMA_SQL_PATH = HISTFINTS_PERSISTENCE_DIR / "schema.sql"
 MIGRATIONS_DIR = HISTFINTS_PERSISTENCE_DIR / "migrations"
 
