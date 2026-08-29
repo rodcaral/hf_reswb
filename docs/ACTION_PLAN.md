@@ -142,7 +142,7 @@ States marked **†** are carried from the v5 UIUX review and must be confirmed 
 | INC-4 | Financial identity/evidence prerequisites | ACTIVE | DFA + SE/SDT | — | identity decisions; evidence pipeline |
 | INC-5 | Corporate-action / economic-event evidence | ACTIVE | SE/SDT + DFA | — (scope set by INC-6/INC-7 needs) | `REQUEST-event-capture.md` |
 | INC-6 | Adjustment-basis and coverage evidence | ACTIVE | SE/SDT + DFA | — (scope set by INC-7 needs) | `REQUEST-tranche2-migration.md` |
-| INC-13 | Catalog: Resolve | NEXT | UIUX + DFA | INC-12 evidence/candidate boundary validated | Resolve specification (GAP: cite) |
+| INC-13 | Catalog: Resolve | NEXT | UIUX + DFA | — (INC-12 boundary satisfied 2026-08-29; UIUX read-only audit in progress; DFA/PO gates upstream of SE/SDT) | Resolve specification (GAP: cite) |
 | INC-3 | Publication-aware acquisition-history diagnostic | CLOSED | DFA → SE/SDT | — | D1–D4 rulings; DFA BYMA calendar rulings; §8/§11 baseline |
 | INC-14 | Application-wide dynamic feedback / live regions | NEXT | UIUX + SE | — | new; specification required |
 | INC-7 | Core Workbench research capability | BLOCKED | DFA → SE/SDT + UIUX | per-analysis evidence prerequisites | `SPEC-panel-eligibility.md`; `DECISIONS.md` |
@@ -228,13 +228,13 @@ Their remaining value is the pattern they establish. Do not reopen; cite them.
 
 ## 10. INC-13 — Catalog: Resolve
 
-**State:** NEXT — **Owner:** UIUX + DFA — **Blocked by:** INC-12 boundary validated
+**State:** NEXT — **Owner:** UIUX + DFA — **Blocked by:** nothing at UIUX's own step. `INC-12 boundary validated` is **satisfied** (INC-12 closed/accepted 2026-08-29, §9) — no longer an open dependency. UIUX is performing its own read-only Resolve audit; any DFA/PO methodology/product gate that audit surfaces remains upstream of specification and implementation. **Not implementation-ready** — Owner is UIUX + DFA at this step, not SE/SDT; SE/SDT ownership begins only after UIUX's audit and DFA/PO's own gates settle, per the delivery sequence (§1).
 
 **Question:** how is an identity adjudication recorded, by whom, on what evidence, and how is it shown as a decision rather than a computation?
 
 **Prohibited:** SP-1, SP-2, SP-3.
 
-**Open:** required evidence, user-visible states, and the disposition vocabulary — GAP, DFA.
+**Open:** required evidence, user-visible states, and the disposition vocabulary — GAP, DFA. (UIUX's read-only audit may inform, not settle, this — the vocabulary itself remains DFA's to decide.)
 
 ## 11. INC-3 — Publication-aware acquisition-history diagnostic
 
