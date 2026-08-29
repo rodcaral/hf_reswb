@@ -62,6 +62,12 @@ from hf_reswb.application.acquisition_evidence_integration import (
     classify_d4,
     load_snapshot,
 )
+from hf_reswb.application.publication_aware_acquisition_diagnostic import (
+    PublicationAwareAcquisitionDiagnostic,
+    SessionsElapsedStatus,
+    diagnose_inc3_acquisition_gap,
+    diagnose_inc3_for_snapshot,
+)
 from hf_reswb.application.class_e_identity_signal import (
     DEFAULT_VENUE_SUFFIXES,
     IdentityCandidate,
@@ -151,4 +157,6 @@ __all__ = [
     "assemble_d1_successful_run_timestamps", "assemble_d2_outcomes",
     "assemble_d4_candidate_evidence", "classify_acquisition_quality", "classify_d1",
     "classify_d2", "classify_d3", "classify_d4", "load_snapshot",
+    "PublicationAwareAcquisitionDiagnostic", "SessionsElapsedStatus",
+    "diagnose_inc3_acquisition_gap", "diagnose_inc3_for_snapshot",
 ]
