@@ -138,7 +138,7 @@ States marked **†** are carried from the v5 UIUX review and must be confirmed 
 | INC-1 | Import & Status UX pilot | CLOSED † | UIUX + SE | — | UIUX pilot specification |
 | INC-2 | Search decision gate and UX | CLOSED † | DFA + PO + UIUX | — | Search decision-gate material |
 | INC-11 | Series / Provider Assignment | CLOSED † | SE/SDT + DFA + UIUX | — | BR-29 record; provider-assignment decisions |
-| INC-12 | Catalog: Discover | BLOCKED | UIUX + SE/SDT + DFA | Gate C (DFA) and Gate D (PO) — Gates A/B PASS 2026-08-29 (§9) | `024_Catalog_Discover_UX_Specification.md` (histfints_uiue) |
+| INC-12 | Catalog: Discover | CLOSED | UIUX + SE/SDT + DFA | — | `024_Catalog_Discover_UX_Specification.md` (histfints_uiue); §8/§9 baseline |
 | INC-4 | Financial identity/evidence prerequisites | ACTIVE | DFA + SE/SDT | — | identity decisions; evidence pipeline |
 | INC-5 | Corporate-action / economic-event evidence | ACTIVE | SE/SDT + DFA | — (scope set by INC-6/INC-7 needs) | `REQUEST-event-capture.md` |
 | INC-6 | Adjustment-basis and coverage evidence | ACTIVE | SE/SDT + DFA | — (scope set by INC-7 needs) | `REQUEST-tranche2-migration.md` |
@@ -208,9 +208,11 @@ Their remaining value is the pattern they establish. Do not reopen; cite them.
 
 **INC-3 — Publication-aware acquisition-history diagnostic.** Baseline for session-aware acquisition diagnostics generally, not only BYMA today: raw elapsed time reported alongside a session-aware count computed only from authoritative curated calendar evidence, `UNKNOWN`/incomplete coverage left unavailable rather than inferred, and acquisition-process gaps kept structurally distinct from missing-observation gaps. Accepted 2026-08-29 (Gate A/C/D — SDT/DFA/PO; Gate B N/A, no UI introduced). Full detail, prohibitions and the validated result: §11. Do not broaden venue coverage, add a threshold/margin/quality-verdict, or build UI from this acceptance without a new decision.
 
+**INC-12 — Catalog: Discover.** Baseline for the evidence/candidate-generation vs. adjudication boundary generally, not only Catalog today: discovery records provider/catalog evidence and, at most, an unresolved `MatchCandidate` — never an automatic identity resolution, at any evidence tier including Tier 0 (exact match); a candidate and a resolved relationship never share wording and are structurally mutually exclusive at the data layer; no confidence/percentage score is ever shown alongside evidence-tier classification. Accepted 2026-08-29 (Gate A — SDT; Gate B — UIUX; Gate C — DFA; Gate D — PO). Full detail, the Gate C evidence package, and the validated result: §9. **Does not extend to Resolve (INC-13)** — Resolve's own gates are unaffected and settle on their own evidence — **and does not authorize automatic financial-identity resolution at any tier**; do not extend this closure to another increment without a new decision.
+
 ## 9. INC-12 — Catalog: Discover
 
-**State:** BLOCKED — **Owner:** UIUX + SE/SDT + DFA — **Blocked by:** Gate C (DFA) and Gate D (PO). Gates A and B are satisfied; UIUX's own record does not, and cannot, certify either remaining gate.
+**State:** CLOSED/ACCEPTED — **Owner:** UIUX + SE/SDT + DFA — **Gate disposition:** A — PASS (SDT technical, 2026-08-29, below). B — PASS (UIUX, 2026-08-29, below). C — PASS (DFA). D — ACCEPT (PO).
 
 **Gate status update (2026-08-29).** `histfints_uiue` commit `f7d3ca3` ("Catalog Discover: close workstream — UIUX runtime validation PASS (032/033)"), verified directly — `033_Catalog_Discover_Workstream_Closure.md`: AC-DIS-01–22 all satisfied (AC-DIS-09/10 N/A by design, reconfirmed), zero discrepancies against `024`'s specification, no sibling repository modified (validation ran against a disposable, seeded, now-deleted test instance). **Gate A** (candidate generation reproducible/provenance-bearing): satisfied — independently reconfirmed by `032`'s live-reproduced and source-verified evidence, on top of `027`/`029`'s implementation evidence. **Gate B** (a user can tell a candidate from a decision, UP-7): satisfied — this is precisely what UIUX's completed runtime validation closes. `PROJECT_INDEX.yaml`'s `current_gate` field confirms: `'None open'` from UIUX's own side. **Gates C and D remain open** — `033`'s own record states this itself: *"DFA/PO gate | Not self-certified; none found open"* — UIUX reports finding no open DFA/PO question, which is not the same as DFA or PO having actually confirmed one. Neither gate is closed by this commit.
 
@@ -218,9 +220,11 @@ Their remaining value is the pattern they establish. Do not reopen; cite them.
 
 **Prohibited:** SP-1, SP-2, SP-3. Increment-specific: Tier-based auto-resolution that is not supported by established methodology must not be normalized by the interface.
 
-**Gates:** A — PASS (2026-08-29, above). B — PASS (2026-08-29, above). C — DFA confirms no candidate presentation reads as identity — **open**. D — PO accepts scope — **open**.
+**Gates:** A — PASS. B — PASS. C — PASS (DFA, on the Gate C evidence package: AC-DIS financial-interpretation criteria, verbatim runtime wording, `VERIFIED`/`FAILED` meanings, unresolved/ambiguity presentation, absence of confidence scoring, action consequences, the Tier-0 zero-`ProviderAssignment` case). D — ACCEPT (PO).
 
-**Open:** governing Discover specification now cited — `024_Catalog_Discover_UX_Specification.md` (`histfints_uiue`), AC-DIS-01–22. GAP resolved.
+**Open:** governing Discover specification cited — `024_Catalog_Discover_UX_Specification.md` (`histfints_uiue`), AC-DIS-01–22. GAP resolved.
+
+**Closure scope — stated explicitly, not implied.** This closes **only** the Discover workstream as specified in `024`/validated in `027`/`029`/`032`/`033`. It does **not**: extend to or close INC-13 (Resolve) — Resolve's own gates are unaffected and remain to be settled on its own evidence; authorize automatic financial-identity resolution at any evidence tier — AC-DIS-08's boundary (no Tier 0–2 auto-resolution) is part of what was accepted, not lifted by acceptance; or extend to any other increment. The Boundary and Prohibited lines below are preserved unchanged as the accepted, binding scope — not loosened by this closure.
 
 ## 10. INC-13 — Catalog: Resolve
 
@@ -320,7 +324,7 @@ Their remaining value is the pattern they establish. Do not reopen; cite them.
 
 The cross-actor consolidation is complete to the extent supported by available governing evidence. The following items remain explicit because this plan must not manufacture authority or closure:
 
-1. **Closure/state verification.** States marked **†** (INC-1, INC-2, INC-11, INC-12) came from the UIUX consolidation and still require confirmation against the authoritative project index. Until confirmed, the dagger is part of the state assertion.
+1. **Closure/state verification.** States marked **†** (INC-1, INC-2, INC-11) came from the UIUX consolidation and still require confirmation against the authoritative project index. Until confirmed, the dagger is part of the state assertion. (INC-12 confirmed against the live project index 2026-08-29 and has since closed — no longer daggered; see §9.)
 2. **Increment-ID provenance.** Confirm that INC-11 through INC-14 do not collide with IDs already assigned in an unavailable prior project index. Existing IDs must never be renumbered silently.
 3. **`SUPERSEDED`.** DFA general semantics remain unresolved because the current docstring and evidence for the existing rows have not been supplied. Do not infer a general lifecycle meaning from the historical reattribution case.
 4. **BR-29.** Cite the governing rule and state exactly what history-preserving removal guarantees.
@@ -357,7 +361,7 @@ Standing rules live in §3 and are cited by ID. Do not restate an SP or UP insid
 
 *As of 2026-08-29. Pointer only — states live in §5.*
 
-- **INC-12** — Discover: hold the evidence/candidate versus adjudication boundary.
+- **INC-12** — **CLOSED/ACCEPTED 2026-08-29 (§8/§9).** All four gates disposed (A/B/C/D PASS-ACCEPT). Reusable baseline only from here — does not extend to Resolve (INC-13) or authorize automatic identity resolution; do not reopen or silently extend without a new decision.
 - **INC-4/5/6** — continue only the prerequisite work defined financial questions require; preserve unresolved states and provenance.
 - **INC-3** — **CLOSED/ACCEPTED 2026-08-29 (§8/§11).** All four gates disposed (A/C/D PASS-ACCEPT, B N/A). Reusable baseline only from here — do not reopen or silently extend without a new decision.
 - **INC-14** — specify the live-region behavior before more screens ship.
