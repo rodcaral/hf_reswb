@@ -1,10 +1,10 @@
 # WORKBENCH ACTION PLAN
 
 **Plan revision:** v7 — **Last updated:** 2026-08-29 — **Supersedes:** v6
-**Owner:** PO — **Domain authority:** DFA — **Technical authority:** SE / SDT — **UIUE authority:** UIUE
+**Owner:** PO — **Domain authority:** DFA — **Technical authority:** SE / SDT — **UIUX authority:** UIUX
 **Purpose:** Dependency-ordered master plan for the Financial Research Workbench (`hf_reswb`).
 
-> This document coordinates work. It does not replace authoritative financial decisions, analytical specifications, technical specifications, defect records, or UIUE specifications. Where a governing source conflicts with this plan, the governing source prevails, and the discrepancy must be surfaced to the owning authority and corrected here.
+> This document coordinates work. It does not replace authoritative financial decisions, analytical specifications, technical specifications, defect records, or UIUX specifications. Where a governing source conflicts with this plan, the governing source prevails, and the discrepancy must be surfaced to the owning authority and corrected here.
 
 *v7 incorporates the reviewed v6 consolidation plus DFA corrections available as of 2026-08-29. Items whose governing evidence is still unavailable remain explicit GAPs; this plan does not manufacture closure.*
 
@@ -20,11 +20,11 @@
 | DFA | Domain Financial Advisor | financial meaning, terminology meaning, methodology, evidence interpretation, analytical eligibility, conclusion boundaries |
 | SE | Software Engineer | architecture, technical validation, provider/adaptor investigation, engineering constraints |
 | SDT1/SDT2/n | Software Development Team (agents) | implementation under SE direction |
-| UIUE | UIUE authority | interaction, information architecture, terminology *presentation*, discoverability, accessibility, warning and uncertainty display, usability validation |
+| UIUX | UIUX authority | interaction, information architecture, terminology *presentation*, discoverability, accessibility, warning and uncertainty display, usability validation |
 
-UIUE is an **independent authority**, not a specialism coordinated by SE. Routing chain:
+UIUX is an **independent authority**, not a specialism coordinated by SE. Routing chain:
 
-**SDT1/SDT2/n ↔ SE ↔ UIUE ↔ DFA ↔ PO**
+**SDT1/SDT2/n ↔ SE ↔ UIUX ↔ DFA ↔ PO**
 
 This is a routing model, not a requirement that every issue pass through every party.
 
@@ -37,10 +37,10 @@ This is a routing model, not a requirement that every issue pass through every p
 
 | Question | Raised by | Settled by |
 |---|---|---|
-| Can the user understand the screen and complete the task? (comprehension, discoverability, accessibility) | anyone | UIUE |
+| Can the user understand the screen and complete the task? (comprehension, discoverability, accessibility) | anyone | UIUX |
 | Would a user reading the screen correctly still draw a materially misleading **financial** conclusion? | anyone | DFA |
 | What does this term mean, and is this label financially accurate? | anyone | DFA |
-| Where does the term appear, how prominent is it, is it used consistently? | anyone | UIUE |
+| Where does the term appear, how prominent is it, is it used consistently? | anyone | UIUX |
 
 ### The three named sequences
 
@@ -53,7 +53,7 @@ Each has a distinct job. Do not merge them or invent a fourth.
 **Financial question → Evidence needs → Methodology → Diagnostics → Finding → Research conclusion**
 
 **Delivery sequence** (how any increment moves to closure):
-**Evidence availability → Domain sufficiency → Product scope → UIUE specification → Technical implementation → Four-gate validation**
+**Evidence availability → Domain sufficiency → Product scope → UIUX specification → Technical implementation → Four-gate validation**
 
 ### Shared vocabulary
 
@@ -99,7 +99,7 @@ One ID space. Cite by ID from increments; do not restate.
 | SP-10 | suppress material uncertainty for presentation convenience |
 | SP-11 | promote research findings into investor-specific recommendations, trade/execution decisions, or fair-value / mispricing / arbitrage / predictive claims |
 
-### Standing UIUE defaults (UP)
+### Standing UIUX defaults (UP)
 
 | ID | Default |
 |---|---|
@@ -108,7 +108,7 @@ One ID space. Cite by ID from increments; do not restate.
 | UP-3 | Unknown is not negative. `UNKNOWN`, missing, unavailable, unresolved, not-yet-tracked, stale, or absent evidence must not be displayed as invalid, failed, nonexistent, low-quality, or incompatible. *(Display counterpart of SP-4; SP-4 governs inference, UP-3 governs labelling.)* |
 | UP-4 | Progressive disclosure. The primary surface may be concise, but provenance, assumptions, evidence quality, dates, units, and limitations remain reachable. |
 | UP-5 | *Withdrawn — folded into SP-2 and SP-5. ID retained so existing references resolve.* |
-| UP-6 | Help is part of the product. Each screen increment compares **actual behavior → current Help → intended meaning**, and classifies each discrepancy as UIUE, documentation, DFA/domain, PO/spec, or implementation. |
+| UP-6 | Help is part of the product. Each screen increment compares **actual behavior → current Help → intended meaning**, and classifies each discrepancy as UIUX, documentation, DFA/domain, PO/spec, or implementation. |
 | UP-7 | Actions communicate consequence. A label and its feedback must make clear whether the action records evidence, creates a candidate, changes configuration, changes lifecycle, adjudicates identity, or only navigates. |
 | UP-8 | The four levels of the research sequence (§1) stay visually and linguistically distinct. |
 
@@ -119,7 +119,7 @@ One ID space. Cite by ID from increments; do not restate.
 | Gate | Owner | Establishes |
 |---|---|---|
 | A — Technical correctness | SE/SDT | implementation behavior, invariants, migrations, data integrity, failure handling, automated regression coverage |
-| B — UX / accessibility correctness | UIUE | task completion, hierarchy, labels, keyboard, focus, screen-reader behavior where material, empty/error/recovery states, warning and uncertainty display, comprehension |
+| B — UX / accessibility correctness | UIUX | task completion, hierarchy, labels, keyboard, focus, screen-reader behavior where material, empty/error/recovery states, warning and uncertainty display, comprehension |
 | C — Financial-interpretation correctness | DFA | terminology, evidence meaning, units/currency/date/period clarity, uncertainty, analytical eligibility, conclusion level, absence of materially misleading financial interpretation |
 | D — Product acceptance | PO | agreed scope, priority, closure and release |
 
@@ -131,24 +131,24 @@ A passing test suite does not establish UX correctness. Passing UX validation do
 
 **IDs are permanent.** New increments append; nothing is renumbered. The table is grouped by state for readability, not by execution order — execution order follows *Blocked by*.
 
-States marked **†** are carried from the v5 UIUE review and must be confirmed against the project index before this revision is treated as authoritative (§17).
+States marked **†** are carried from the v5 UIUX review and must be confirmed against the project index before this revision is treated as authoritative (§17).
 
 | ID | Increment | State | Primary owner | Blocked by | Governing material |
 |---|---|---|---|---|---|
-| INC-1 | Import & Status UX pilot | CLOSED † | UIUE + SE | — | UIUE pilot specification |
-| INC-2 | Search decision gate and UX | CLOSED † | DFA + PO + UIUE | — | Search decision-gate material |
-| INC-11 | Series / Provider Assignment | CLOSED † | SE/SDT + DFA + UIUE | — | BR-29 record; provider-assignment decisions |
-| INC-12 | Catalog: Discover | ACTIVE † | UIUE + SE/SDT + DFA | — (verify against project index) | Discover specification (GAP: cite) |
+| INC-1 | Import & Status UX pilot | CLOSED † | UIUX + SE | — | UIUX pilot specification |
+| INC-2 | Search decision gate and UX | CLOSED † | DFA + PO + UIUX | — | Search decision-gate material |
+| INC-11 | Series / Provider Assignment | CLOSED † | SE/SDT + DFA + UIUX | — | BR-29 record; provider-assignment decisions |
+| INC-12 | Catalog: Discover | ACTIVE † | UIUX + SE/SDT + DFA | — (verify against project index) | Discover specification (GAP: cite) |
 | INC-4 | Financial identity/evidence prerequisites | ACTIVE | DFA + SE/SDT | — | identity decisions; evidence pipeline |
 | INC-5 | Corporate-action / economic-event evidence | ACTIVE | SE/SDT + DFA | — (scope set by INC-6/INC-7 needs) | `REQUEST-event-capture.md` |
 | INC-6 | Adjustment-basis and coverage evidence | ACTIVE | SE/SDT + DFA | — (scope set by INC-7 needs) | `REQUEST-tranche2-migration.md` |
-| INC-13 | Catalog: Resolve | NEXT | UIUE + DFA | INC-12 evidence/candidate boundary validated | Resolve specification (GAP: cite) |
+| INC-13 | Catalog: Resolve | NEXT | UIUX + DFA | INC-12 evidence/candidate boundary validated | Resolve specification (GAP: cite) |
 | INC-3 | Publication-aware acquisition-history diagnostic | NEXT | DFA → SE/SDT | authoritative historically applicable BYMA session evidence and bounded curation contract | D1–D4 rulings; DFA BYMA calendar rulings |
-| INC-14 | Application-wide dynamic feedback / live regions | NEXT | UIUE + SE | — | new; specification required |
-| INC-7 | Core Workbench research capability | BLOCKED | DFA → SE/SDT + UIUE | per-analysis evidence prerequisites | `SPEC-panel-eligibility.md`; `DECISIONS.md` |
-| INC-8 | Screen-by-screen UIUE expansion | CONTINUOUS | UIUE + SE + DFA | per-screen decision gates | UIUE audits and specifications |
-| INC-9 | Workbench-wide information architecture | DEFERRED | PO, informed by UIUE + DFA + SE | several validated workflows delivered | future PO decision |
-| INC-10 | Four-gate validation | CONTINUOUS | SE + UIUE + DFA + PO | — | §4 |
+| INC-14 | Application-wide dynamic feedback / live regions | NEXT | UIUX + SE | — | new; specification required |
+| INC-7 | Core Workbench research capability | BLOCKED | DFA → SE/SDT + UIUX | per-analysis evidence prerequisites | `SPEC-panel-eligibility.md`; `DECISIONS.md` |
+| INC-8 | Screen-by-screen UIUX expansion | CONTINUOUS | UIUX + SE + DFA | per-screen decision gates | UIUX audits and specifications |
+| INC-9 | Workbench-wide information architecture | DEFERRED | PO, informed by UIUX + DFA + SE | several validated workflows delivered | future PO decision |
+| INC-10 | Four-gate validation | CONTINUOUS | SE + UIUX + DFA + PO | — | §4 |
 
 **Blocking is per-analysis, not global.** INC-7 waits on the evidence its *specific* question needs — not on global completeness of INC-4/5/6.
 
@@ -208,7 +208,7 @@ Their remaining value is the pattern they establish. Do not reopen; cite them.
 
 ## 9. INC-12 — Catalog: Discover
 
-**State:** ACTIVE † — **Owner:** UIUE + SE/SDT + DFA
+**State:** ACTIVE † — **Owner:** UIUX + SE/SDT + DFA
 
 **Boundary:** Discover owns **evidence and candidate generation**. Resolve (INC-13) owns **adjudication and disposition**. The UI must not blur them.
 
@@ -216,11 +216,11 @@ Their remaining value is the pattern they establish. Do not reopen; cite them.
 
 **Gates:** A — candidate generation is reproducible and provenance-bearing. B — a user can tell a candidate from a decision (UP-7). C — DFA confirms no candidate presentation reads as identity. D — PO accepts scope.
 
-**Open:** cite the governing Discover specification — GAP, PO/UIUE.
+**Open:** cite the governing Discover specification — GAP, PO/UIUX.
 
 ## 10. INC-13 — Catalog: Resolve
 
-**State:** NEXT — **Owner:** UIUE + DFA — **Blocked by:** INC-12 boundary validated
+**State:** NEXT — **Owner:** UIUX + DFA — **Blocked by:** INC-12 boundary validated
 
 **Question:** how is an identity adjudication recorded, by whom, on what evidence, and how is it shown as a decision rather than a computation?
 
@@ -288,7 +288,7 @@ Their remaining value is the pattern they establish. Do not reopen; cite them.
 
 ## 15. INC-7 — Core Workbench research capability
 
-**State:** BLOCKED per-analysis — **Owner:** DFA → SE/SDT + UIUE — **Source:** `SPEC-panel-eligibility.md`
+**State:** BLOCKED per-analysis — **Owner:** DFA → SE/SDT + UIUX — **Source:** `SPEC-panel-eligibility.md`
 
 **Scope:** the primary analytical workflows, each unblocked by its own evidence prerequisites. Current directions: CEDEAR / foreign-underlying implied-FX panel; ordinary Series comparison and diagnostics. Each follows the analytical sequence (§1).
 
@@ -298,7 +298,7 @@ Their remaining value is the pattern they establish. Do not reopen; cite them.
 
 **Conclusion boundary:** a calculation is not a research conclusion; a research conclusion is not investor-specific advice or a trade decision (SP-11).
 
-## 16. INC-8, INC-9, INC-14 — UIUE programme
+## 16. INC-8, INC-9, INC-14 — UIUX programme
 
 **INC-8 — Screen-by-screen expansion. CONTINUOUS**, dependency-driven, no longer globally deferred. Per screen: **audit → DFA/PO decision gate where needed → UX specification → implementation → four-gate validation**. Prioritize by product value and dependency readiness.
 
@@ -306,13 +306,13 @@ Their remaining value is the pattern they establish. Do not reopen; cite them.
 
 **INC-9 — Workbench-wide IA. DEFERRED.** Synthesizes the validated screen-level findings once several workflows are delivered. Do not redesign navigation merely because the current structure looks technically oriented. PO decision, recorded in `DECISIONS.md`.
 
-**INC-14 — Application-wide dynamic feedback / live regions. NEXT.** Cross-cutting accessibility work item; **does not reopen validated screen workstreams**. Evaluates `role="status"` after full-page navigation or reload, `role="alert"`, focus restoration, success/error/no-op announcements, and cross-screen consistency. Owner UIUE + SE. Specification required — GAP, UIUE.
+**INC-14 — Application-wide dynamic feedback / live regions. NEXT.** Cross-cutting accessibility work item; **does not reopen validated screen workstreams**. Evaluates `role="status"` after full-page navigation or reload, `role="alert"`, focus restoration, success/error/no-op announcements, and cross-screen consistency. Owner UIUX + SE. Specification required — GAP, UIUX.
 
 ## 17. Remaining verification gaps
 
 The cross-actor consolidation is complete to the extent supported by available governing evidence. The following items remain explicit because this plan must not manufacture authority or closure:
 
-1. **Closure/state verification.** States marked **†** (INC-1, INC-2, INC-11, INC-12) came from the UIUE consolidation and still require confirmation against the authoritative project index. Until confirmed, the dagger is part of the state assertion.
+1. **Closure/state verification.** States marked **†** (INC-1, INC-2, INC-11, INC-12) came from the UIUX consolidation and still require confirmation against the authoritative project index. Until confirmed, the dagger is part of the state assertion.
 2. **Increment-ID provenance.** Confirm that INC-11 through INC-14 do not collide with IDs already assigned in an unavailable prior project index. Existing IDs must never be renumbered silently.
 3. **`SUPERSEDED`.** DFA general semantics remain unresolved because the current docstring and evidence for the existing rows have not been supplied. Do not infer a general lifecycle meaning from the historical reattribution case.
 4. **BR-29.** Cite the governing rule and state exactly what history-preserving removal guarantees.
@@ -325,7 +325,7 @@ These are documentation/evidence gaps unless a governing source reveals a substa
 
 This plan stays concise; detail belongs in governing documents.
 
-- `Workbench_UIUE_decisions_&_constraints.md` — UIUE domain and architectural constraints.
+- `Workbench_UIUX_decisions_&_constraints.md` — UIUX domain and architectural constraints.
 - `SPEC-panel-eligibility.md` — panel eligibility methodology.
 - `DECISIONS.md` — authoritative project decisions and rulings.
 - `REQUEST-event-capture.md` — event-capture evidence capability. *(The available project source is titled `REQUEST-event-capture.md`; SE should still verify repository canonical naming if duplicate physical files exist.)*
@@ -333,7 +333,7 @@ This plan stays concise; detail belongs in governing documents.
 - `DEFECT-F009.md` — defect evidence where applicable.
 - *GAP:* Discover specification, Resolve specification, BR-29 record, INC-14 specification.
 
-UIUE audits and screen specifications remain governing for their screens.
+UIUX audits and screen specifications remain governing for their screens.
 
 ## 19. Maintenance rule
 
