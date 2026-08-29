@@ -5,19 +5,26 @@ lived here stays exactly where it is; this file only adds a reading order and on
 
 ## Reading order — start here for current-state understanding
 
-1. [`HISTFINTS-BRIEF-v2.md`](HISTFINTS-BRIEF-v2.md) — the corrected, current-state technical
+1. [`ACTION_PLAN.md`](ACTION_PLAN.md) — the master, dependency-ordered coordination plan:
+   parties and settled authority (PO/DFA/SE/SDT/UI-UE), the three governing sequences, the
+   standing prohibitions (SP) and UI/UE defaults (UP) increments must cite by ID, the
+   four-gate validation model, and every increment's state. Read this to know what's
+   currently active, blocked, or next — and why. Landed in version control 2026-08-29 after
+   seven revisions kept only on PO's Desktop; update **Last updated** in the same edit as any
+   state change, per its own §19.
+2. [`HISTFINTS-BRIEF-v2.md`](HISTFINTS-BRIEF-v2.md) — the corrected, current-state technical
    reference for HistFinTS (schema facts, known defects, adjustment basis, V0 data reality).
    Read this before writing any code.
-2. [`DECISIONS.md`](DECISIONS.md) — the full specification and reasoning log. Every
+3. [`DECISIONS.md`](DECISIONS.md) — the full specification and reasoning log. Every
    architectural decision, open question, known defect, and queued spec amendment, each with
    evidence, in reverse-chronological order. This is the project's actual continuity
    mechanism across sessions — when in doubt about *why* something is the way it is, this is
    where the answer lives.
-3. [`SPEC_PANEL_ELIGIBILITY.md`](SPEC_PANEL_ELIGIBILITY.md) — the converged spec for
+4. [`SPEC_PANEL_ELIGIBILITY.md`](SPEC_PANEL_ELIGIBILITY.md) — the converged spec for
    panel-derived analytics.
-4. [`SPEC_F009_EVIDENCE_CONSUMPTION.md`](SPEC_F009_EVIDENCE_CONSUMPTION.md) — the design note
+5. [`SPEC_F009_EVIDENCE_CONSUMPTION.md`](SPEC_F009_EVIDENCE_CONSUMPTION.md) — the design note
    for the F-009 evidence-consumption/reconciliation capability.
-5. [`histfints-requests/`](histfints-requests/) — filings sent to (or pending for) the
+6. [`histfints-requests/`](histfints-requests/) — filings sent to (or pending for) the
    HistFinTS team, and cross-repository review/status reports. Each filing is independently
    dated; there is no separate reading order within this directory.
 
