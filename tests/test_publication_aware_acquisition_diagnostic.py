@@ -213,6 +213,34 @@ class TestAvailableWithRealEvidence:
         assert result.sessions_elapsed == 1
         assert result.special_limited_sessions_elapsed == 1
 
+    def test_authoritative_unknown_status_session_counted_in_neither_bucket(self) -> None:
+        """An authoritative record can (structurally) carry `session_status=UNKNOWN` -- e.g. a
+        curated 'we formally do not know' entry with no qualification, so no independent review
+        was required. It correctly contributes to `known_days`/`coverage_complete` (HistFinTS's
+        own view only gates on `is_authoritative`, not on a non-UNKNOWN status) but must never be
+        silently counted as a real trading opportunity in either `sessions_elapsed` or
+        `special_limited_sessions_elapsed` -- this is the concrete propagation this test pins."""
+        sessions_with_unknown = _REAL_2020_03_30_SESSIONS + [
+            {
+                "session_date": "2020-04-01",
+                "session_status": "UNKNOWN",
+                "evidence_tier": "none",
+                "source_reference": "",
+            }
+        ]
+        result = diagnose_inc3_acquisition_gap(
+            _byma_assignment(
+                byma_session_coverage=_coverage(
+                    range_end="2020-04-01", total_days=3, known_days=3, sessions=sessions_with_unknown
+                )
+            ),
+            series_type="STOCK",
+        )
+        assert result.sessions_elapsed_status == SessionsElapsedStatus.AVAILABLE
+        assert result.sessions_elapsed == 1  # only the real 2020-03-30 TRADING record
+        assert result.special_limited_sessions_elapsed == 0
+        assert result.session_evidence_known_days == 3  # UNKNOWN still counts as "known" coverage
+
 
 # --- Distinctness: acquisition gap vs. missing observation, enforced structurally -------------
 
