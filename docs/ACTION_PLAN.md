@@ -142,7 +142,7 @@ States marked **†** are carried from the v5 UIUX review and must be confirmed 
 | INC-4 | Financial identity/evidence prerequisites | ACTIVE | DFA + SE/SDT | — | identity decisions; evidence pipeline |
 | INC-5 | Corporate-action / economic-event evidence | ACTIVE | SE/SDT + DFA | — (scope set by INC-6/INC-7 needs) | `REQUEST-event-capture.md` |
 | INC-6 | Adjustment-basis and coverage evidence | ACTIVE | SE/SDT + DFA | — (scope set by INC-7 needs) | `REQUEST-tranche2-migration.md` |
-| INC-13 | Catalog: Resolve | NEXT | UIUX + DFA | — (INC-12 boundary satisfied 2026-08-29; UIUX read-only audit in progress; DFA/PO gates upstream of SE/SDT) | Resolve specification (GAP: cite) |
+| INC-13 | Catalog: Resolve | NEXT (held pending UIUX spec) | UIUX + DFA | DFA gates + PO gates named in `034` §8/§9 — audit COMPLETE, decisions not confirmed settled (§10) | `034_Catalog_Resolve_Current_State_UX_Audit.md` (histfints_uiue) |
 | INC-3 | Publication-aware acquisition-history diagnostic | CLOSED | DFA → SE/SDT | — | D1–D4 rulings; DFA BYMA calendar rulings; §8/§11 baseline |
 | INC-14 | Application-wide dynamic feedback / live regions | NEXT | UIUX + SE | — | new; specification required |
 | INC-7 | Core Workbench research capability | BLOCKED | DFA → SE/SDT + UIUX | per-analysis evidence prerequisites | `SPEC-panel-eligibility.md`; `DECISIONS.md` |
@@ -228,7 +228,11 @@ Their remaining value is the pattern they establish. Do not reopen; cite them.
 
 ## 10. INC-13 — Catalog: Resolve
 
-**State:** NEXT — **Owner:** UIUX + DFA — **Blocked by:** nothing at UIUX's own step. `INC-12 boundary validated` is **satisfied** (INC-12 closed/accepted 2026-08-29, §9) — no longer an open dependency. UIUX is performing its own read-only Resolve audit; any DFA/PO methodology/product gate that audit surfaces remains upstream of specification and implementation. **Not implementation-ready** — Owner is UIUX + DFA at this step, not SE/SDT; SE/SDT ownership begins only after UIUX's audit and DFA/PO's own gates settle, per the delivery sequence (§1).
+**State:** NEXT (held here pending UIUX's Resolve UX specification) — **Owner:** UIUX + DFA — **Blocked by:** DFA and PO decisions on the audit's own named gates (below). `INC-12 boundary validated` remains **satisfied** (INC-12 closed/accepted 2026-08-29, §9) — no longer an open dependency.
+
+**Audit status (2026-08-29) — verified against `histfints_uiue` commit `261d2ba` / `034_Catalog_Resolve_Current_State_UX_Audit.md` directly, not taken on the relayed summary alone.** **Audit COMPLETE** — confirmed, the document's own gate line: *"Catalog Resolve current-state UX audit: COMPLETE — ready for DFA/PO decisions on §8/§9 before a UX specification can be approved."* **DFA semantics and PO product decisions are not confirmed settled by this artifact — the opposite is stated directly in it.** `034` §8 lists three explicit, still-open DFA financial-methodology gates (resolution friction vs. evidence tier; raw internal rule-identifier exposure in error messages; competing-candidate presentation) and §9 lists five open PO product-decision gates (confirmation/review step before disposition; reversibility communication; competing-candidate grouping; MERGE consequence communication; NVDA-validation scope) — none marked resolved in this document, and its own commit message reads *"DECISION-GATE PENDING."* This plan is not recording "DFA semantics settled" or "PO product decisions settled" as fact on the strength of an instruction alone when the one available artifact states the opposite — flagged for SE/PO to clarify (a since-relayed settlement not yet reflected in `histfints_uiue`, or a premature characterization) rather than silently absorbed either way.
+
+**Not implementation-ready regardless of how that question resolves** — Owner is UIUX + DFA at this step, not SE/SDT; `034` itself is a current-state audit, not a specification, and states a specification only follows once §8/§9 are actually settled. SE/SDT ownership begins only after UIUX delivers the Resolve UX specification with testable acceptance criteria.
 
 **Question:** how is an identity adjudication recorded, by whom, on what evidence, and how is it shown as a decision rather than a computation?
 
