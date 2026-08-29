@@ -6,8 +6,8 @@ lived here stays exactly where it is; this file only adds a reading order and on
 ## Reading order — start here for current-state understanding
 
 1. [`ACTION_PLAN.md`](ACTION_PLAN.md) — the master, dependency-ordered coordination plan:
-   parties and settled authority (PO/DFA/SE/SDT/UI-UE), the three governing sequences, the
-   standing prohibitions (SP) and UI/UE defaults (UP) increments must cite by ID, the
+   parties and settled authority (PO/DFA/SE/SDT/UIUE), the three governing sequences, the
+   standing prohibitions (SP) and UIUE defaults (UP) increments must cite by ID, the
    four-gate validation model, and every increment's state. Read this to know what's
    currently active, blocked, or next — and why. Landed in version control 2026-08-29 after
    seven revisions kept only on PO's Desktop; update **Last updated** in the same edit as any
