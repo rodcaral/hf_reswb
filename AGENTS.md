@@ -22,6 +22,16 @@ Yahoo Finance clone — see `docs/DECISIONS.md` §"Inherited principles" for the
 principles (P1–P43), especially **P1** (a ticker is never identity) and **P3** (every
 displayed value must be traceable).
 
+## Sibling repositories
+
+This repo, HistFinTS itself, `histfints_uiue`, and `_shared-standards` (cross-project standards
+and the RGC role's own home) all live as siblings under `E:\dev\` (`E:\dev\workbench`,
+`E:\dev\histfints`, `E:\dev\histfints_uiue`, `E:\dev\_shared-standards`) as of the 2026-08-28
+restructure — see `E:\dev\_shared-standards\HISTFINTS_RESTRUCTURE_RUNBOOK.md` for the full
+record. If you're working from an older checkout (e.g. under a `Proyectos\` path, or a
+`histfints-v3` folder), that tree still runs but is stale — re-root against `E:\dev\` before
+trusting cross-repo references.
+
 ## Where things are
 
 | File | What it is |
