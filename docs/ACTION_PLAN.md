@@ -138,7 +138,7 @@ States marked **†** are carried from the v5 UIUX review and must be confirmed 
 | INC-1 | Import & Status UX pilot | CLOSED † | UIUX + SE | — | UIUX pilot specification |
 | INC-2 | Search decision gate and UX | CLOSED † | DFA + PO + UIUX | — | Search decision-gate material |
 | INC-11 | Series / Provider Assignment | CLOSED † | SE/SDT + DFA + UIUX | — | BR-29 record; provider-assignment decisions |
-| INC-12 | Catalog: Discover | ACTIVE † | UIUX + SE/SDT + DFA | — (verify against project index) | Discover specification (GAP: cite) |
+| INC-12 | Catalog: Discover | BLOCKED | UIUX + SE/SDT + DFA | Gate C (DFA) and Gate D (PO) — Gates A/B PASS 2026-08-29 (§9) | `024_Catalog_Discover_UX_Specification.md` (histfints_uiue) |
 | INC-4 | Financial identity/evidence prerequisites | ACTIVE | DFA + SE/SDT | — | identity decisions; evidence pipeline |
 | INC-5 | Corporate-action / economic-event evidence | ACTIVE | SE/SDT + DFA | — (scope set by INC-6/INC-7 needs) | `REQUEST-event-capture.md` |
 | INC-6 | Adjustment-basis and coverage evidence | ACTIVE | SE/SDT + DFA | — (scope set by INC-7 needs) | `REQUEST-tranche2-migration.md` |
@@ -210,15 +210,17 @@ Their remaining value is the pattern they establish. Do not reopen; cite them.
 
 ## 9. INC-12 — Catalog: Discover
 
-**State:** ACTIVE † — **Owner:** UIUX + SE/SDT + DFA
+**State:** BLOCKED — **Owner:** UIUX + SE/SDT + DFA — **Blocked by:** Gate C (DFA) and Gate D (PO). Gates A and B are satisfied; UIUX's own record does not, and cannot, certify either remaining gate.
+
+**Gate status update (2026-08-29).** `histfints_uiue` commit `f7d3ca3` ("Catalog Discover: close workstream — UIUX runtime validation PASS (032/033)"), verified directly — `033_Catalog_Discover_Workstream_Closure.md`: AC-DIS-01–22 all satisfied (AC-DIS-09/10 N/A by design, reconfirmed), zero discrepancies against `024`'s specification, no sibling repository modified (validation ran against a disposable, seeded, now-deleted test instance). **Gate A** (candidate generation reproducible/provenance-bearing): satisfied — independently reconfirmed by `032`'s live-reproduced and source-verified evidence, on top of `027`/`029`'s implementation evidence. **Gate B** (a user can tell a candidate from a decision, UP-7): satisfied — this is precisely what UIUX's completed runtime validation closes. `PROJECT_INDEX.yaml`'s `current_gate` field confirms: `'None open'` from UIUX's own side. **Gates C and D remain open** — `033`'s own record states this itself: *"DFA/PO gate | Not self-certified; none found open"* — UIUX reports finding no open DFA/PO question, which is not the same as DFA or PO having actually confirmed one. Neither gate is closed by this commit.
 
 **Boundary:** Discover owns **evidence and candidate generation**. Resolve (INC-13) owns **adjudication and disposition**. The UI must not blur them.
 
 **Prohibited:** SP-1, SP-2, SP-3. Increment-specific: Tier-based auto-resolution that is not supported by established methodology must not be normalized by the interface.
 
-**Gates:** A — candidate generation is reproducible and provenance-bearing. B — a user can tell a candidate from a decision (UP-7). C — DFA confirms no candidate presentation reads as identity. D — PO accepts scope.
+**Gates:** A — PASS (2026-08-29, above). B — PASS (2026-08-29, above). C — DFA confirms no candidate presentation reads as identity — **open**. D — PO accepts scope — **open**.
 
-**Open:** cite the governing Discover specification — GAP, PO/UIUX.
+**Open:** governing Discover specification now cited — `024_Catalog_Discover_UX_Specification.md` (`histfints_uiue`), AC-DIS-01–22. GAP resolved.
 
 ## 10. INC-13 — Catalog: Resolve
 
