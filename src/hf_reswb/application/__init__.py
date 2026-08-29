@@ -48,6 +48,20 @@ from hf_reswb.application.acquisition_quality_capability import (
     looks_like_non_production_fixture,
     qualify_failure_diagnostic,
 )
+from hf_reswb.application.acquisition_evidence_integration import (
+    AcquisitionQualityClassification,
+    AssignmentClassification,
+    D3Result,
+    assemble_d1_successful_run_timestamps,
+    assemble_d2_outcomes,
+    assemble_d4_candidate_evidence,
+    classify_acquisition_quality,
+    classify_d1,
+    classify_d2,
+    classify_d3,
+    classify_d4,
+    load_snapshot,
+)
 from hf_reswb.application.class_e_identity_signal import (
     DEFAULT_VENUE_SUFFIXES,
     IdentityCandidate,
@@ -133,4 +147,8 @@ __all__ = [
     "PopulationFilterResult", "PopulationRow", "classify_population_membership",
     "determine_fixture_status", "evaluate_fallback_activation",
     "filter_for_acquisition_quality_metrics",
+    "AcquisitionQualityClassification", "AssignmentClassification", "D3Result",
+    "assemble_d1_successful_run_timestamps", "assemble_d2_outcomes",
+    "assemble_d4_candidate_evidence", "classify_acquisition_quality", "classify_d1",
+    "classify_d2", "classify_d3", "classify_d4", "load_snapshot",
 ]
