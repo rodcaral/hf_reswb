@@ -189,19 +189,46 @@ under `035` §10's stricter reading — a wording decision, not a structural one
 
 ---
 
-## 6. Open items for UIUX, named rather than guessed at
+## 6. Open items — status at hand-off (2026-08-29)
 
-1. **BR-19's "why" wording** (§2.4) — needs domain phrasing UIUX should confirm, not SDT-authored
-   unilaterally, given DFA-R02 is a DFA-flavored ruling.
-2. **`confirm_column` Help text** (AC-RES-13, §1) — "Confirms the strongest candidate as fact" is
-   a real, newly-found tension with DFA-R01; needs rewording UIUX should own, not SDT.
-3. **Reversed-candidate history visibility** (AC-RES-08) — `list_unresolved_candidates()` only
-   returns unresolved ones, so nothing on the page today shows an already-resolved (and thus
-   potentially-reversible) candidate after the success flash disappears. Making Undo "locatable
-   after reload" needs either a new resolved-candidates listing or a different mechanism (e.g. a
-   short-lived, id-addressable confirmation record) — **flagged as needing UIUX's own
-   scope decision**, not resolved here, since it is plausibly larger than "the smallest safe
-   addition" `035` otherwise stays within.
+All three items below are now **settled or verified**, closing this assessment as a complete
+technical hand-off. SDT-WB did not implement any of it — per the standing sibling-repository
+rule, implementation in `histfints` is SDT-HF's own to perform.
+
+1. **BR-19's "why" wording** — **settled by UIUX**, `035` §10a (added in place, 2026-08-29).
+   Approved replacement, verbatim: *"Can't merge: both Series already have an assignment from
+   the same provider ({shared_providers}). Merging would leave the result with two assignments
+   from the same provider, which isn't allowed — resolve the overlap first (e.g. reverse one of
+   the assignments) before merging. (reference: BR-19)"* — sourced from `GUI_USER_MANUAL.md`'s
+   existing gloss, not new UIUX invention.
+2. **`confirm_column` Help text** — **settled by UIUX**, `035` §2 (DFA-R01, added in place). Approved
+   replacement, verbatim: *"Applies your own decision to this candidate — a human disposition,
+   not a confirmation that the evidence is correct. A ProviderSymbol-subject row (identity
+   match): set Priority and click ATTACH to link it onto the Candidate Series. A Series-subject
+   row (relationship match): set Ratio and click SET_UNDERLYING. Evidence tier is context for
+   that judgment, never authorization by itself."* `learn_more="resolution-operations"` unchanged.
+3. **AC-RES-08 mechanism** — **settled by UIUX** (`035` §6a: reuse the two existing per-object
+   identity-echo surfaces — the ProviderSymbol relationship-state suffix for ATTACH/GROUP, and the
+   Series detail view for SET_UNDERLYING/MERGE — rather than a new history/listing capability),
+   **and independently verified by this assessment, per §6a's own gate condition, that the
+   required Series-side surface actually exists**: `series.html` renders each Series as a real,
+   persistent, ID-addressable `<fieldset id="series-{id}">` block (label/type/interval/backfill/
+   currency/country/instrument_subtype/status/acquisition-status/provider-assignments), reached
+   via the existing `/series?id=X` exact-Series hand-off (`web.py:546-560` — its own comment:
+   *"no dedicated detail route exists — this is the smallest safe mechanism, not a new page"*).
+   This block does not currently show `underlying_series_id` or `SeriesMerge` state, but it is a
+   real, extensible per-object surface, not a flat generic list — the required addition is
+   presentation/template work on an existing surface, not a new one. **Not blocked. §6a's gate
+   condition — "if... no existing per-Series identity-echo point... report the gap" — does not
+   trigger; the surface exists.**
+
+**Hand-off scope for SDT-HF**, per this assessment's own §1–§5: the confirmation-flow mechanism
+for all four `resolve_*` routes (§2.1, §3), the grouping addition to `catalog_resolve_page()`
+(§2.2, no new query), reuse of the four existing `reverse_*` routes for Undo/Revert (§2.3), the
+MERGE consequence text from already-available service-layer data (§2.5), the two approved wording
+replacements above (verbatim, not to be re-authored), and the accessible-naming pattern (§2.6).
+Full AC-RES-01–22 classification and route-to-mechanism mapping: §1/§3. **No implementation, no
+new resolution semantics, no HistFinTS file modified by SDT-WB at any point in this workstream.**
 
 ---
 
@@ -216,5 +243,11 @@ under `035` §10's stricter reading — a wording decision, not a structural one
 ## Gate
 
 Per `035`'s expected transition — `035 specification → SE/SDT implementation assessment →
-implementation → UI/UE validation` — this document is the assessment half. Returning to UIUX/SE
-for disposition on §6's open items before implementation begins.
+implementation → UI/UE validation` — this document is the assessment half, **now complete and
+final** (§6's three open items are settled/verified, not outstanding). **Hand-off: to SDT-HF for
+implementation in `histfints`** — SDT-WB does not implement, per the standing sibling-repository
+rule (read freely, write only with explicit authorization, which was not given for this
+workstream). **After SDT-HF implements, SDT-WB will perform a read-only conformance review
+against AC-RES-01–22 and this assessment** — not before, and not as a substitute for SDT-HF's own
+implementation evidence and UIUX's runtime validation (including the mandatory NVDA pass,
+PO-R05/AC-RES-20).
