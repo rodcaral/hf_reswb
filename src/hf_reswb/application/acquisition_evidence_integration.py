@@ -171,28 +171,39 @@ def classify_d2(assignment: dict) -> IdentifierCompatibilityAssessment:
 
 
 # ---------------------------------------------------------------------------------------------
-# D1 -- cadence capability. NOT operational from this contract: `assess_cadence_capability`
-# needs consecutive-success GAPS (>=2 successful-run timestamps, and >= min_samples+1 to clear
-# the default INSUFFICIENT_EVIDENCE floor); the snapshot exposes only the single latest run per
-# assignment. This wiring is included so the honest INSUFFICIENT_EVIDENCE result is produced by
-# the real classifier rather than assumed, and so a future contract extension (HistFinTS's own
-# capability-D assessment names the missing bulk run-history method) needs no interface change
-# here -- only a richer `successful_run_started_at` list.
+# D1 -- cadence capability. Now operational: HistFinTS's contract exposes `run_history`, the
+# full, authoritative, most-recent-first `ImportRun` list per assignment (previously only the
+# single latest run was exposed, which structurally could never clear
+# `assess_cadence_capability()`'s own gap-based evidence floor). Only `SUCCESS` runs contribute a
+# timestamp -- matching HistFinTS's own `RunHistoryEntry` docstring ("the minimum evidence a D1
+# cadence classifier needs to compute its own observed successful-run gaps") and this project's
+# established rule that `PARTIAL`/`IN_PROGRESS` runs are not forced into a binary read. Verdict
+# and margin-sufficiency judgment stay entirely the existing classifier's: this module supplies
+# evidence only, never a tolerance, a margin threshold, or a STALE/OK-shaped conclusion.
 # ---------------------------------------------------------------------------------------------
 
 
 def assemble_d1_successful_run_timestamps(assignment: dict) -> list[datetime]:
-    latest = assignment["latest_import"]
-    if latest is None or latest["status"] != "SUCCESS":
-        return []
-    return [datetime.fromisoformat(latest["started_at"])]
+    """Every `SUCCESS`-status entry in `run_history`, as real `datetime`s -- not sampled, not
+    capped, and not limited to the latest run. An assignment with an empty or all-non-SUCCESS
+    `run_history` correctly yields `[]`, which `assess_cadence_capability()` already turns into
+    `INSUFFICIENT_EVIDENCE` on its own; this function does not special-case that outcome."""
+    return [
+        datetime.fromisoformat(run["started_at"])
+        for run in assignment["run_history"]
+        if run["status"] == "SUCCESS"
+    ]
 
 
 def classify_d1(assignment: dict, *, tolerance: timedelta) -> CadenceCapabilityAssessment:
     """`tolerance` must be supplied by the caller (the Series' own `staleness_tolerance`, per
-    D1's original design) -- this module does not invent one. With at most one timestamp
-    available from the current contract, every real call returns `INSUFFICIENT_EVIDENCE`; that
-    is the correct, evidence-accurate answer, not a bug in this wiring."""
+    D1's original design) -- this module does not invent, select, or default one, and never will:
+    that is a DFA-approved policy boundary this module has no authority to cross. With HistFinTS's
+    `run_history` now available, a series with enough recorded `SUCCESS` runs (>= `min_samples`
+    consecutive-run gaps, per the classifier's own floor) produces a real `SUFFICIENT_MARGIN`/
+    `INSUFFICIENT_MARGIN` verdict; a series with too few still honestly reports
+    `INSUFFICIENT_EVIDENCE`, exactly as before -- the missing-evidence state is preserved, not
+    papered over now that richer evidence exists for series that have it."""
     return assess_cadence_capability(
         tolerance=tolerance,
         successful_run_started_at=assemble_d1_successful_run_timestamps(assignment),

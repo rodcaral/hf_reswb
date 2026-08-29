@@ -46,6 +46,7 @@ def _assignment(**overrides) -> dict:
         adjustment_basis_effective="SPLIT_ADJUSTED",
         adjustment_basis_source="provider_default",
         latest_import=None,
+        run_history=[],
     )
     defaults.update(overrides)
     return defaults
@@ -59,6 +60,18 @@ def _latest_import(**overrides) -> dict:
         started_at="2026-08-20T17:00:00+00:00",
         ended_at="2026-08-20T17:00:05+00:00",
         errors=[],
+    )
+    defaults.update(overrides)
+    return defaults
+
+
+def _run_history_entry(**overrides) -> dict:
+    defaults = dict(
+        import_run_id=1,
+        status="SUCCESS",
+        trigger_type="SCHEDULED",
+        started_at="2026-08-01T17:00:00+00:00",
+        ended_at="2026-08-01T17:00:05+00:00",
     )
     defaults.update(overrides)
     return defaults
@@ -229,22 +242,99 @@ class TestD2:
 
 
 class TestD1:
-    def test_no_run_is_insufficient_evidence(self) -> None:
-        result = classify_d1(_assignment(latest_import=None), tolerance=timedelta(days=3))
+    def test_empty_run_history_is_insufficient_evidence(self) -> None:
+        result = classify_d1(_assignment(run_history=[]), tolerance=timedelta(days=3))
         assert result.verdict == CadenceCapabilityVerdict.INSUFFICIENT_EVIDENCE
         assert result.observed_gap_count == 0
 
-    def test_single_successful_run_still_insufficient_evidence(self) -> None:
-        """The structural limitation this contract has today: one timestamp cannot produce a
-        gap, and even a genuine gap wouldn't clear the classifier's own min_samples=3 floor."""
-        a = _assignment(latest_import=_latest_import(status="SUCCESS"))
-        assert len(assemble_d1_successful_run_timestamps(a)) == 1
+    def test_too_few_successful_runs_still_insufficient_evidence(self) -> None:
+        """Below the classifier's own min_samples=3-gap floor (i.e. fewer than 4 SUCCESS
+        timestamps) -- still an honest INSUFFICIENT_EVIDENCE, not a forced verdict."""
+        a = _assignment(
+            run_history=[
+                _run_history_entry(started_at="2026-08-01T17:00:00+00:00"),
+                _run_history_entry(started_at="2026-08-02T17:00:00+00:00"),
+            ]
+        )
+        assert len(assemble_d1_successful_run_timestamps(a)) == 2
         result = classify_d1(a, tolerance=timedelta(days=3))
         assert result.verdict == CadenceCapabilityVerdict.INSUFFICIENT_EVIDENCE
 
-    def test_failed_run_contributes_no_timestamp(self) -> None:
-        a = _assignment(latest_import=_latest_import(status="FAILED"))
+    def test_enough_regular_runs_yields_sufficient_margin(self) -> None:
+        """The real capability this integration unlocks: >=4 SUCCESS timestamps (>=3 gaps)
+        with every gap inside tolerance now produces a genuine SUFFICIENT_MARGIN verdict --
+        not achievable from the previous latest-run-only contract."""
+        a = _assignment(
+            run_history=[
+                _run_history_entry(started_at="2026-08-01T17:00:00+00:00"),
+                _run_history_entry(started_at="2026-08-02T17:00:00+00:00"),
+                _run_history_entry(started_at="2026-08-03T17:00:00+00:00"),
+                _run_history_entry(started_at="2026-08-04T17:00:00+00:00"),
+                _run_history_entry(started_at="2026-08-05T17:00:00+00:00"),
+            ]
+        )
+        result = classify_d1(a, tolerance=timedelta(days=3))
+        assert result.verdict == CadenceCapabilityVerdict.SUFFICIENT_MARGIN
+        assert result.observed_gap_count == 4
+        assert result.max_observed_gap == timedelta(days=1)
+
+    def test_one_wide_gap_yields_insufficient_margin(self) -> None:
+        a = _assignment(
+            run_history=[
+                _run_history_entry(started_at="2026-08-01T17:00:00+00:00"),
+                _run_history_entry(started_at="2026-08-02T17:00:00+00:00"),
+                _run_history_entry(started_at="2026-08-03T17:00:00+00:00"),
+                _run_history_entry(started_at="2026-08-10T17:00:00+00:00"),  # 7-day gap
+            ]
+        )
+        result = classify_d1(a, tolerance=timedelta(days=3))
+        assert result.verdict == CadenceCapabilityVerdict.INSUFFICIENT_MARGIN
+        assert result.max_observed_gap == timedelta(days=7)
+
+    def test_this_module_never_selects_or_defaults_a_tolerance(self) -> None:
+        """`tolerance` has no default in `classify_d1()`'s signature -- calling without it is a
+        TypeError, not a silently-assumed value. This is the DFA policy boundary SE's directive
+        named explicitly; it is enforced by the function signature, not by convention alone."""
+        import inspect
+
+        assert inspect.signature(classify_d1).parameters["tolerance"].default is inspect.Parameter.empty
+
+    def test_failed_and_partial_and_in_progress_runs_contribute_no_timestamp(self) -> None:
+        a = _assignment(
+            run_history=[
+                _run_history_entry(status="FAILED"),
+                _run_history_entry(status="PARTIAL"),
+                _run_history_entry(status="IN_PROGRESS", ended_at=None),
+            ]
+        )
         assert assemble_d1_successful_run_timestamps(a) == []
+
+    def test_mixed_statuses_only_success_entries_counted(self) -> None:
+        a = _assignment(
+            run_history=[
+                _run_history_entry(started_at="2026-08-01T17:00:00+00:00", status="SUCCESS"),
+                _run_history_entry(started_at="2026-08-02T17:00:00+00:00", status="FAILED"),
+                _run_history_entry(started_at="2026-08-03T17:00:00+00:00", status="SUCCESS"),
+            ]
+        )
+        assert len(assemble_d1_successful_run_timestamps(a)) == 2
+
+    def test_out_of_order_history_still_computes_correct_gaps(self) -> None:
+        """`run_history` arrives most-recent-first per HistFinTS's contract -- this must not be
+        assumed pre-sorted the way `assess_cadence_capability()` itself needs (it sorts
+        internally), but this test pins that assumption isn't silently required here either."""
+        a = _assignment(
+            run_history=[
+                _run_history_entry(started_at="2026-08-05T17:00:00+00:00"),
+                _run_history_entry(started_at="2026-08-01T17:00:00+00:00"),
+                _run_history_entry(started_at="2026-08-03T17:00:00+00:00"),
+                _run_history_entry(started_at="2026-08-04T17:00:00+00:00"),
+                _run_history_entry(started_at="2026-08-02T17:00:00+00:00"),
+            ]
+        )
+        result = classify_d1(a, tolerance=timedelta(days=3))
+        assert result.verdict == CadenceCapabilityVerdict.SUFFICIENT_MARGIN
+        assert result.max_observed_gap == timedelta(days=1)
 
 
 # --- D4: operational, six of seven dimensions structurally unavailable ------------------------
@@ -295,12 +385,19 @@ class TestClassifyAcquisitionQuality:
                 _assignment(
                     provider_assignment_id=1,
                     latest_import=_latest_import(status="SUCCESS"),
+                    run_history=[
+                        _run_history_entry(started_at="2026-08-01T17:00:00+00:00"),
+                        _run_history_entry(started_at="2026-08-02T17:00:00+00:00"),
+                        _run_history_entry(started_at="2026-08-03T17:00:00+00:00"),
+                        _run_history_entry(started_at="2026-08-04T17:00:00+00:00"),
+                    ],
                 ),
                 _assignment(
                     provider_assignment_id=2,
                     provider_name="Alpha Vantage",
                     adjustment_basis_source="unavailable",
                     latest_import=_latest_import(status="FAILED"),
+                    run_history=[_run_history_entry(status="FAILED")],
                 ),
             ],
         )
@@ -317,7 +414,8 @@ class TestClassifyAcquisitionQuality:
         assert result.assignments[1].d2.verdict == (
             IdentifierCompatibilityVerdict.CONSISTENTLY_UNRESOLVED
         )
-        assert result.assignments[0].d1.verdict == CadenceCapabilityVerdict.INSUFFICIENT_EVIDENCE
+        assert result.assignments[0].d1.verdict == CadenceCapabilityVerdict.SUFFICIENT_MARGIN
+        assert result.assignments[1].d1.verdict == CadenceCapabilityVerdict.INSUFFICIENT_EVIDENCE
         assert result.assignments[1].d4.verdict == FallbackConsiderationVerdict.MATERIALITY_UNKNOWN
 
     def test_zero_assignments_still_returns_a_complete_result(self) -> None:
