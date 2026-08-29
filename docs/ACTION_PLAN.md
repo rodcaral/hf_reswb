@@ -143,7 +143,7 @@ States marked **†** are carried from the v5 UIUX review and must be confirmed 
 | INC-5 | Corporate-action / economic-event evidence | ACTIVE | SE/SDT + DFA | — (scope set by INC-6/INC-7 needs) | `REQUEST-event-capture.md` |
 | INC-6 | Adjustment-basis and coverage evidence | ACTIVE | SE/SDT + DFA | — (scope set by INC-7 needs) | `REQUEST-tranche2-migration.md` |
 | INC-13 | Catalog: Resolve | NEXT | UIUX + DFA | INC-12 evidence/candidate boundary validated | Resolve specification (GAP: cite) |
-| INC-3 | Publication-aware acquisition-history diagnostic | NEXT | DFA → SE/SDT | authoritative historically applicable BYMA session evidence and bounded curation contract | D1–D4 rulings; DFA BYMA calendar rulings |
+| INC-3 | Publication-aware acquisition-history diagnostic | BLOCKED | DFA → SE/SDT | Gate C (DFA) and Gate D (PO) — Gate A satisfied for the validated 2026-08-29 diagnostic baseline (§8); Gate B N/A, no user-facing surface yet | D1–D4 rulings; DFA BYMA calendar rulings; §8 baseline |
 | INC-14 | Application-wide dynamic feedback / live regions | NEXT | UIUX + SE | — | new; specification required |
 | INC-7 | Core Workbench research capability | BLOCKED | DFA → SE/SDT + UIUX | per-analysis evidence prerequisites | `SPEC-panel-eligibility.md`; `DECISIONS.md` |
 | INC-8 | Screen-by-screen UIUX expansion | CONTINUOUS | UIUX + SE + DFA | per-screen decision gates | UIUX audits and specifications |
@@ -230,7 +230,11 @@ Their remaining value is the pattern they establish. Do not reopen; cite them.
 
 ## 11. INC-3 — Publication-aware acquisition-history diagnostic
 
-**State:** NEXT — **Owner:** DFA → SE/SDT — **Blocked by:** authoritative historically applicable BYMA session evidence and bounded curation contract
+**State:** BLOCKED — **Owner:** DFA → SE/SDT — **Blocked by:** Gate C (DFA) and Gate D (PO). Gate A is satisfied for the validated baseline below; Gate B is N/A (no user-facing surface exists yet).
+
+**Validated baseline (2026-08-29, Gate A only — not a claim that Gates B/C/D are closed).** `hf_reswb/application/publication_aware_acquisition_diagnostic.py` produced a live, fully-traceable `AVAILABLE` result for all 6 series in the first bounded population's real-data test (11323–11327, 11329; the 7th CEDEAR series, 11328, correctly excluded as `ETF`, not `STOCK`): `sessions_elapsed=1`, `coverage_complete=True` against the one curated authoritative 2026-08-18 `TRADING` record (BYMA 2026 Trading Calendar, `TRADING_CALENDAR` tier), with raw elapsed acquisition time reported alongside it throughout, and confirmed byte-for-byte traceable back to an independent `byma-trading-sessions` query. Full result detail: `docs/DECISIONS.md`, 2026-08-29 entries. **This behavior is the reference baseline going forward — do not alter it without a new decision**, per this increment's own standing prohibitions (unchanged, restated for emphasis on acceptance): do not broaden venue coverage beyond BYMA, do not add a threshold, margin, or quality/comparability verdict of any kind, and do not build a UI surface from this acceptance alone (Gate B remains N/A until a UIUX specification exists). One residual named, not closed: `UNKNOWN`-status session propagation is validated only by unit test — no live authoritative `UNKNOWN`-status record exists yet to confirm the same behavior on real data.
+
+**Original scope, unchanged below:**
 
 **Financial question:** for a Series whose acquisition history shows gaps or apparent lateness, are those gaps inconsistent with financially relevant BYMA trading opportunities, or explained by the historically applicable BYMA market schedule?
 
@@ -351,7 +355,9 @@ Standing rules live in §3 and are cited by ID. Do not restate an SP or UP insid
 
 - **INC-12** — Discover: hold the evidence/candidate versus adjudication boundary.
 - **INC-4/5/6** — continue only the prerequisite work defined financial questions require; preserve unresolved states and provenance.
-- **INC-3** — next bounded acquisition-history increment: BYMA-venue-established `STOCK` Series, historically applicable authoritative BYMA session evidence, and explicit `UNKNOWN` where session evidence is insufficient.
+- **INC-3** — **SDT technical work (Gate A) complete and baselined 2026-08-29 (§11); do not silently extend it.** BLOCKED on Gate C (DFA) and Gate D (PO) — no further SDT implementation on this increment until those gates move, or a new decision reopens it.
 - **INC-14** — specify the live-region behavior before more screens ship.
 - **INC-7** — advance each analytical workflow when its own evidence and methodology gates are satisfied.
 - **§17** — close the remaining evidence/documentation gaps without inferring missing semantics.
+
+**Next SDT increment — candidates for PO/SE selection, not unilaterally chosen here** (per §1: PO settles sequencing): from the master sequence (§5), the increments with active or immediately-startable SDT technical work not already blocked on another party's own gate are **INC-4/5/6** (already ACTIVE, joint DFA+SE/SDT evidence-pipeline work — the most immediately continuable without a new specification) and **INC-12** (ACTIVE†, UIUX+SE/SDT+DFA, pending the †-confirmation named in §17). INC-13 and INC-14 are NEXT but each names a GAP blocking SDT start (a governing specification not yet cited). INC-7 stays BLOCKED per-analysis. Recommend SE/PO confirm which of these — or a different item — is next, rather than this plan asserting a choice on its own authority.
