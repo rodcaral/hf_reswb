@@ -22,9 +22,14 @@
 | SDT1/SDT2/n | Software Development Team (agents) | implementation under SE direction |
 | UIUX | UIUX authority | interaction, information architecture, terminology *presentation*, discoverability, accessibility, warning and uncertainty display, usability validation |
 
-UIUX is an **independent authority**, not a specialism coordinated by SE. Routing chain:
+UIUX is an **independent authority**, not a specialism coordinated by SE — it settles its own
+questions (§4's boundary table) without SE approval. That independence is about decision
+authority, not routing: UIUX-to-DFA communication still routes through SE, per PO's
+2026-08-29 settlement (`ACTOR_MODEL.md`'s "Confirmed relationships"; `ACTOR_AND_MODEL_INTERACTION_RULES.md`
+§2.3, "DFA does not interact directly with either SDT" — extended here to read "with any
+implementation-side actor," UIUX included, not only the two SDTs). Routing chain:
 
-**SDT1/SDT2/n ↔ SE ↔ UIUX ↔ DFA ↔ PO**
+**SDT1/SDT2/n, UIUX ↔ SE ↔ DFA ↔ PO**
 
 This is a routing model, not a requirement that every issue pass through every party.
 
