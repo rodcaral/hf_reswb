@@ -159,6 +159,10 @@ Applying it in Workbench means, at minimum:
 - After any structural documentation change, validate discoverability, references, counts, and
   tests per the procedure's §10/§11 — not just that the move itself succeeded.
 
+**Shared staging surface:** `../_shared-standards/coordination/staging/` — a two-way drop
+point, across all actors, for output not yet placed or input not yet triaged. Nothing there is
+authoritative; see its own `README.md` for the rules, not restated here.
+
 ## Non-negotiable constraints, extracted for quick reference
 
 - **HistFinTS is read-only.** Never write to its database. Workbench owns its own SQLite
