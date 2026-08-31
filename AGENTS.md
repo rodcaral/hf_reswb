@@ -27,8 +27,10 @@ displayed value must be traceable).
 This repo, HistFinTS itself, `histfints_uiue`, and `_shared-standards` (cross-project standards
 and the RGC role's own home) all live as siblings under `E:\dev\` (`E:\dev\workbench`,
 `E:\dev\histfints`, `E:\dev\histfints_uiue`, `E:\dev\_shared-standards`) as of the 2026-08-28
-restructure — see `E:\dev\_shared-standards\HISTFINTS_RESTRUCTURE_RUNBOOK.md` for the full
-record. If you're working from an older checkout (e.g. under a `Proyectos\` path, or a
+restructure — see `E:\dev\_shared-standards\coordination\HISTFINTS_RESTRUCTURE_RUNBOOK.md` for
+the full record (closed-historical since 2026-08-31; moved from `_shared-standards`' root once
+its own P6-6/P6-8 closed). If you're working from an older checkout (e.g. under a `Proyectos\`
+path, or a
 `histfints-v3` folder), that tree still runs but is stale — re-root against `E:\dev\` before
 trusting cross-repo references.
 
