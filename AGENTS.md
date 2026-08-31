@@ -35,8 +35,10 @@ trusting cross-repo references.
 ## Actor charter: SDT-WB
 
 A session working in this repository is the **SDT-WB** actor in this ecosystem's governance
-protocol — see `../_shared-standards/ACTOR_MODEL.md` and
-`../_shared-standards/ACTOR_AND_MODEL_INTERACTION_RULES.md` §2.5 for the formal actor set.
+protocol — see `../_shared-standards/ACTOR_MODEL.md` for the actor set, and
+`../_shared-standards/ACTOR_AND_MODEL_INTERACTION_RULES.md` for the governing protocol for this
+ecosystem as a whole: actor set, communication, routing, and message format. §2.5 is this
+actor's identity entry point — read past it, not just to it.
 This section is SDT-WB's adopted charter, per the nine-section template at
 `../_shared-standards/ACTOR_CHARTER_TEMPLATE.md`.
 
