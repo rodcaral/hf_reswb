@@ -334,7 +334,7 @@ Their remaining value is the pattern they establish. Do not reopen; cite them.
 
 ## 14. INC-6 — Adjustment basis and historical coverage
 
-**State:** ACTIVE — **Owner:** SE/SDT + DFA — **Source:** `REQUEST-tranche2-migration.md`
+**State:** ACTIVE — **Gate A: PASS (2026-09-01, below) — prepared for DFA review (Gate C).** **Owner:** SE/SDT + DFA — **Source:** `REQUEST-tranche2-migration.md`
 
 **Financial question:** is the stored history sufficiently complete and comparable for the intended analysis, or does apparent absence reflect Series existence, provider assignment, provider availability, incomplete acquisition, or another unresolved cause?
 
@@ -345,6 +345,24 @@ Their remaining value is the pattern they establish. Do not reopen; cite them.
 **Prohibited:** SP-4, SP-8.
 
 **Gate C:** for each consuming analysis, DFA confirms the coverage evidence answers that analysis's comparability question; unresolved causes remain visibly unresolved (UP-3).
+
+### Gate A — SDT-WB independent conformance review (2026-09-01)
+
+Verified `histfints@fe17b39` and the live database directly, not taken on the relayed summary. `HEAD` matches; working tree clean except unrelated same-day BYMA evidence-collection output. Full suite **1485 passed, 0 failed** — matching the reported count exactly. Three commits reviewed in sequence: `f8d273b` (new `Provider.adjustment_basis_evidence` column, migration `0021`; `set_adjustment_basis()`/`correct_provider_series_identifier()`-style narrow write; applied live once), `01af3b6` (regression coverage for the write path and the three-state invariant), `fe17b39` (doc-only correction of `DATABASE_SCHEMA.md`'s inventory after a live corrective write moved BYMA from an initially-recorded `UNKNOWN` to `NOT_APPLICABLE`).
+
+**1. Technical/model conformance — PASS.** Live database (`provider` table, all 7 rows) confirmed directly by SQL query: `FRED=NOT_APPLICABLE`, `Yahoo Finance=SPLIT_ADJUSTED`, `BYMA=NOT_APPLICABLE`, `Finnhub=NULL`, `Twelve Data=NULL`, `MERVAL=UNKNOWN`, `BYMA EOD=UNKNOWN` — the complete 7-provider inventory, every value matching the task's stated targets exactly. The `AdjustmentBasis` enum (`provider.py`) keeps `RAW`/`SPLIT_ADJUSTED`/`SPLIT_AND_DIVIDEND_ADJUSTED`/`NOT_APPLICABLE`/`UNKNOWN` as five distinct real values, with Python `None`/SQL `NULL` as a sixth, structurally separate "no assertion" state — confirmed the three DFA-relevant states (`NULL`/`UNKNOWN`/`NOT_APPLICABLE`) never collapse, both in source (a domain-level test added in `01af3b6` asserts this) and in the live data (Finnhub/Twelve Data genuinely `NULL`, not a string "UNKNOWN"; MERVAL/BYMA EOD genuinely the enum value `UNKNOWN`, not `NULL`; BYMA/FRED genuinely `NOT_APPLICABLE`).
+
+**2. Evidence provenance — PASS.** `entity_change_log` (`entity_type='Provider'`, 10 rows, `id` 4–13) is fully auditable: FRED/Yahoo each got one `adjustment_basis_evidence`-only write (no value change — an established value gaining its supporting citation, not being altered); BYMA shows a genuine two-step corrective history preserved in full (`RAW→UNKNOWN` with its own evidence text, then `UNKNOWN→NOT_APPLICABLE` with a second evidence text explicitly stating it "supersedes the 2026-09-01 UNKNOWN write" — neither step overwritten or deleted, both reconstructible); MERVAL and BYMA EOD each show one `NULL→UNKNOWN` write with a citation of the real code review performed and its negative result. Every `adjustment_basis_evidence` value read live is substantive, checkable text (specific files checked, specific reasoning, specific observation/run counts as of the review date), not a placeholder. `docs/DATABASE_SCHEMA.md`'s own inventory (`fe17b39`) matches the live data exactly, corrected once to remove a transient mismatch rather than left stale.
+
+**3. No historical rows rewritten — PASS, confirmed structurally, not by claim.** `entity_change_log` contains zero `Observation`- or `ImportRun`-type entries, ever (grouped-count query across the full table: `Provider` 10, `ProviderAssignment` 1 — the unrelated, separately-verified `BF.A→BF-A` fix — `ProviderSymbol` 2, nothing else). `observation`'s and `import_run`'s own `max(updated_at)` (13:23:51 and 13:24:05 respectively) both **predate** the INC-6 corrective writes (15:20:03–15:35:38) — neither table has been touched since before this work began. `provider_assignment.adjustment_basis_override`: 0 of 11,467 rows non-`NULL`, matching `f8d273b`'s own claim exactly.
+
+**4. Financial-domain correctness — NOT evaluated here, explicitly deferred to DFA.** Whether `NOT_APPLICABLE` is the financially correct classification for BYMA (vs. e.g. treating a never-successfully-invoked adapter differently), whether `UNKNOWN` is the correct disposition for MERVAL/BYMA EOD rather than a specific basis being derivable from further review, and whether the underlying evidence texts themselves meet DFA's own bar for "established" are financial-methodology questions this review does not adjudicate — Gate C's own question, unchanged. This review confirms the *model and mechanism* conform to the DFA `NULL`/`UNKNOWN`/`NOT_APPLICABLE` semantics as already encoded in the domain layer; it does not confirm the specific classifications are the financially correct ones.
+
+**UIUX state (`histfints_uiue` `054`/`2dbb923`), independently verified**: `054` read in full — a read-only, state-generic UX assessment (AC-INC6-01–05) against no live surface; HistFinTS's web UI has no adjustment-basis column anywhere (`series.html`, `import_history.html` both confirmed not to render it), and Workbench has no HTML templates at all. `2dbb923` re-confirms `054` covers the finalized inventory without needing a rewrite (its criteria are state-generic, not tied to provider names) and explicitly records that no live UI/NVDA gate exists or applies yet — matching this review's own independent check exactly. `054` remains a future presentation contract only.
+
+**Scope discipline, confirmed not exceeded**: this review and the underlying implementation do not touch cross-provider comparability, do not rewrite or reinterpret any Observation, and do not perform or claim any corporate-action analysis — none of `f8d273b`/`01af3b6`/`fe17b39` touches `data_constraints.py`, `panel.py`, or any comparability/reconciliation logic (confirmed by their own diffs, all confined to `Provider`/`AdjustmentBasis` and its evidence field).
+
+**Does not claim DFA or PO acceptance.** Gate C (DFA) and Gate D (PO) remain open. Does not modify HistFinTS or `histfints_uiue`.
 
 ## 15. INC-7 — Core Workbench research capability
 
