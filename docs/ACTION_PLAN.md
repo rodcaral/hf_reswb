@@ -367,7 +367,7 @@ Per PO's own direct instruction ("PO has ACCEPTED the bounded INC-4 `MatchCandid
 
 ## 13. INC-5 — Corporate-action and economic-event evidence
 
-**State:** ACTIVE — **Owner:** SE/SDT + DFA — **Source:** `REQUEST-event-capture.md`
+**State:** ACTIVE — **Gate A: PASS (2026-09-01, below). Gate C: PASS (DFA, 2026-09-01, below). Gate D: open — not claimed. Not CLOSED/ACCEPTED.** — **Owner:** SE/SDT + DFA — **Source:** `REQUEST-event-capture.md`
 
 **Financial question:** what externally reported event evidence exists, for which Series and effective period, and how far may it support reconciliation of observed time-series behavior?
 
@@ -378,6 +378,28 @@ Per PO's own direct instruction ("PO has ACCEPTED the bounded INC-4 `MatchCandid
 **Prohibited:** SP-7, SP-9.
 
 **Gates:** A — provenance is queryable for every captured event. C — DFA confirms stored fields and any wording keep reported evidence distinct from reconciled fact. B/D — on first user-facing surface.
+
+### Gates A/C — wiring fix + live event capture (2026-09-01)
+
+**Gate A — SDT-WB independent conformance review of `histfints@5eafe66` and the live database.** Verified directly, not taken on the relayed summary. `HEAD` matches, working tree clean except unrelated same-day BYMA evidence-collection output. Full suite **1518 passed, 0 failed**, matching the reported count exactly.
+
+**Wiring fix confirmed delegation-only.** The diff is exactly one production file, `providers/retry.py`: a single `__getattr__` method delegating any attribute `RetryingProviderClient` doesn't itself define straight to the wrapped client. Read the method and its docstring in full — `fetch()` (the only retry-wrapped method) is unaffected, since `__getattr__` is only ever consulted after normal attribute lookup fails; a dedicated test (`test_getattr_delegation_does_not_retry_a_retryable_error`) independently proves a delegated method's own error is **not** retried (`sleeps == []`), confirming retry policy is genuinely unchanged, not merely claimed. **Zero other production files touched** by this commit (confirmed by `git show --stat`: `retry.py` plus two test files only) — structurally confirms event semantics, provider selection, Series identity, and historical-observation code are all untouched by construction, not merely by inspection.
+
+**The original failed zero-event attempt correctly diagnosed as an execution failure, not evidence.** Confirmed: the pre-fix `AttributeError` was raised and caught *before* either capture service's own event-construction/save loop ever ran (read both `yahoo_event_capture_service.py` and `fred_event_capture_service.py` in full — the `try/except` wraps only the provider-client call itself, returning `[]` immediately on any exception) — no spurious `ProviderEvent` row was ever created from the failed attempt, and no workbench record (`DECISIONS.md`/`ACTION_PLAN.md`, checked directly) ever characterized that prior silent-empty result as genuine capture evidence. The commit's own message states this correctly ("silently reported as 'no events found,' indistinguishable from a genuine empty result... Confirmed live") — a defect diagnosis, not evidence.
+
+**Live capture results independently confirmed via direct SQL against `histfints.db`**: `provider_event` totals **859 rows exactly** — `4` `SPLIT` + `57` `DIVIDEND` (both `series_id=33`, "Apple Inc. — Common Stock," provider Yahoo Finance) + `798` `REVISION` (`series_id=1`, "US Unemployment Rate," provider FRED). Types explicitly distinguishable at the schema level (`event_type` column, `CHECK`-documented as `SPLIT, DIVIDEND, REVISION, CORPORATE_ACTION, OTHER`) and by provider (`provider_id`), never conflated.
+
+**Row-level traceability, checked field by field on real sample rows**: `provider_id` (provider/source), `series_id` (relevant Series), `event_date` (real-world effective date), `acquired_at` (capture timestamp), `provider_source_id` (the provider's own identifier for the event), `structured_data` (the retained provider representation as JSON, e.g. `{"numerator": 2.0, "denominator": 1.0, "source": "Yahoo Finance chart API", "symbol": "AAPL"}`), and `provenance_note` (human-readable source description). **One nuance worth naming precisely, not glossed over**: there is no dedicated capture-run entity/FK (`provider_event` has no `import_run_id`-equivalent column) — "captured in run Z" (this section's own "Legitimate conclusion" wording) is reconstructible via `acquired_at`, since every event from one `capture_events_for_series()` call shares the exact same timestamp (confirmed: all AAPL split/dividend rows share one `acquired_at`; all FRED revision rows share a distinct, later one) — a real, working traceability mechanism, but an implicit one via shared timestamp rather than an explicit run-id relationship. Not treated as a blocking gap, since row-level traceability is genuinely complete without it, but stated precisely rather than claimed as identical to `ImportRun`'s own explicit FK pattern.
+
+**No historical observations/import runs rewritten — confirmed structurally and by exact figures.** `observation` (28,062,084 rows) and `import_run` (222,654 rows) both show the **identical** counts and `max(updated_at)` (13:23:51/13:24:05, both 2026-09-01) as every prior check this session — both timestamps **predate** this event-capture work (18:13) entirely. `entity_change_log` unchanged (`Provider` 12, `ProviderAssignment` 1, `ProviderSymbol` 2 — no new rows of any type).
+
+**Evidence-only boundary confirmed by reading both capture services in full**: neither `yahoo_event_capture_service.py` nor `fred_event_capture_service.py` references `Observation`, performs reconciliation, historical price repair, causal attribution, comparability judgment, or any corporate-action adjudication anywhere (grepped directly — zero matches) — each does exactly three things: fetch, de-duplicate against already-captured events for the same series/date/type, and save a new, immutable `ProviderEvent` row.
+
+**Gate C — DFA's confirmation (2026-09-01), attributed to its actual owning authority.** Re-verified before recording, not taken on the relayed ruling alone: the stored fields (`event_type`, `structured_data`, `provenance_note`) and this section's own "Legitimate conclusion" wording ("an event was reported by provider X... Nothing stronger") are structurally incapable of asserting anything beyond a reported fact — no adjustment-correctness field, no comparability field, no causal-attribution field, no adjudication field exists anywhere in `provider_event`'s schema (confirmed by reading the full `CREATE TABLE` statement).
+
+**Methodological boundary, preserved exactly, per instruction:** provider event capture establishes reported external evidence; it does not establish adjustment correctness, cross-provider comparability, causal explanation of price discontinuities, historical price repair, or automatic corporate-action adjudication. Confirmed true of the actual implementation, not merely restated as policy.
+
+**Not marked CLOSED/ACCEPTED.** Gate D (PO) remains open, per explicit instruction. Gate B remains explicitly deferred to "first user-facing surface" (unchanged, this section's own pre-existing rule) — no UI exists for this evidence today. Does not modify HistFinTS or `histfints_uiue`.
 
 ## 14. INC-6 — Adjustment basis and historical coverage
 
