@@ -1,6 +1,6 @@
 # WORKBENCH ACTION PLAN
 
-**Plan revision:** v7 — **Last updated:** 2026-08-31 — **Supersedes:** v6
+**Plan revision:** v7 — **Last updated:** 2026-09-01 — **Supersedes:** v6
 **Owner:** PO — **Domain authority:** DFA — **Technical authority:** SE / SDT — **UIUX authority:** UIUX
 **Purpose:** Dependency-ordered master plan for the Financial Research Workbench (`hf_reswb`).
 
@@ -150,6 +150,7 @@ States marked **†** are carried from the v5 UIUX review and must be confirmed 
 | INC-13 | Catalog: Resolve | CLOSED | UIUX + SE/SDT + DFA | — | `035_Catalog_Resolve_UX_Specification.md`, `039_Catalog_Resolve_Workstream_Closure.md` (histfints_uiue); §8/§10 baseline |
 | INC-3 | Publication-aware acquisition-history diagnostic | CLOSED | DFA → SE/SDT | — | D1–D4 rulings; DFA BYMA calendar rulings; §8/§11 baseline |
 | INC-14 | Application-wide dynamic feedback / live regions | CLOSED | UIUX + SE/SDT + PO | — | `043_Application_Wide_Dynamic_Feedback_UX_Specification.md`, `052_Application_Wide_Dynamic_Feedback_AC_DFB_08_Final_Validation_Evidence.md` (histfints_uiue); §8/§16 baseline |
+| INC-16 | `USER_DISABLED` manual-Run prohibition | BLOCKED | UIUX + SE/SDT + PO | Gate D (PO acceptance) only — Gate C N/A, no financial content | `047_USER_DISABLED_Manual_Run_UX_Specification.md`, `053_USER_DISABLED_Manual_Run_UIUX_Validation_Evidence.md` (histfints_uiue); §16a detail |
 | INC-15 | Catalog: Cross-Workflow (Search/Discover/Resolve hand-offs) | CLOSED | UIUX + SE/SDT + DFA | — | `040_Catalog_Workflow_Cross_Screen_UX_Assessment.md`, `041_Catalog_Workflow_Cross_Screen_UX_Specification.md`, `045_Catalog_Workflow_AC_XWF_11_Revalidation_Evidence.md` (histfints_uiue); §8/§10a baseline |
 | INC-7 | Core Workbench research capability | BLOCKED | DFA → SE/SDT + UIUX | per-analysis evidence prerequisites | `SPEC-panel-eligibility.md`; `DECISIONS.md` |
 | INC-8 | Screen-by-screen UIUX expansion | CONTINUOUS | UIUX + SE + DFA | per-screen decision gates | UIUX audits and specifications |
@@ -379,6 +380,26 @@ Their remaining value is the pattern they establish. Do not reopen; cite them.
 
 **Closure scope — stated explicitly, not implied.** This closes only the mechanism specified in `043` and validated in `048`–`052`: the shared `base.html` flash region and `job_running.html`'s status region are now reliably announced on full navigation/first arrival, via the zero-JavaScript `tabindex="-1"`/`autofocus` technique, with the `#series-{id}` fragment interaction resolved. It does **not**: extend to or reopen INC-12, INC-13, or INC-15 — none of their own AC-* criteria concern focus management or announcement timing (independently re-confirmed here, consistent with every one of `048`–`052`'s own repeated check); authorize any further UI/live-region mechanism change without its own specification; or extend to any other increment. **The evidence chain is preserved exactly as recorded** — `048`/`049`/`050`/`051` remain unedited as accurate, dated evidence about the specific commits they each tested, and `052`'s own two qualifications (DOM `document.activeElement` not independently captured; `job_running.html` not freshly re-captured with NVDA in that pass) stand as recorded, neither treated as a defect nor as blocking this closure. Does not touch `histfints_uiue 60d12dd`'s own repository — **noted explicitly: that commit was, as of the prior record, local-only/unpushed** in `histfints_uiue`, a fact about that repository's own state, not something this closure changes or depends on beyond citing it accurately; if its push status has since changed, that is a fact for a future record to confirm, not inferred here.
 
+## 16a. INC-16 — `USER_DISABLED` Manual Run Prohibition
+
+**State:** BLOCKED — Gate D (PO) only — **Owner:** UIUX + SE/SDT + PO — **Gate disposition:** A — PASS (SDT-WB, below). B — PASS (UIUX, `053`). C — N/A (no financial content). D — open, not claimed.
+
+**Background.** A pre-existing, already-flagged backlog item (`005` §9, 2026-08-25 — not a new workstream), explicitly carved out as unaffected by the Provider Assignment Removal closure (`010` §5, "continues on its own track") and never answered by any subsequent document through `030`'s own Series UX closure. `046` re-verified the asymmetry live in the current codebase (unchanged from `005`): a `USER_DISABLED` Series with a provider assignment rendered an enabled, clickable Run button in Import & Status, identical to an `ACTIVE` Series — scheduled bulk Run already correctly excluded non-`ACTIVE` Series, but manual per-row Run did not.
+
+**Closure record so far (2026-09-01).** `046` (current-state re-verification, one PO gate restated from `005` §9) → `047` (specification, settled 2026-08-31: PO-UD01 — manual Run prohibited for `USER_DISABLED`, both paths brought into alignment with scheduled Run's existing exclusion; AC-UD-01–12; amended in place at `836fb2e` to settle AC-UD-07's exact bulk-confirm dialog wording, §4a) → SDT-HF implementation (`c3e2cf6`, full suite 1460/1460 at the time, up from 1450) → **adjacent, non-AC finding during UIUX's own validation**: the `USER_DISABLED` rejection message leaked internal specification/AC references (`"(histfints_uiue 047, AC-UD-02)"` plus a rationale paragraph) into user-visible flash text — not a FAIL of any AC-UD criterion (`047` never specified this exception's exact wording), flagged rather than treated as a defect → bounded cleanup (`3023a84`, the exception string only, rationale moved to a code comment, matching the sibling `SUPERSEDED` guard's own established style) → UIUX narrow follow-up validation (spot-check only, not a full AC-UD-01–12 re-run — none needed, the diff touched one string) — **PASS**, both recorded together in `053`.
+
+**Gate A (SDT-WB technical conformance, this record).** Verified both commits directly in `histfints`: `HEAD` is `3023a84`, working tree clean except unrelated same-day BYMA evidence-collection output; full suite **1460 passed, 0 failed** (unchanged count from `c3e2cf6` — `3023a84` added assertions to existing tests, no new test functions, matching its own commit message exactly). Read `c3e2cf6`'s full diff (`import_service.py`, `import_status_view.py`, `import_status.html`, plus three test files, 323 lines) — confirms `SeriesImportStatus.is_disabled` is deliberately independent of `is_scheduled` (047 §9 Q1, answered), the disabled-reason precedence rule (AC-UD-03), the shared-choke-point `ImportService.run_import()` rejection (AC-UD-02, closing the previously-open direct-call bypass), the two independent non-overlapping bulk-dialog counts (§4a), and the first-ever `Series.status` indicator on this page (`046`'s own finding, now addressed) — all matching `047`'s specification, not a paraphrase. Read `3023a84`'s full diff — confirms it is exactly the exception string, nothing else: no routing, status-behavior, template-wording, or bulk-confirm-wording change, per its own commit message, independently verified rather than trusted. **PASS.**
+
+**Gate B (UIUX, `053`).** **PASS.** Full AC-UD-01–12 validated live against `c3e2cf6` — all twelve PASS, including a real-NVDA capture for AC-UD-10 (verbatim: `"...an import. Series is disabled — re-enable it first to run an import."`). The message-leak finding (§3 above) was recorded as history, not as an AC-UD FAIL, and the narrow follow-up against `3023a84` (spot-check, not a full re-run — the diff didn't warrant one) confirmed the corrected wording and zero regression in the adjacent per-row reason (AC-UD-05) or bulk-dialog wording (AC-UD-07), both found byte-identical to the `c3e2cf6` validation.
+
+**Distinction preserved, per instruction, independently re-confirmed**: the original AC-UD-01–12 validation (against `c3e2cf6`) and the later non-AC cleanup validation (against `3023a84`) are two distinct events in `053`'s own record, not conflated into one pass — `053` itself states this explicitly (§1's five-step sequence) and this record does not compress them further.
+
+**Gate C (DFA): N/A.** No financial meaning, methodology, or evidence-interpretation question is raised — confirmed directly (`046` §3/`047`'s own framing: "a product-behavior question... not a financial-methodology one — no DFA gate identified"), independently re-confirmed by reading both documents end to end.
+
+**Gate D (PO): open — not claimed here.** This record states Gates A/B PASS and Gate C N/A; it does **not** assert PO acceptance, and the workstream is **not** marked CLOSED or ACCEPTED, per explicit instruction.
+
+**Not extended to any other increment.** Does not reopen `030` (Series UX) — this item was never part of what `030` closed, confirmed by both `046` and `047` stating so directly. `046` remains unchanged as the historical pre-decision record; `047` remains unchanged as the settled specification (its one amendment, `836fb2e`, predates this record and is already reflected in the wording verified above, not a further change made here).
+
 ## 17. Remaining verification gaps
 
 The cross-actor consolidation is complete to the extent supported by available governing evidence. The following items remain explicit because this plan must not manufacture authority or closure:
@@ -418,7 +439,7 @@ Standing rules live in §3 and are cited by ID. Do not restate an SP or UP insid
 
 ## 20. Current focus
 
-*As of 2026-08-31. Pointer only — states live in §5.*
+*As of 2026-09-01. Pointer only — states live in §5.*
 
 - **INC-12** — **CLOSED/ACCEPTED 2026-08-29 (§8/§9).** All four gates disposed (A/B/C/D PASS-ACCEPT). Reusable baseline only from here — does not extend to Resolve (INC-13) or authorize automatic identity resolution; do not reopen or silently extend without a new decision.
 - **INC-13** — **CLOSED/ACCEPTED 2026-08-29 (§8/§10).** All four gates disposed (A/B/C/D PASS-ACCEPT; Gate B carries two named, not-rounded-up NVDA validation-coverage qualifications). Reusable baseline only from here — does not authorize automatic identity resolution at any tier, and each future disposition remains subject to its own evidence/adjudication requirements; do not reopen or silently extend without a new decision.
@@ -426,6 +447,7 @@ Standing rules live in §3 and are cited by ID. Do not restate an SP or UP insid
 - **INC-4/5/6** — continue only the prerequisite work defined financial questions require; preserve unresolved states and provenance.
 - **INC-3** — **CLOSED/ACCEPTED 2026-08-29 (§8/§11).** All four gates disposed (A/C/D PASS-ACCEPT, B N/A). Reusable baseline only from here — do not reopen or silently extend without a new decision.
 - **INC-14** — **CLOSED/ACCEPTED 2026-08-31 (§8/§16).** All four gates disposed (A/B/D PASS-ACCEPT; C N/A, no financial content; Gate B carries two named, not-glossed-over evidence-scope qualifications). Reusable baseline only from here — distinct from INC-15, not touched or advanced by its closure; do not reopen or silently extend without a new decision.
+- **INC-16** — **BLOCKED, Gate D (PO) only, 2026-09-01 (§16a).** Gates A (SDT-WB) and B (UIUX, `053`) PASS; Gate C N/A (no financial content). Not marked CLOSED or ACCEPTED. `046` remains unchanged as historical pre-decision evidence; `047` remains unchanged as the settled specification.
 - **INC-7** — advance each analytical workflow when its own evidence and methodology gates are satisfied.
 - **§17** — close the remaining evidence/documentation gaps without inferring missing semantics.
 
