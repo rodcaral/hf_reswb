@@ -129,6 +129,28 @@ document from `AGENTS.md`. Maintained by RGC under
 `_shared-standards/AGENT_ROLE_GIT_AND_DOCS.md` §1's charter-maintenance authority, amended the
 same day to explicitly cover a relocated charter.
 
+## Decision Support / Communication — Decision Brief default for PO decisions
+
+**Adopted 2026-09-01, per PO.** When a question in this project's domain reaches PO for
+settlement, present it as a **Decision Brief** rather than an open-ended question or a single
+recommendation stated as if it were the only option:
+
+- **2–3 viable alternatives**, not more — enough to show real tradeoffs, not so many that the
+  choice becomes a survey.
+- **Material pros/cons** for each — what actually matters for this decision, not an exhaustive
+  list padded to look thorough.
+- **Consequences** — what actually follows from picking each one, stated concretely.
+- **A concrete project/user case** grounding the choice in something real, not an abstract
+  hypothetical.
+- **A DFA recommendation, when evidence permits one** — stated plainly when it doesn't, rather
+  than manufacturing a preference the evidence doesn't support.
+- **One focused question only when a PO decision is a hard dependency** — not the default way
+  to open every escalation; most Decision Briefs present the alternatives and let PO choose,
+  without needing to ask anything first.
+
+Same standard as `DFA_CHARTER.md` §3's Decision Brief definition — this section applies it to
+this repository's own PO-facing decisions specifically, not a separate methodology.
+
 ## Where things are
 
 | File | What it is |
