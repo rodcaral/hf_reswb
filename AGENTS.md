@@ -172,6 +172,11 @@ Applying it in Workbench means, at minimum:
 point, across all actors, for output not yet placed or input not yet triaged. Nothing there is
 authoritative; see its own `README.md` for the rules, not restated here.
 
+**The canonical health check:** `../_shared-standards/tools/actor_health_check.ps1`. If asked
+for a health check, this is the one to run or point to — see its own `README.md` for what it
+covers. A local convenience check is fine for something this one doesn't cover, but this is the
+one that governs if results ever disagree.
+
 ## Non-negotiable constraints, extracted for quick reference
 
 - **HistFinTS is read-only.** Never write to its database. Workbench owns its own SQLite
