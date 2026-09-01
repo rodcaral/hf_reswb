@@ -41,7 +41,7 @@ protocol — see `../_shared-standards/ACTOR_MODEL.md` for the actor set, and
 `../_shared-standards/ACTOR_AND_MODEL_INTERACTION_RULES.md` for the governing protocol for this
 ecosystem as a whole: actor set, communication, routing, and message format. §2.5 is this
 actor's identity entry point — read past it, not just to it.
-**This citation was written against `ACTOR_AND_MODEL_INTERACTION_RULES.md@6699b81`. If you have
+**This citation was written against `ACTOR_AND_MODEL_INTERACTION_RULES.md@419eac0`. If you have
 not read that document at this exact ref in this session, open it before your first inter-actor
 message this session** — not as a general reminder to stay current, but as a condition on one
 specific action, checkable against something you already know (whether you've opened it, and at
