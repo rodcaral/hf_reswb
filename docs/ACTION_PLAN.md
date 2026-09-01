@@ -312,13 +312,36 @@ Their remaining value is the pattern they establish. Do not reopen; cite them.
 
 ## 12. INC-4 — Financial identity and evidence prerequisites
 
-**State:** ACTIVE — **Owner:** DFA + SE/SDT
+**State:** ACTIVE — **Gate A: PASS (2026-09-01, below). Gate C: PASS (DFA, 2026-09-01, below), for the `EvidenceSignal` capability specifically. Gate D: open — not claimed. Not CLOSED/ACCEPTED.** — **Owner:** DFA + SE/SDT
 
 **Established domain rule:** financial identity requires authoritative, temporally valid evidence sufficient for the identity question. Technical/provider signals may discover candidates and support evidence collection but cannot independently establish identity (SP-3). Missing, stale, contradictory or insufficient evidence produces `UNRESOLVED`.
 
 **Constraints:** `automatic_resolution_enabled=False` is binding (SP-1); the compatibility states retain narrow provider/technical meaning (§7); current evidence cannot automatically establish historical identity; source count is not a substitute for authority, independence, or effective-date validity.
 
 **Gate C:** evidence may populate the identity pipeline only where doing so does not silently redefine Tier 0/1/2/3 methodology. Where the tiers cannot express a required evidence condition, record a specification gap for DFA/PO rather than stretching a tier.
+
+### Gates A/C — `EvidenceSignal` capability: 1:N technical-evidence retention (2026-09-01)
+
+**Scope of what passed, stated precisely — not the whole of INC-4, only this capability.** `MatchCandidate → EvidenceSignal`, the 1:N technical-signal-retention child, is implemented, independently conformance-reviewed, live-activated, and now DFA-confirmed to conform to the approved Tier 0/1/2 methodology. This does **not** mean INC-4 as a whole (identity adjudication, the broader "financial identity requires authoritative, temporally valid evidence" question above) is resolved — only that the evidence-retention *mechanism* conforms.
+
+**Gate A — SDT-WB independent conformance review, cited as evidence: `613638a`.** Full detail there (twelve verified properties, five demonstration cases located and confirmed, full suite 1506/1506 at `histfints@a113456`). Not re-derived here.
+
+**Gate C — DFA's ruling (2026-09-01), attributed to its actual owning authority.** Independently re-verified before recording, not taken on the relayed summary alone:
+
+- **1:N capability implemented and verified**: unchanged from Gate A's own finding — re-confirmed still true at the current `histfints` HEAD.
+- **Tier 0/1/2 evidence remains informational and non-adjudicative**: re-confirmed — zero `resolve_attach`/`resolve_group`/`resolve_merge`/`resolve_set_underlying` calls anywhere in `a113456` or the new `0a4893d` commit (grepped directly); `gather_evidence_for_candidate()`'s own docstring and its four dedicated tests confirm it never creates a candidate, never touches `evidence_tier`/`rule_reference`, never resolves.
+- **Independence/derivative-lineage/contradiction/temporal-applicability/provenance semantics conform to DFA methodology**: re-confirmed against Gate A's own twelve-property and five-demonstration-case findings — unchanged, since neither `histfints` commit since Gate A touches `domain/evidence_signal.py`'s own rules.
+- **Migration `0022` successfully activated live**: independently confirmed by direct query — live `histfints.db`'s `PRAGMA user_version=22` (was `21` at Gate A's own review), `evidence_signal` table now exists.
+- **Bounded live gatherer run produced zero Tier 0/1/2 signals**: independently confirmed — `evidence_signal` table has **0 rows** live. Traced to why, not merely accepted: all 9 currently-unresolved `MatchCandidate` rows in the live database carry `evidence_tier=3` (originally Tier-3-only matches — their subject genuinely had no Tier 0/1/2 evidence when first discovered), and `gather_evidence_for_candidate()`'s own re-check against the same underlying data honestly finds the same nothing again — exactly the behavior `test_gather_evidence_for_candidate_never_creates_a_new_signal_when_tiers_0_1_2_all_still_miss` asserts. **This zero-signal result is methodologically correct, not a failure** — the alternative (fabricating a signal to show something happened) is precisely what this capability's own "never fabricates" guarantee (independently verified at Gate A) exists to prevent.
+- **No real production Tier 0/1/2 signal has yet occurred**: confirmed by the same query — `evidence_signal` is empty. Preserved here as a standing note, not a defect: a future naturally-occurring Tier 0/1/2 case (a new Discover run against a subject with real identifier/normalized-identity evidence) will provide the first genuine real-data validation this capability has not yet had; nothing about this closure record should be read as substituting for that.
+- **Tier 3 not validated or expanded**: re-confirmed — `0a4893d`'s diff touches only `catalog_discovery_service.py`/`cli.py`/tests; Tier 3's own matching logic is untouched, and `gather_evidence_for_candidate()` produces zero signals for a Tier-3-only candidate by design (the same test cited above).
+- **Resolve/adjudication semantics unchanged**: re-confirmed live — the 4 already-resolved `MatchCandidate` rows in the live database are unchanged (same `resolution_operation`/`evidence_tier` values as before this work began); `entity_change_log` contains zero `MatchCandidate`-type entries, ever.
+
+**Full suite re-confirmed at the current HEAD**: **1512 passed, 0 failed** (up from 1506 at Gate A's own review — 6 new tests for `gather_evidence_for_candidate()`).
+
+**UIUX `055`, independently verified — confirmation only, not a manufactured gate.** Read in full: a bounded, read-only readiness assessment finding the existing Discover/Resolve UI contracts (`024`/`035`/`040`/`041`) already sufficient for a one-`MatchCandidate`-per-tier gatherer shape, no new UX specification needed for what `a113456`/`0a4893d` actually ship. **Independently confirmed no UI code was touched by either commit** (both diffs confined to `application`/`domain`/`persistence`/`composition_root.py`/`cli.py` — zero `presentation/templates/*.html` or `web.py` changes) — `055` is treated exactly as instructed: confirmation that no UI specification/runtime gate is currently required, not manufactured evidence of a validation that didn't need to happen.
+
+**Not marked CLOSED/ACCEPTED.** Gate D (PO) remains open, per explicit instruction. Does not resolve INC-4's own broader financial-identity-adjudication question (the "Established domain rule"/"Constraints" text above, unchanged and still binding) — only the `EvidenceSignal` retention capability's own conformance. Does not modify HistFinTS or `histfints_uiue`.
 
 ## 13. INC-5 — Corporate-action and economic-event evidence
 
