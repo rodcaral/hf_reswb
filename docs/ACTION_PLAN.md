@@ -334,7 +334,7 @@ Their remaining value is the pattern they establish. Do not reopen; cite them.
 
 ## 14. INC-6 — Adjustment basis and historical coverage
 
-**State:** ACTIVE — **Gate A: PASS (2026-09-01, below) — prepared for DFA review (Gate C).** **Owner:** SE/SDT + DFA — **Source:** `REQUEST-tranche2-migration.md`
+**State:** ACTIVE — **Gate A: PASS. Gate C: PASS (DFA, 2026-09-01, below). Gate D: open — not claimed. Not CLOSED/ACCEPTED.** **Owner:** SE/SDT + DFA — **Source:** `REQUEST-tranche2-migration.md`
 
 **Financial question:** is the stored history sufficiently complete and comparable for the intended analysis, or does apparent absence reflect Series existence, provider assignment, provider availability, incomplete acquisition, or another unresolved cause?
 
@@ -362,7 +362,17 @@ Verified `histfints@fe17b39` and the live database directly, not taken on the re
 
 **Scope discipline, confirmed not exceeded**: this review and the underlying implementation do not touch cross-provider comparability, do not rewrite or reinterpret any Observation, and do not perform or claim any corporate-action analysis — none of `f8d273b`/`01af3b6`/`fe17b39` touches `data_constraints.py`, `panel.py`, or any comparability/reconciliation logic (confirmed by their own diffs, all confined to `Provider`/`AdjustmentBasis` and its evidence field).
 
-**Does not claim DFA or PO acceptance.** Gate C (DFA) and Gate D (PO) remain open. Does not modify HistFinTS or `histfints_uiue`.
+### Gate C — DFA re-evaluation of the finalized inventory (2026-09-01)
+
+Per SE relaying DFA's own re-evaluation, attributed to its actual owning authority, consistent with this project's standing practice. **Finalized, DFA-confirmed 7-provider inventory**: `FRED=NOT_APPLICABLE`, `Yahoo Finance=SPLIT_ADJUSTED`, `BYMA=NOT_APPLICABLE`, `Finnhub=NULL`, `Twelve Data=UNKNOWN`, `MERVAL=UNKNOWN`, `BYMA EOD=UNKNOWN`. **Independently re-verified against the live database before recording**, not taken on the relayed inventory alone — one value had changed since Gate A's own review (`Twelve Data`: `NULL` → `UNKNOWN`, a new live write, `histfints@5619399`/`8a77de6`, full suite now **1486 passed, 0 failed**): live query confirms all seven values exactly as stated above; `entity_change_log` (`entity_type='Provider'`, now 12 rows) gained one new, substantive `NULL→UNKNOWN` write for Twelve Data, citing its 161 `SUCCESS` import runs and `import_service.py`'s own FR-11 dedup rule as the reason 0 observations are directly attributable to those runs despite genuine successful fetches (priority 2–3, suppressed by an already-current identical value from a higher-priority provider — a real, reviewed, observation-producing path, correctly `UNKNOWN` not `NULL`, per the same evidence bar already applied to MERVAL/BYMA EOD). No historical row rewritten by this additional write either — `entity_change_log` still contains zero `Observation`/`ImportRun` entries ever, and `adjustment_basis_override` remains 0-of-11,467.
+
+**Finnhub's `NULL` boundary condition — preserved exactly, not weakened.** `NULL` is DFA-conforming for Finnhub only because, and only while, it has zero successful stored observations — independently confirmed live: 23 `FAILED` import runs, 0 `SUCCESS`, all-time. This is a **live-data condition, not a permanent classification**: the first time Finnhub produces a real `SUCCESS` run with a stored `Observation`, it moves into the same observation-producing/evidence-review class Twelve Data was just placed in, and its `adjustment_basis` must then be resolved to an established value or `UNKNOWN` — it may no longer sit at `NULL` at that point. No code enforces this transition automatically (confirmed: `docs/DATABASE_SCHEMA.md`'s own `5619399` text states this explicitly) — it is a documented rule for whoever next reviews Finnhub's state, not a pre-emptive live-data write against its current, unchanged, all-failure history. This boundary condition is recorded here as a standing note for any future review of Finnhub's provider row, not merely restated once and forgotten.
+
+**UIUX state, re-confirmed unchanged.** `histfints_uiue` `054`/`2dbb923` still describe a state-generic contract (AC-INC6-01–05) that covers the finalized inventory, including Twelve Data's new value, without needing a rewrite — neither document names specific providers in its acceptance criteria. No live UI surface exists in either application; no NVDA/runtime validation gate applies at this data-model-only stage. `054` remains the future presentation contract only.
+
+**Scope discipline, re-confirmed at this pass.** Neither `5619399` (docs-only) nor `8a77de6` (test-only) touches comparability, splicing, corporate-action logic, or any UI code — confirmed by their own diffs.
+
+**Not marked CLOSED/ACCEPTED.** Gate D (PO) remains open, per explicit instruction — this record states Gates A/C disposed, not a workstream closure. Does not modify HistFinTS or `histfints_uiue`.
 
 ## 15. INC-7 — Core Workbench research capability
 
