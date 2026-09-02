@@ -151,7 +151,7 @@ States marked **†** are carried from the v5 UIUX review and must be confirmed 
 | INC-3 | Publication-aware acquisition-history diagnostic | CLOSED | DFA → SE/SDT | — | D1–D4 rulings; DFA BYMA calendar rulings; §8/§11 baseline |
 | INC-14 | Application-wide dynamic feedback / live regions | CLOSED | UIUX + SE/SDT + PO | — | `043_Application_Wide_Dynamic_Feedback_UX_Specification.md`, `052_Application_Wide_Dynamic_Feedback_AC_DFB_08_Final_Validation_Evidence.md` (histfints_uiue); §8/§16 baseline |
 | INC-16 | `USER_DISABLED` manual-Run prohibition | CLOSED | UIUX + SE/SDT + PO | — | `047_USER_DISABLED_Manual_Run_UX_Specification.md`, `053_USER_DISABLED_Manual_Run_UIUX_Validation_Evidence.md` (histfints_uiue); §8/§16a baseline |
-| INC-17 | `IdentityAdjudication` corrective increment (authoritative-contradiction resolution + case-specific materiality persistence) | **ACTIVE** — Gate A PASS (`0b111d0`); `AC-COR-03` fix applied (`27b6865`, full suite 1688 passed); **Gate B still open pending 3 items**: UIUX revalidation of `AC-COR-03`, `AC-COR-07` reachability resolution, and the narrow NVDA per-dimension-satisfaction check; Gates C/D open. **NOT CLOSED, NOT ACCEPTED** | DFA (§7 ✓) → SDT-HF (design ✓) → [UIUX (contract ✓) \|\| DFA (trigger-map ✓)] → implementation ✓ → corrective fixes ✓ (`2f7e1d8`, `27b6865`) → **Gate B open (3 items)** → conformance/domain gates → PO acceptance | — | `TIER_0_1_2_3_FINANCIAL_IDENTITY_EVIDENCE_METHODOLOGY_REFERENCE_2026-09-01.md` §6b/§7b/§7c; `histfints/docs/future_designs/INC17_CORRECTIVE_INCREMENT_DESIGN.md`; `068`/`069`/`070` (histfints_uiue); §12a–§12k detail |
+| INC-17 | `IdentityAdjudication` corrective increment (authoritative-contradiction resolution + case-specific materiality persistence) | **ACTIVE** — Gate A PASS (`0b111d0`); all functional/reachability questions resolved per `071`: `AC-COR-03` PASS in full at `2f7e1d8` (supersedes `070`'s FAIL — browser-cache false negative), `AC-COR-07` resolved as not independently exercisable / not an application FAIL (dead code, two independent grounds); **Gate B still open — only the real-NVDA per-material-dimension satisfaction/status confirmation remains**; Gates C/D open. **NOT CLOSED, NOT ACCEPTED** | DFA (§7 ✓) → SDT-HF (design ✓) → [UIUX (contract ✓) \|\| DFA (trigger-map ✓)] → implementation ✓ → corrective fixes ✓ (`2f7e1d8`, `27b6865`) → AC-COR-03/07 resolved ✓ (`071`) → **Gate B open (NVDA item only)** → conformance/domain gates → PO acceptance | — | `TIER_0_1_2_3_FINANCIAL_IDENTITY_EVIDENCE_METHODOLOGY_REFERENCE_2026-09-01.md` §6b/§7b/§7c; `histfints/docs/future_designs/INC17_CORRECTIVE_INCREMENT_DESIGN.md`; `068`/`069`/`070`/`071` (histfints_uiue); §12a–§12l detail |
 | INC-15 | Catalog: Cross-Workflow (Search/Discover/Resolve hand-offs) | CLOSED | UIUX + SE/SDT + DFA | — | `040_Catalog_Workflow_Cross_Screen_UX_Assessment.md`, `041_Catalog_Workflow_Cross_Screen_UX_Specification.md`, `045_Catalog_Workflow_AC_XWF_11_Revalidation_Evidence.md` (histfints_uiue); §8/§10a baseline |
 | INC-7 | Core Workbench research capability | BLOCKED | DFA → SE/SDT + UIUX | per-analysis evidence prerequisites | `SPEC-panel-eligibility.md`; `DECISIONS.md` |
 | INC-8 | Screen-by-screen UIUX expansion | CONTINUOUS | UIUX + SE + DFA | per-screen decision gates | UIUX audits and specifications |
@@ -1151,6 +1151,69 @@ remain accurate, dated accounts of what they each tested.
 
 **All prior stage records (§12a–§12j) preserved completely unedited.** No HistFinTS or
 `histfints_uiue` file modified by this record.
+
+## 12l. UIUX `071` — AC-COR-07 resolved (unreachable dead code), AC-COR-03 correction supersedes `070` (2026-09-02)
+
+**Verified directly against `histfints_uiue/071_INC17_AC_COR_07_Resolution.md`, not taken on the
+relayed summary.**
+
+- **`AC-COR-07` resolved — Outcome 2, not independently exercisable, not an application FAIL.**
+  `071` documents two independent grounds, both read from source, not constructed via a synthetic
+  corruption path:
+  1. **Persisted-state reachability** (`070`'s finding, reconfirmed): `match_candidate`'s
+     `FOREIGN KEY ... ON DELETE RESTRICT` plus `CHECK ((provider_symbol_id IS NULL) !=
+     (subject_series_id IS NULL))` make the design's own named scenario (a candidate whose
+     subject/candidate `Series`/`ProviderSymbol` reference is not loadable) structurally
+     impossible to persist; no `delete()` method exists anywhere for `SqliteSeriesRepository` or
+     `SqliteProviderSymbolRepository`, so there is no code path that could even attempt the
+     restricted delete.
+  2. **Control-flow reachability — a stronger, independent finding**: both callers of
+     `_validation_failures()` (`preview_adjudication()`, `record_adjudication()`) call
+     `_resolve_signals()` first, which already raises `ValueError` for a nonexistent
+     `candidate_id` before `_validation_failures()`'s own `except ValueError: relevant = None`
+     branch could ever fire for that same condition. The web route's own existence check
+     (`web.py:1872-1877`) precedes its `_adjudication_form_state()` call the same way. **The
+     branch is dead code under the current call order**, independent of and in addition to
+     ground 1.
+  - No synthetic/corrupt persisted state was created to force this branch; no database integrity
+    constraint was weakened or bypassed.
+  - **Test coverage assessed, not remediated**: the domain-level building blocks
+    (`discover_candidate_context_dimensions()`/`discover_relevant_dimensions()`) are tested for
+    all-`None` inputs (empty `frozenset`, no error — correct, by design). The specific
+    `_validation_failures()` catch-and-convert branch and its exact reason text
+    ("the relevant-dimension inventory could not be established for this candidate") are
+    untested at every layer, because nothing in the current codebase can reach them. `071`
+    explicitly declines to recommend removal vs. retention as belt-and-suspenders defense —
+    left as SE's/DFA's design judgment, not a UIUX finding.
+
+- **`AC-COR-03` correction — supersedes `070`'s FAIL, found while sourcing the above, not
+  requested.** `070`'s "FAIL — all applicable origins disclosed" finding is corrected: it was a
+  **false negative caused by a browser-cache artifact** in the embedded-browser-pane method used
+  for that bare, query-string-free URL check, not a real defect in `histfints@2f7e1d8`. `071`
+  re-verified via raw HTTP (`urllib.request`, no cache) against a single confirmed fresh disposable
+  server and reproduced the three-way `dimension_origins` disclosure
+  (`"DENOMINATION_CURRENCY — origin: evidence gathered for this dimension, and also raised by
+  candidate context (context is not itself evidence)"`) already present in `2f7e1d8` — the exact
+  commit `070` validated, not a later change. `071` further re-verified `070`'s other four
+  findings (AC-COR-12 checkbox rendering, AC-COR-08/09 states, the NON_MATERIAL round-trip) via
+  raw HTTP and confirmed all four reproduce identically — those checks had used distinguishing
+  query strings, which is why only the bare-URL AC-COR-03 check was affected.
+  - **`070` itself is left unedited, per this repository's documentation-lifecycle
+    discipline** — `071` is the correction of record, not a retrofit.
+  - **`27b6865` remains a valid, additive/read-only presentation improvement** (already recorded
+    at §12k) — this correction does not retroactively convert it into proof that `AC-COR-03` was
+    a genuine pre-existing defect; per `071` itself, the three-way disclosure logic `27b6865`
+    reuses was already present and functioning correctly in `2f7e1d8`, before `27b6865`.
+
+**Gate B state, per this record**: all functional/reachability questions are now resolved
+(`AC-COR-03` PASS in full at `2f7e1d8`, superseding `070`; `AC-COR-07` resolved as not
+independently exercisable, not an application FAIL). **Only the previously requested real-NVDA
+confirmation of per-material-dimension satisfaction/status text remains outstanding before Gate B
+can be fully discharged.** Gate B is not itself claimed discharged by this record — the NVDA item
+is still open. Gates C/D remain open. **INC-17: NOT CLOSED, NOT ACCEPTED.**
+
+**All prior stage records (§12a–§12k) preserved completely unedited, including `070` itself.** No
+HistFinTS or `histfints_uiue` file modified by this record.
 
 ## 13. INC-5 — Corporate-action and economic-event evidence
 
