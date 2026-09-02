@@ -406,51 +406,68 @@ Per PO's own direct instruction ("PO has ACCEPTED the bounded INC-4 `MatchCandid
 
 **No HistFinTS or `histfints_uiue` file modified by this record.**
 
-## 12a. INC-17 — `IdentityAdjudication` corrective increment (2026-09-01, NEXT — not implemented, not accepted)
+## 12a. INC-17 — `IdentityAdjudication` corrective increment — persisted plan/dependency state (2026-09-01, NEXT — not implemented, not accepted)
 
-**Correction to a stale statement recorded at `8bcab60`.** §20's own current-focus line for INC-4
-previously stated "no SDT-HF task is currently justified." That was accurate at the time it was
-written but is now stale: DFA's subsequent canonical adjudication-record ruling establishes two
-real, forward-looking implementation gaps in the already-closed `IdentityAdjudication` capability —
-**a bounded corrective increment is now justified.** This section records that justification only;
-it does not design, implement, or accept anything.
+**Correction to a stale statement recorded at `8bcab60`, superseded and consolidated here.**
+§20's own current-focus line for INC-4 previously stated "no SDT-HF task is currently justified."
+That was accurate when written but became stale once DFA's subsequent ruling landed; corrected in
+place there, and the full plan/dependency state is persisted here as the current record of record
+for INC-17.
 
-**The two gaps, already named — not newly discovered here — in the governing methodology
-reference's own "Implementation status" notes** (`TIER_0_1_2_3_FINANCIAL_IDENTITY_EVIDENCE_
-METHODOLOGY_REFERENCE_2026-09-01.md`, adopted `8bcab60`):
+**The state, in dependency order, exactly as it stands:**
 
-1. **Case-specific materiality persistence** (reference §7b/§7c). The shipped code derives
-   `required_dimensions` fresh, per request, from whatever the candidate's evidence happens to
-   touch (`web.py`'s `_adjudication_form_state()`) — it does not persist, as its own recorded fact,
-   *which* dimensions were actually determined material for a *specific* adjudication once one is
-   recorded, nor does it yet distinguish a `SAME_INSTRUMENT`-shaped materiality question from a
-   `RELATED_BUT_DISTINCT`-shaped one per §7c's ruling.
-2. **Affirmative authoritative-contradiction resolution** (reference §6b). The shipped
+1. **The governing Tier 0/1/2 methodology is established.**
+   `TIER_0_1_2_3_FINANCIAL_IDENTITY_EVIDENCE_METHODOLOGY_REFERENCE_2026-09-01.md`, adopted
+   `8bcab60`, resolves §1's own Tier 0/1/2 GAP row (Tier 3 remains deferred, unaffected).
+2. **DFA subsequently identified canonical persisted semantics for two areas** — case-specific
+   materiality and authoritative-contradiction resolution — that the adopted methodology names but
+   the shipped mechanism does not yet record as its own persisted fact. Ruled by DFA, relayed by
+   SE/PO; incorporated into the governing reference at §6b (authoritative-contradiction
+   resolution: the four evidentiary acts, the explicit non-resolving mechanisms, required
+   preservation) and §7b/§7c (the case-specific material identity dimension rule;
+   disposition-specific `SAME_INSTRUMENT`/`RELATED_BUT_DISTINCT` conditions).
+3. **A read-only HistFinTS assessment confirmed both as real implementation gaps** — not
+   theoretical, not newly invented here. Performed while adopting the governing reference (`8bcab60`):
+   the shipped `web.py`'s `_adjudication_form_state()` derives `required_dimensions` fresh, per
+   request, from whatever the candidate's evidence happens to touch — it does not persist, as its
+   own recorded fact, *which* dimensions were determined material for a *specific* recorded
+   adjudication, and does not yet distinguish a `SAME_INSTRUMENT`-shaped materiality question from
+   a `RELATED_BUT_DISTINCT`-shaped one (gap 1, reference §7b/§7c). The shipped
    `diagnose()`/`_validation_failures()` code detects an authoritative contradiction as a flat
-   boolean and blocks on it; it has no mechanism to record which of the four DFA-ruled resolution
-   acts (correction/supersession; temporal separation; subject/scope disambiguation; established
-   domain-valid authority precedence) applies, no record type for a correction/supersession
-   assertion distinct from an ordinary signal, and no authority-precedence table exists anywhere.
+   boolean and blocks on it, with no mechanism to record which of the four DFA-ruled resolution
+   acts applies, no record type for a correction/supersession assertion distinct from an ordinary
+   signal, and no authority-precedence table anywhere in the codebase (gap 2, reference §6b). Both
+   confirmed by direct source reading, read-only — no HistFinTS file modified to reach this
+   finding.
+4. **The previously accepted manual-adjudication capability remains historically CLOSED/
+   ACCEPTED.** §12's own closure record above (Gates A/B/C/D, all PASS-ACCEPT) is unedited by this
+   section — not silently reopened. This increment is a *new*, separate, corrective piece of work
+   responding to a *later* DFA ruling, the same posture INC-6's Finnhub boundary condition and
+   INC-4's own `EvidenceSignal`-then-`IdentityAdjudication` sequencing already established: a
+   closure records what was true and accepted at that time; a subsequent ruling can justify new,
+   separately-gated work without retroactively undoing the earlier acceptance.
+5. **A new bounded corrective increment (INC-17) is now in technical-design stage.** Not
+   implemented; not accepted. Scope is exactly the two gaps named in item 3, nothing broader.
+6. **SDT-HF is currently tasked with producing that design before implementation** — per SE/PO's
+   own direct instruction, recorded here as the current task assignment, not decided or assigned
+   by SDT-WB. SDT-WB does not produce the technical design (SDT-HF's own repository and
+   ownership); this record establishes and preserves the justification and the two gaps the design
+   must address, nothing more.
+7. **Real production adjudication remains separately blocked by the absence of naturally-occurring
+   Tier 0/1/2 `EvidenceSignal`s.** `evidence_signal`: 0 rows, live-confirmed at closure and
+   unchanged since. This is a **separate** block, unrelated to and not itself blocking INC-17's
+   design/implementation — the two named gaps exist in the mechanism itself, checkable and fixable
+   independent of whether any real candidate has yet exercised it.
 
-**Sequencing, stated exactly as instructed, not decided further here:**
-`SDT-HF technical design → PO/DFA domain-ambiguity check → UIUX contract → implementation`. SDT-WB
-does not produce the technical design (SDT-HF's own repository and ownership); this record only
-establishes that the design step is now justified and names the two gaps it must address.
+**Dependency order, preserved exactly as instructed:**
 
-**Preserved distinctions, stated explicitly, not implied:**
+> Governing methodology (1) → DFA's canonical-semantics ruling (2) → read-only gap confirmation
+> (3) → SDT-HF technical design (5–6, current stage) → PO/DFA domain-ambiguity check → UIUX
+> contract → implementation.
 
-- **The previously accepted `IdentityAdjudication` capability remains historically CLOSED/
-  ACCEPTED — not silently reopened.** §12's own closure record above (Gates A/B/C/D, all PASS-
-  ACCEPT) is unedited by this section. This increment is a *new*, separate, corrective piece of
-  work responding to a *later* DFA ruling — the same posture INC-6's Finnhub boundary condition
-  and INC-4's own `EvidenceSignal`-then-`IdentityAdjudication` sequencing already established: a
-  closure records what was true and accepted at that time; a subsequent ruling can justify new,
-  separately-gated work without retroactively undoing the earlier acceptance.
-- **Real production adjudication still waits for naturally-occurring eligible Tier 0/1/2 evidence
-  — unaffected, unrelated to this increment's own justification.** `evidence_signal`: 0 rows,
-  live-confirmed at closure and unchanged since. That absence does **not** block technical
-  design/implementation of this corrective increment — the two named gaps exist in the mechanism
-  itself, checkable and fixable independent of whether any real candidate has yet exercised it.
+Items 4 and 7 sit outside this dependency chain, stated as standing, unaffected facts — the prior
+closure (4) is not a step this chain revisits, and the production-evidence block (7) does not gate
+any step in it.
 
 **State: NEXT.** Not implemented; not accepted. No HistFinTS or `histfints_uiue` file modified by
 this record.
