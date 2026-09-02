@@ -151,7 +151,7 @@ States marked **†** are carried from the v5 UIUX review and must be confirmed 
 | INC-3 | Publication-aware acquisition-history diagnostic | CLOSED | DFA → SE/SDT | — | D1–D4 rulings; DFA BYMA calendar rulings; §8/§11 baseline |
 | INC-14 | Application-wide dynamic feedback / live regions | CLOSED | UIUX + SE/SDT + PO | — | `043_Application_Wide_Dynamic_Feedback_UX_Specification.md`, `052_Application_Wide_Dynamic_Feedback_AC_DFB_08_Final_Validation_Evidence.md` (histfints_uiue); §8/§16 baseline |
 | INC-16 | `USER_DISABLED` manual-Run prohibition | CLOSED | UIUX + SE/SDT + PO | — | `047_USER_DISABLED_Manual_Run_UX_Specification.md`, `053_USER_DISABLED_Manual_Run_UIUX_Validation_Evidence.md` (histfints_uiue); §8/§16a baseline |
-| INC-17 | `IdentityAdjudication` corrective increment (authoritative-contradiction resolution + case-specific materiality persistence) | **ACTIVE** — Gate A PASS (`0b111d0`); corrective UI fix applied (`2f7e1d8`, full suite 1684 passed) for `AC-COR-12`/`08`/`09`/`NON_MATERIAL` round-trip; **Gate B still open pending UIUX revalidation**; Gates C/D open. **NOT CLOSED, NOT ACCEPTED** | DFA (§7 ✓) → SDT-HF (design ✓) → [UIUX (contract ✓) \|\| DFA (trigger-map ✓)] → implementation ✓ (Gate A PASS) → corrective fix applied (`2f7e1d8`) → **Gate B revalidation pending** → conformance/domain gates → PO acceptance | — | `TIER_0_1_2_3_FINANCIAL_IDENTITY_EVIDENCE_METHODOLOGY_REFERENCE_2026-09-01.md` §6b/§7b/§7c; `histfints/docs/future_designs/INC17_CORRECTIVE_INCREMENT_DESIGN.md`; `068`/`069_INC17_AC_COR_Validation_Evidence.md` (histfints_uiue); §12a–§12i detail |
+| INC-17 | `IdentityAdjudication` corrective increment (authoritative-contradiction resolution + case-specific materiality persistence) | **ACTIVE** — Gate A PASS (`0b111d0`); corrective fix (`2f7e1d8`) scoped-revalidated PASS on all 4 requested items (`070`); **Gate B still open** — `070` itself: "cannot be called fully discharged" (new `AC-COR-03` origin-disclosure gap; `AC-COR-07` structurally unreachable, SE/PO's to weigh); Gates C/D open. **NOT CLOSED, NOT ACCEPTED** | DFA (§7 ✓) → SDT-HF (design ✓) → [UIUX (contract ✓) \|\| DFA (trigger-map ✓)] → implementation ✓ (Gate A PASS) → corrective fix ✓ (`2f7e1d8`, `070`) → **Gate B open (AC-COR-03/07)** → conformance/domain gates → PO acceptance | — | `TIER_0_1_2_3_FINANCIAL_IDENTITY_EVIDENCE_METHODOLOGY_REFERENCE_2026-09-01.md` §6b/§7b/§7c; `histfints/docs/future_designs/INC17_CORRECTIVE_INCREMENT_DESIGN.md`; `068`/`069`/`070_INC17_Revalidation_2f7e1d8.md` (histfints_uiue); §12a–§12j detail |
 | INC-15 | Catalog: Cross-Workflow (Search/Discover/Resolve hand-offs) | CLOSED | UIUX + SE/SDT + DFA | — | `040_Catalog_Workflow_Cross_Screen_UX_Assessment.md`, `041_Catalog_Workflow_Cross_Screen_UX_Specification.md`, `045_Catalog_Workflow_AC_XWF_11_Revalidation_Evidence.md` (histfints_uiue); §8/§10a baseline |
 | INC-7 | Core Workbench research capability | BLOCKED | DFA → SE/SDT + UIUX | per-analysis evidence prerequisites | `SPEC-panel-eligibility.md`; `DECISIONS.md` |
 | INC-8 | Screen-by-screen UIUX expansion | CONTINUOUS | UIUX + SE + DFA | per-screen decision gates | UIUX audits and specifications |
@@ -1020,6 +1020,77 @@ later, separate fact, not a retroactive edit to `069`'s own findings.
 **All prior stage records (§12a–§12h) preserved completely unedited.** No HistFinTS or
 `histfints_uiue` file modified by this record — read-only verification throughout (`git show`,
 full test-suite re-run, direct read-only SQL against the live database).
+
+## 12j. Scoped revalidation of the corrective fix — UIUX `070` (2026-09-02)
+
+**Verified `histfints_uiue/070_INC17_Revalidation_2f7e1d8.md` directly, not taken on the relayed
+summary.** Read in full: revalidates `histfints@2f7e1d8` against the four items PO scoped for this
+pass; deliberately narrow — `069`'s own already-PASS items were not rerun and remain valid on their
+own evidence.
+
+**The four requested corrective checks at `2f7e1d8` — all PASS, confirmed real and end-to-end**:
+
+- **`AC-COR-12`**: the resolution-recording form exercised through the **real UI this time** (not
+  the direct-service-call bypass `069` had to use) — both fieldsets render real checkboxes,
+  submission recorded a real `ContradictionResolution`, and relying on it correctly unblocked both
+  stronger dispositions. Real NVDA confirmed both fieldsets `Tab`-reachable with meaningful
+  per-signal announcements — closing `069`'s own `AC-COR-21` partial-FAIL for these two fieldsets
+  specifically.
+- **`AC-COR-08`/`09`**: the new per-dimension satisfaction paragraph confirmed live, distinct per
+  state (`satisfied` / `missing evidence`), shown at each `MATERIAL` dimension's own fieldset — both
+  gaps `069` found are closed functionally/visually. NVDA confirmation of this exact new paragraph
+  specifically was not independently captured this pass — recorded as a narrower, named gap, not
+  rounded up to a full accessibility PASS.
+- **`NON_MATERIAL` round-trip**: all three required behaviors confirmed live — accurate message,
+  the reviewer's selection preserved (`checked: true` after the round trip, previously reverted),
+  and the specific accurate reason coexisting correctly alongside the generic aggregate message
+  rather than being subsumed by it.
+
+**`AC-COR-03` — newly confirmed presentation gap, not a regression from `2f7e1d8`**: a genuine
+dual-origin dimension (`DENOMINATION_CURRENCY`, raised by both gathered evidence and candidate
+context on the same candidate) is correctly deduplicated — shown exactly once — but the rendered
+label discloses only one origin ("evidence gathered for this dimension"), never both. Root-caused
+directly in the route's own code comment: a deliberate binary-label simplification, not a currently
+-failing computation. `070` states plainly this is **new evidence from independently exercising a
+scenario `069` left untested**, not present in `2f7e1d8`'s own diff — not attributable to the
+corrective fix.
+
+**`AC-COR-07` — remains unresolved as a validation-reachability question, not presently an
+application FAIL, confirmed precisely why**: `070` attempted to construct a `MatchCandidate`
+referencing a nonexistent `Series` via a normal seed insert and hit a real
+`sqlite3.IntegrityError: FOREIGN KEY constraint failed`. Confirmed by reading
+`discover_relevant_dimensions_for_candidate()`'s own source: its only "could not be established"
+path fires when the `MatchCandidate` itself doesn't exist (a different, already-handled case) — the
+schema's own FK constraint means a real `MatchCandidate` can never carry a dangling `Series`
+reference in the first place. `070`'s own framing preserved exactly: "whether the design intended a
+scenario the schema itself now forecloses is a DFA/SE design question, not a UIUX finding" — not
+rounded up to PASS, not left silently unaddressed.
+
+**The stale seven-server condition — confirmed a validation-harness artifact, not an INC-17
+defect, documented in `070` §0.** Seven disposable Flask dev-server processes had accumulated on
+the same port across this and an earlier validation pass's restart attempts (Windows permits
+multiple listeners on one port); requests landed unpredictably on stale processes, producing
+data that appeared inconsistent with what had just been seeded. Resolved by killing all seven by
+their real Windows PIDs and confirming exactly one process bound before any of the scoped
+evidence above was captured — `070` itself states this explicitly: "This was a test-harness
+artifact, not an INC-17 or HistFinTS defect."
+
+**Current state, recorded exactly, matching `070`'s own "cannot be called fully discharged from
+this pass alone":**
+
+> Gate A — PASS (unchanged, §12g). Gate B — **still open**: the four scoped items PASS, but
+> `AC-COR-03`'s newly-found origin-disclosure gap and `AC-COR-07`'s structural-unreachability
+> question remain outside this pass's own resolution — `070` explicitly declines to assert whether
+> either blocks Gate B, naming that as SE's/PO's call, not decided here either way. Gates C/D —
+> open. **INC-17: NOT CLOSED, NOT ACCEPTED.**
+
+**`069` and `070` both preserved as historical validation evidence, neither rewritten.** `069`
+remains the accurate original-defect record against `0b111d0`; `070` is a later, separate,
+deliberately-scoped revalidation against `2f7e1d8` — the two stand side by side, not merged or
+edited into one another.
+
+**All prior stage records (§12a–§12i) preserved completely unedited.** No HistFinTS or
+`histfints_uiue` file modified by this record.
 
 ## 13. INC-5 — Corporate-action and economic-event evidence
 
