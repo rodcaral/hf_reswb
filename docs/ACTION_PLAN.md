@@ -151,7 +151,7 @@ States marked **†** are carried from the v5 UIUX review and must be confirmed 
 | INC-3 | Publication-aware acquisition-history diagnostic | CLOSED | DFA → SE/SDT | — | D1–D4 rulings; DFA BYMA calendar rulings; §8/§11 baseline |
 | INC-14 | Application-wide dynamic feedback / live regions | CLOSED | UIUX + SE/SDT + PO | — | `043_Application_Wide_Dynamic_Feedback_UX_Specification.md`, `052_Application_Wide_Dynamic_Feedback_AC_DFB_08_Final_Validation_Evidence.md` (histfints_uiue); §8/§16 baseline |
 | INC-16 | `USER_DISABLED` manual-Run prohibition | CLOSED | UIUX + SE/SDT + PO | — | `047_USER_DISABLED_Manual_Run_UX_Specification.md`, `053_USER_DISABLED_Manual_Run_UIUX_Validation_Evidence.md` (histfints_uiue); §8/§16a baseline |
-| INC-17 | `IdentityAdjudication` corrective increment (authoritative-contradiction resolution + case-specific materiality persistence) | NEXT — SDT-HF technical design justified, not started | SDT-HF (design) → PO/DFA (domain-ambiguity check) → UIUX (contract) → SDT-HF (implementation) | — | `TIER_0_1_2_3_FINANCIAL_IDENTITY_EVIDENCE_METHODOLOGY_REFERENCE_2026-09-01.md` §6b/§7b/§7c; §12a detail |
+| INC-17 | `IdentityAdjudication` corrective increment (authoritative-contradiction resolution + case-specific materiality persistence) | NEXT — SDT-HF design proposed (`cf5463a`), its own §7 boundary question now DFA-ruled, design mapping against the ruling not yet done | SDT-HF (design, `cf5463a`) → DFA (§7 ruling, done) → SDT-HF (map ruling to design) → PO/DFA (domain-ambiguity check) → UIUX (contract) → SDT-HF (implementation) | — | `TIER_0_1_2_3_FINANCIAL_IDENTITY_EVIDENCE_METHODOLOGY_REFERENCE_2026-09-01.md` §6b/§7b/§7c; `histfints/docs/future_designs/INC17_CORRECTIVE_INCREMENT_DESIGN.md`; §12a/§12b detail |
 | INC-15 | Catalog: Cross-Workflow (Search/Discover/Resolve hand-offs) | CLOSED | UIUX + SE/SDT + DFA | — | `040_Catalog_Workflow_Cross_Screen_UX_Assessment.md`, `041_Catalog_Workflow_Cross_Screen_UX_Specification.md`, `045_Catalog_Workflow_AC_XWF_11_Revalidation_Evidence.md` (histfints_uiue); §8/§10a baseline |
 | INC-7 | Core Workbench research capability | BLOCKED | DFA → SE/SDT + UIUX | per-analysis evidence prerequisites | `SPEC-panel-eligibility.md`; `DECISIONS.md` |
 | INC-8 | Screen-by-screen UIUX expansion | CONTINUOUS | UIUX + SE + DFA | per-screen decision gates | UIUX audits and specifications |
@@ -471,6 +471,76 @@ any step in it.
 
 **State: NEXT.** Not implemented; not accepted. No HistFinTS or `histfints_uiue` file modified by
 this record.
+
+## 12b. DFA's ruling on INC-17's §7 boundary question — the candidate-context completeness rule (2026-09-01)
+
+**Context, verified directly before recording.** SDT-HF's own technical design
+(`histfints@cf5463a`, `docs/future_designs/INC17_CORRECTIVE_INCREMENT_DESIGN.md`, read in full)
+named one concrete, unresolved boundary question at its own §7: for an identity dimension no
+Tier 0/1/2 gatherer has ever produced evidence for on a given candidate, does materiality review
+require (a) an explicit determination against a fixed, DFA-defined taxonomy regardless of gathered
+evidence, or (b) stay strictly scoped to gathered evidence, with an ungathered dimension simply out
+of scope? The design explicitly declined to choose, stating engineering cannot resolve it without
+inventing financial-methodology taxonomy.
+
+**DFA's ruling, relayed by SE/PO, settles this — as a synthesis, not a literal pick of (a) or
+(b):**
+
+- **Case-specific relevant-dimension inventory.** The set of dimensions requiring an explicit
+  materiality determination for a given adjudication is derived from **governing identity
+  taxonomy plus financially typed candidate context** together — neither a single fixed list
+  applied uniformly to every candidate (pure option (a)) nor a set limited to whatever a gatherer
+  happened to produce (pure option (b)). A CEDEAR-vs-underlying candidate's own financially typed
+  context pulls in dimensions (e.g. settlement) the governing taxonomy names as relevant to that
+  candidate *type*, whether or not a Tier 0/1/2 gatherer has produced evidence for them yet.
+- **Candidate context discovers, it does not establish.** The financially typed candidate context
+  that expands the relevant-dimension inventory beyond gathered evidence is itself only a
+  discovery mechanism — it identifies which dimensions are *potentially* relevant for a candidate
+  of that type. It does **not** itself constitute authoritative evidence for or against any
+  dimension; it only says which dimensions must be explicitly ruled on.
+- **Every relevant dimension must be explicitly `MATERIAL` or `NON_MATERIAL`.** No relevant
+  dimension may be left un-ruled-on — silence is not a valid third state.
+- **`NON_MATERIAL` requires reviewer rationale.** Matches the design's own already-specified
+  `DimensionMateriality.__post_init__` requirement (`cf5463a` §1) — confirmed consistent, not a
+  new constraint the design lacked.
+- **Every `MATERIAL` dimension must satisfy evidence, temporal-applicability, and contradiction
+  rules** — the existing gates (§7a/§8/§6 of the governing reference) apply to every dimension
+  ruled `MATERIAL`, regardless of whether that dimension came from gathered evidence or from the
+  taxonomy-plus-context inventory.
+- **Evidence presence/absence alone cannot define the inventory or materiality.** Directly settles
+  the design's own §7 framing: gathered-evidence presence is not sufficient to define the full
+  relevant-dimension set (rules out pure option (b) as the complete answer), and evidence *absence*
+  does not itself make a dimension `NON_MATERIAL` either — a taxonomy-identified dimension with no
+  gathered evidence must still be explicitly ruled on, most likely blocking a stronger disposition
+  until it is (consistent with, and extending, DFA-D03's own "not a substitute for authority"
+  framing already compiled in the governing reference).
+- **Inability to establish relevant-set completeness forces `UNRESOLVED`.** If the governing
+  taxonomy or the candidate's financial typing cannot be established with enough confidence to
+  determine the full relevant-dimension inventory for a given candidate, the honest outcome is
+  `UNRESOLVED` — the same "missing evidence cannot be worked around" discipline already governing
+  every other gate in this methodology, applied here to inventory-completeness itself rather than
+  to any one dimension's own evidence.
+
+**DFA could not inspect the literal §7 option labels — recorded explicitly, not glossed over.**
+DFA does not read `histfints` source directly (per this project's own actor-model routing); the
+ruling above answers the underlying methodological question DFA was actually asked, not a literal
+selection between SDT-HF's own internally-labeled options (a)/(b). **SDT-HF is now mapping this
+ruling against the actual persisted design (`cf5463a`) before UIUX work begins** — determining
+precisely how "governing identity taxonomy plus financially typed candidate context" cashes out
+against the design's own `candidate_context_dimensions` completeness check (§3.1) and
+`materiality_determinations` structure (§1), which is engineering/design work this record does not
+do or anticipate on SDT-HF's behalf.
+
+**Dependency order — continued from §12a, this step inserted precisely where it occurred:**
+
+> ... SDT-HF technical design (`cf5463a`, named the §7 boundary question) → **DFA's ruling on that
+> question (this record)** → **SDT-HF maps the ruling against the persisted design (current step,
+> not yet done)** → PO/DFA domain-ambiguity check on the mapped result → UIUX contract →
+> implementation.
+
+**State: the boundary question is DFA-ruled; the design mapping against it is not yet done.** Not
+implemented; not accepted; does not itself change the persisted design document, which remains
+SDT-HF's to update. No HistFinTS or `histfints_uiue` file modified by this record.
 
 ## 13. INC-5 — Corporate-action and economic-event evidence
 
