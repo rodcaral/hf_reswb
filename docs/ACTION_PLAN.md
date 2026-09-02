@@ -151,7 +151,7 @@ States marked **†** are carried from the v5 UIUX review and must be confirmed 
 | INC-3 | Publication-aware acquisition-history diagnostic | CLOSED | DFA → SE/SDT | — | D1–D4 rulings; DFA BYMA calendar rulings; §8/§11 baseline |
 | INC-14 | Application-wide dynamic feedback / live regions | CLOSED | UIUX + SE/SDT + PO | — | `043_Application_Wide_Dynamic_Feedback_UX_Specification.md`, `052_Application_Wide_Dynamic_Feedback_AC_DFB_08_Final_Validation_Evidence.md` (histfints_uiue); §8/§16 baseline |
 | INC-16 | `USER_DISABLED` manual-Run prohibition | CLOSED | UIUX + SE/SDT + PO | — | `047_USER_DISABLED_Manual_Run_UX_Specification.md`, `053_USER_DISABLED_Manual_Run_UIUX_Validation_Evidence.md` (histfints_uiue); §8/§16a baseline |
-| INC-17 | `IdentityAdjudication` corrective increment (authoritative-contradiction resolution + case-specific materiality persistence) | NEXT — DFA §7 ruling and SDT-HF design finalization (`2f1da5a`) both COMPLETE; UIUX contract + DFA trigger-map confirmation open in parallel | DFA (§7 ruling ✓) → SDT-HF (design finalization ✓) → [UIUX (contract) \|\| DFA (trigger-map confirmation)] → SDT-HF (implementation) → validation | — | `TIER_0_1_2_3_FINANCIAL_IDENTITY_EVIDENCE_METHODOLOGY_REFERENCE_2026-09-01.md` §6b/§7b/§7c; `histfints/docs/future_designs/INC17_CORRECTIVE_INCREMENT_DESIGN.md`; §12a/§12b/§12c detail |
+| INC-17 | `IdentityAdjudication` corrective increment (authoritative-contradiction resolution + case-specific materiality persistence) | NEXT — DFA §7 ruling, SDT-HF design finalization (`2f1da5a`), and UIUX contract (`068`, AC-COR-01..25) all COMPLETE; DFA trigger-map confirmation still OPEN | DFA (§7 ruling ✓) → SDT-HF (design finalization ✓) → [UIUX (contract ✓) \|\| DFA (trigger-map confirmation OPEN)] → SDT-HF (implementation) → validation | — | `TIER_0_1_2_3_FINANCIAL_IDENTITY_EVIDENCE_METHODOLOGY_REFERENCE_2026-09-01.md` §6b/§7b/§7c; `histfints/docs/future_designs/INC17_CORRECTIVE_INCREMENT_DESIGN.md`; `068_INC17_Materiality_Contradiction_Resolution_UX_Contract.md` (histfints_uiue); §12a/§12b/§12c/§12d detail |
 | INC-15 | Catalog: Cross-Workflow (Search/Discover/Resolve hand-offs) | CLOSED | UIUX + SE/SDT + DFA | — | `040_Catalog_Workflow_Cross_Screen_UX_Assessment.md`, `041_Catalog_Workflow_Cross_Screen_UX_Specification.md`, `045_Catalog_Workflow_AC_XWF_11_Revalidation_Evidence.md` (histfints_uiue); §8/§10a baseline |
 | INC-7 | Core Workbench research capability | BLOCKED | DFA → SE/SDT + UIUX | per-analysis evidence prerequisites | `SPEC-panel-eligibility.md`; `DECISIONS.md` |
 | INC-8 | Screen-by-screen UIUX expansion | CONTINUOUS | UIUX + SE + DFA | per-screen decision gates | UIUX audits and specifications |
@@ -612,6 +612,74 @@ return the extracted trigger table; UIUX should return the INC-17 contract.
 
 **State: NEXT — design finalized, two parallel tracks open, neither complete.** Not implemented;
 not accepted. No HistFinTS or `histfints_uiue` file modified by this record.
+
+**Preserved as history, not rewritten**: the paragraph above accurately describes the state as of
+`bf32910`. §12d below records the current, later stage — it does not edit this section.
+
+## 12d. UIUX contract complete (`histfints_uiue` `068`) — one of two parallel tracks done (2026-09-02)
+
+**Verified directly before recording, not taken on the relayed summary.** `histfints_uiue`
+`068_INC17_Materiality_Contradiction_Resolution_UX_Contract.md`, read in full: grounded explicitly
+in `histfints@2f1da5a` and the DFA §7 ruling applied there; status "specification work only... Not
+implemented, not accepted, not closed"; does not modify HistFinTS or Workbench.
+
+- **`AC-COR-01..25` drafted and complete** — 25 numbered acceptance criteria, confirmed by direct
+  count.
+- **Coverage confirmed against the requested list, each independently checked, not assumed
+  present**: dimension origin/presentation (§1, `AC-COR-01..03` — each dimension states which
+  origin(s) raised it, a dimension present via both origins shown once); explicit `MATERIAL`/
+  `NON_MATERIAL` classification with nothing preselected (§2, `AC-COR-04`); non-material rationale
+  required, material not (`AC-COR-05`); stronger-disposition blocking on an unclassified dimension
+  or an unestablishable inventory, `UNRESOLVED` exempt (`AC-COR-06/07`); per-`MATERIAL`-dimension
+  evidence/temporal/satisfaction-state visibility, visually distinct from `NON_MATERIAL` (§3,
+  `AC-COR-08/09`); structured contradiction resolution — contradictions visible regardless of
+  selection state, exactly the four DFA-approved mechanisms with no default/ranking, the exact
+  fields the design's own `ContradictionResolution.__post_init__` requires, tier/preference/
+  majority/recency excluded as resolvers, acknowledgment kept distinct from resolution, full
+  per-candidate resolution history discoverable (§4, `AC-COR-10..15`); the five-stage evidence
+  chain preserved at every UI stage — *`EvidenceSignals/context → materiality assessment →
+  contradiction resolution → human adjudication disposition → separately authorized catalog
+  action`* — with the confirmation step restating materiality/resolution basis, not just the
+  disposition label (§5, `AC-COR-16..18`); explicit prohibitions on scoring/ranking/confidence/
+  recommendation and on any auto-resolution/auto-classification path (§6, `AC-COR-19/20`);
+  keyboard/NVDA acceptance criteria, drafted not yet validated (§7, `AC-COR-21..25`).
+- **The corrected `Get-SpeechViewerText` path is recorded as the required future NVDA
+  evidence-capture mechanism** — `AC-COR-25`, verbatim: any future INC-17 NVDA validation "must
+  use the corrected `Get-SpeechViewerText` capture function (`histfints@0a8377a`), not
+  `AutomationElement.Current.Name`" — explicitly to avoid repeating the capture-bug-confounded
+  pattern `058`/`061`/`063`/`064` went through.
+- **`CONTEXT_DIMENSION_TRIGGERS`'s concrete field list is deliberately not embedded in the UX
+  contract** — confirmed, §8: the contract specifies presentation behavior for whatever dimensions
+  the discovery mechanism surfaces, without enumerating or depending on the specific field list,
+  "since that finite mapping is undergoing an independent DFA completeness confirmation... If DFA
+  amends the mapping, no AC in this document requires revision."
+- **UIUX contract completion does not authorize implementation by itself** — confirmed, §9: "Does
+  not claim INC-17 implemented, validated, or accepted," and does not settle the separate,
+  still-open DFA trigger-map confirmation, "unaffected by this contract."
+
+**Dependency state, updated:**
+
+> DFA §7 ruling ✓ → SDT-HF design finalization ✓ → **[UIUX contract ✓ || DFA trigger-map
+> confirmation OPEN]** → implementation → validation.
+
+**Correction to a statement now stale**: §12c's own closing line ("UIUX should return the INC-17
+contract") described an outstanding item as of `bf32910`; that item is fulfilled by `068`,
+verified above — the statement is now stale and superseded by this record, not left standing as
+if still current. §12c itself is left unedited as the accurate prior-stage history it was at the
+time.
+
+**Preserved exactly, per explicit instruction**: the trigger-map confirmation was non-blocking for
+UX specification work (confirmed independently true — `068` was completed without it, per its own
+§8) but remains a prerequisite for production implementation — neither parallel item's status
+changes the other's; only the UIUX branch is now checked off.
+
+**No new instruction to SDT-HF** — its trigger-table extraction request (the `CONTEXT_DIMENSION_
+TRIGGERS` table) remains outstanding, unchanged, per explicit note; SDT-WB is waiting on it, not
+issuing a new one.
+
+**State: NEXT — one of two parallel tracks complete (UIUX ✓), the DFA trigger-map confirmation
+still OPEN.** Not implemented; not accepted. No HistFinTS or `histfints_uiue` file modified by
+this record.
 
 ## 13. INC-5 — Corporate-action and economic-event evidence
 
