@@ -1346,6 +1346,43 @@ PASS per `072` (§12m) → **Gate C PASS (DFA), Gate D PASS/PO ACCEPTED, INC-17 
 above, not editing any existing baseline entry). §5 master row updated to match. No HistFinTS or
 `histfints_uiue` file modified by this record.
 
+## 12o. Post-INC-17 next-stage plan (2026-09-02)
+
+**Recorded exactly as instructed. Existing accepted capabilities preserved unchanged — this is a
+state/plan record, not a reopening of any of them.**
+
+- **INC-17 is CLOSED/ACCEPTED and pushed** — Gate A/B/C/D all PASS (§12n), pushed to `origin/main`
+  at `508e348` (`1792572..508e348`), local/remote `HEAD` confirmed matching at push time.
+- **The Tier 0/1/2 methodology/documentation gap is resolved** — `TIER_0_1_2_3_FINANCIAL_
+  IDENTITY_EVIDENCE_METHODOLOGY_REFERENCE_2026-09-01.md`, GOVERNING status, resolves §1's own
+  Tier 0/1/2 GAP row (recorded 2026-09-01, §12 top). Unaffected and unextended by this record.
+- **Real production adjudication remains blocked by zero naturally occurring Tier 0/1/2
+  `EvidenceSignal` rows** — the pre-existing, unresolved condition named throughout §12/§12a
+  (a live capability with genuinely zero real-world occurrences is not itself a defect, provided
+  the reason is independently traceable — §8's `EvidenceSignal` baseline entry); INC-17's closure
+  does not manufacture, simulate, or otherwise create eligible evidence to work around this —
+  still true, still unrelated to INC-17's own closure.
+- **Tier 3 remains deferred** — out of scope throughout, unaffected by this record, per the
+  governing methodology reference's own preserved deferral.
+- **The next active INC-4 question is the separate G1/G9 boundary** — the on-hold
+  `IdentityEvidenceEvaluator` capability (`057`'s own §0 boundary, referenced throughout INC-4's
+  and INC-17's closure scopes as explicitly untouched) is now the next item requiring a
+  product/domain decision before any further INC-4 implementation work.
+- **DFA is now reviewing whether G1/G9 should be reactivated, remain deferred, or be formally
+  retired/superseded** — a live, open review, not yet settled; this record does not anticipate,
+  narrow, or presuppose its outcome.
+- **No new HistFinTS implementation is authorized until that product/domain decision is
+  settled** — a standing hold on new HistFinTS-side G1/G9-adjacent implementation work, binding
+  until DFA's review concludes and PO/SE convey the settled decision.
+- **The BYMA/Event Log Readers and acquisition-monitoring threads remain independent operational
+  work** — explicitly recorded as **not** blocking this INC-4/G1-G9 decision, and this decision
+  does not block them; the two remain on separate tracks.
+
+**Existing accepted capabilities preserved unchanged**: both prior INC-4 bounded closures
+(`MatchCandidate → EvidenceSignal`, `IdentityAdjudication`, both 2026-09-01) and INC-17's own
+closure (§12n, 2026-09-02) stand exactly as recorded — this plan record does not reopen, restate,
+or silently extend any of them. No HistFinTS or `histfints_uiue` file modified by this record.
+
 ## 13. INC-5 — Corporate-action and economic-event evidence
 
 **State:** the live Yahoo/FRED provider-event capture capability: **CLOSED/ACCEPTED (2026-09-01).** Gate disposition: A — PASS. C — PASS (DFA). D — ACCEPT (PO, below). Gate B remains deferred to first user-facing surface (unchanged). — **Owner:** SE/SDT + DFA — **Source:** `REQUEST-event-capture.md`
@@ -1550,7 +1587,7 @@ Standing rules live in §3 and are cited by ID. Do not restate an SP or UP insid
 - **INC-12** — **CLOSED/ACCEPTED 2026-08-29 (§8/§9).** All four gates disposed (A/B/C/D PASS-ACCEPT). Reusable baseline only from here — does not extend to Resolve (INC-13) or authorize automatic identity resolution; do not reopen or silently extend without a new decision.
 - **INC-13** — **CLOSED/ACCEPTED 2026-08-29 (§8/§10).** All four gates disposed (A/B/C/D PASS-ACCEPT; Gate B carries two named, not-rounded-up NVDA validation-coverage qualifications). Reusable baseline only from here — does not authorize automatic identity resolution at any tier, and each future disposition remains subject to its own evidence/adjudication requirements; do not reopen or silently extend without a new decision.
 - **INC-15** — **CLOSED/ACCEPTED 2026-08-31 (§8/§10a).** All four gates disposed (A/B/C/D PASS-ACCEPT; Gate B carries a named defect-and-correction cycle, `044` FAIL → `045` PASS — not glossed over). Reusable baseline only from here — does not extend to INC-12/INC-13/INC-14 or authorize automatic identity resolution; do not reopen or silently extend without a new decision.
-- **INC-4** — ACTIVE overall; two bounded capabilities **CLOSED/ACCEPTED 2026-09-01 (§8/§12)**: `MatchCandidate → EvidenceSignal` (A/C/D PASS-ACCEPT; the empty `evidence_signal` table — no real production signal yet — is not a reopening condition, a future occurrence is additional validation only) and manual financial-identity adjudication (`IdentityAdjudication`, A/B/C/D PASS-ACCEPT; Gate B fully discharged only after a genuine capture-tooling defect, distinct from a genuine application defect, was separately found and fixed — see §12). Reusable baselines only for those bounded capabilities — neither closes INC-4 as a whole, validates/expands Tier 3, changes Resolve/adjudication semantics, or authorizes automatic/automated identity resolution; do not reopen or silently extend without a new decision. **Tier 0/1/2 methodology GAP RESOLVED 2026-09-01** (§1/§12) — governing reference adopted, `docs/28` provenance limitation preserved; shipped implementation not yet claimed conformant to the newly-incorporated authoritative-contradiction-resolution/disposition-materiality rulings. **Correction (2026-09-01): stale as of `8bcab60`.** DFA's subsequent canonical adjudication-record ruling establishes two real, forward-looking implementation gaps (case-specific materiality persistence; affirmative authoritative-contradiction resolution) — a bounded corrective increment, **INC-17**, is now justified for SDT-HF technical design (§12a). The previously-closed `IdentityAdjudication` capability remains historically CLOSED/ACCEPTED, not reopened. Real production adjudication still waits on a genuinely eligible Tier 0/1/2 `EvidenceSignal` occurring naturally — that remains true and unrelated, and does not itself block INC-17's design/implementation.
+- **INC-4** — ACTIVE overall; three bounded capabilities now **CLOSED/ACCEPTED**: `MatchCandidate → EvidenceSignal` (2026-09-01, A/C/D PASS-ACCEPT; the empty `evidence_signal` table — no real production signal yet — is not a reopening condition, a future occurrence is additional validation only), manual financial-identity adjudication (`IdentityAdjudication`, 2026-09-01, A/B/C/D PASS-ACCEPT; Gate B fully discharged only after a genuine capture-tooling defect, distinct from a genuine application defect, was separately found and fixed — see §12), and the **INC-17 corrective increment over `IdentityAdjudication`** (2026-09-02, A/B/C/D PASS-ACCEPT, pushed `508e348` — see §12n). Reusable baselines only for those three bounded capabilities — none closes INC-4 as a whole, validates/expands Tier 3, changes Resolve/adjudication semantics, or authorizes automatic/automated identity resolution; do not reopen or silently extend without a new decision. **Tier 0/1/2 methodology GAP RESOLVED 2026-09-01** (§1/§12), unaffected and unextended by INC-17's closure — governing reference adopted, `docs/28` provenance limitation preserved. **Real production adjudication remains blocked by zero naturally occurring Tier 0/1/2 `EvidenceSignal` rows** — still true, unrelated to and not resolved by INC-17's closure. **Tier 3 remains deferred**, out of scope. **Post-INC-17 next-stage plan recorded 2026-09-02 (§12o): the next active INC-4 question is the separate, on-hold G1/G9 `IdentityEvidenceEvaluator` boundary** — DFA is now reviewing whether it should be reactivated, remain deferred, or be formally retired/superseded; **no new HistFinTS implementation is authorized until that product/domain decision is settled.** The BYMA/Event Log Readers and acquisition-monitoring threads remain independent operational work, not blocking and not blocked by this decision.
 - **INC-5** — live Yahoo/FRED capture capability **CLOSED/ACCEPTED 2026-09-01 (§8/§13)**, all applicable gates disposed (A/C/D PASS-ACCEPT; B deferred to first user-facing surface, unchanged). 859 real captured events preserved as operational evidence, evidence-only; capture-run provenance via shared `acquired_at` explicitly not equivalent to `ImportRun`'s FK pattern. Reusable baseline only — does not extend to comparability/causal-attribution/adjudication or any other increment; continue only the further prerequisite work defined financial questions require beyond this capability.
 - **INC-6** — **CLOSED/ACCEPTED 2026-09-01 (§8/§14), provider-level `adjustment_basis` field scope only.** All three applicable gates disposed (A/C/D PASS-ACCEPT). Reusable baseline only from here — does not extend to cross-provider comparability, historical splicing, corporate-action correctness, or UI implementation; Finnhub's `NULL` boundary condition stands as a permanent, self-expiring standing note, not discharged by this closure; do not reopen or silently extend without a new decision.
 - **INC-3** — **CLOSED/ACCEPTED 2026-08-29 (§8/§11).** All four gates disposed (A/C/D PASS-ACCEPT, B N/A). Reusable baseline only from here — do not reopen or silently extend without a new decision.
