@@ -151,7 +151,7 @@ States marked **†** are carried from the v5 UIUX review and must be confirmed 
 | INC-3 | Publication-aware acquisition-history diagnostic | CLOSED | DFA → SE/SDT | — | D1–D4 rulings; DFA BYMA calendar rulings; §8/§11 baseline |
 | INC-14 | Application-wide dynamic feedback / live regions | CLOSED | UIUX + SE/SDT + PO | — | `043_Application_Wide_Dynamic_Feedback_UX_Specification.md`, `052_Application_Wide_Dynamic_Feedback_AC_DFB_08_Final_Validation_Evidence.md` (histfints_uiue); §8/§16 baseline |
 | INC-16 | `USER_DISABLED` manual-Run prohibition | CLOSED | UIUX + SE/SDT + PO | — | `047_USER_DISABLED_Manual_Run_UX_Specification.md`, `053_USER_DISABLED_Manual_Run_UIUX_Validation_Evidence.md` (histfints_uiue); §8/§16a baseline |
-| INC-17 | `IdentityAdjudication` corrective increment (authoritative-contradiction resolution + case-specific materiality persistence) | **ACTIVE** — Gate A PASS (`0b111d0`); all functional/reachability questions resolved per `071`: `AC-COR-03` PASS in full at `2f7e1d8` (supersedes `070`'s FAIL — browser-cache false negative), `AC-COR-07` resolved as not independently exercisable / not an application FAIL (dead code, two independent grounds); **Gate B still open — only the real-NVDA per-material-dimension satisfaction/status confirmation remains**; Gates C/D open. **NOT CLOSED, NOT ACCEPTED** | DFA (§7 ✓) → SDT-HF (design ✓) → [UIUX (contract ✓) \|\| DFA (trigger-map ✓)] → implementation ✓ → corrective fixes ✓ (`2f7e1d8`, `27b6865`) → AC-COR-03/07 resolved ✓ (`071`) → **Gate B open (NVDA item only)** → conformance/domain gates → PO acceptance | — | `TIER_0_1_2_3_FINANCIAL_IDENTITY_EVIDENCE_METHODOLOGY_REFERENCE_2026-09-01.md` §6b/§7b/§7c; `histfints/docs/future_designs/INC17_CORRECTIVE_INCREMENT_DESIGN.md`; `068`/`069`/`070`/`071` (histfints_uiue); §12a–§12l detail |
+| INC-17 | `IdentityAdjudication` corrective increment (authoritative-contradiction resolution + case-specific materiality persistence) | **ACTIVE** — Gate A PASS (`0b111d0`); **Gate B PASS / fully discharged** per `072`: `AC-COR-03` PASS confirmed at its correct commit `27b6865` (correcting `071`'s attribution error — the fix is not in `2f7e1d8`), `AC-COR-07` resolved as not independently exercisable / not an application FAIL, real-NVDA `AC-COR-08`/`09` confirmation PASS; **Gate C pending DFA (review request already outstanding)**; Gate D open. **NOT CLOSED, NOT ACCEPTED** | DFA (§7 ✓) → SDT-HF (design ✓) → [UIUX (contract ✓) \|\| DFA (trigger-map ✓)] → implementation ✓ → corrective fixes ✓ (`2f7e1d8`, `27b6865`) → AC-COR-03/07 resolved ✓ (`071`, corrected by `072`) → NVDA confirmation ✓ (`072`) → **Gate B PASS** → **Gate C pending DFA** → Gate D → PO acceptance | — | `TIER_0_1_2_3_FINANCIAL_IDENTITY_EVIDENCE_METHODOLOGY_REFERENCE_2026-09-01.md` §6b/§7b/§7c; `histfints/docs/future_designs/INC17_CORRECTIVE_INCREMENT_DESIGN.md`; `068`/`069`/`070`/`071`/`072` (histfints_uiue); §12a–§12m detail |
 | INC-15 | Catalog: Cross-Workflow (Search/Discover/Resolve hand-offs) | CLOSED | UIUX + SE/SDT + DFA | — | `040_Catalog_Workflow_Cross_Screen_UX_Assessment.md`, `041_Catalog_Workflow_Cross_Screen_UX_Specification.md`, `045_Catalog_Workflow_AC_XWF_11_Revalidation_Evidence.md` (histfints_uiue); §8/§10a baseline |
 | INC-7 | Core Workbench research capability | BLOCKED | DFA → SE/SDT + UIUX | per-analysis evidence prerequisites | `SPEC-panel-eligibility.md`; `DECISIONS.md` |
 | INC-8 | Screen-by-screen UIUX expansion | CONTINUOUS | UIUX + SE + DFA | per-screen decision gates | UIUX audits and specifications |
@@ -1214,6 +1214,73 @@ is still open. Gates C/D remain open. **INC-17: NOT CLOSED, NOT ACCEPTED.**
 
 **All prior stage records (§12a–§12k) preserved completely unedited, including `070` itself.** No
 HistFinTS or `histfints_uiue` file modified by this record.
+
+## 12m. UIUX `072` — real-NVDA AC-COR-08/09 confirmation, correcting `071`'s own commit
+attribution; Gate B PASS (2026-09-02)
+
+**Verified directly against `histfints_uiue/072_INC17_AC_COR_08_09_NVDA_Confirmation.md`, not
+taken on the relayed summary.**
+
+- **The corrected sequence, precisely, per `072`'s own §3 and this record's independent read**:
+  - `070` **correctly identified a real `AC-COR-03` dual-origin presentation defect** at
+    `histfints@2f7e1d8`. §12l's characterization of `070`'s finding as a browser-cache false
+    negative is **itself now understood to have been wrong** — not because `071` reasoned
+    incorrectly from what it read, but because what it read had already moved past `2f7e1d8`
+    before it read it (see below).
+  - `071` **correctly resolved `AC-COR-07`** as not independently exercisable under current
+    schema/public-API invariants (Outcome 2, two independent grounds — persisted-state
+    unreachability and control-flow dead code) — this finding is unaffected by the correction
+    below and stands as recorded in §12l.
+  - `071`'s claim that `AC-COR-03` was **already fixed in `2f7e1d8`** was an **attribution
+    error**, per `072`'s own root-cause account: `071` opened with `git log -1` (printing
+    `2f7e1d8` at that moment), but `histfints@27b6865` landed from outside this session while
+    `071`'s own investigation was in progress; `071` then read the *working tree* (already past
+    `2f7e1d8`) rather than a `git show 2f7e1d8:...` snapshot, and attributed what it saw there to
+    the wrong commit. `072` confirms this directly: `git show 2f7e1d8:src/histfints/
+    presentation/web.py` contains only the old two-way `"evidence"`/`"context"` inference —
+    exactly the shape `070` reported as insufficient — not the three-way logic `071` read.
+  - **The actual `AC-COR-03` fix is `histfints@27b6865`** (already recorded at §12k), not
+    `2f7e1d8`.
+  - **`AC-COR-03` is PASS at `27b6865`** — `071`'s raw-HTTP re-verification of the three-way
+    disclosure stands as accurate (only its commit attribution was wrong), and `072`'s own NVDA
+    capture independently reproduces the identical disclosure text at `27b6865`.
+  - **`AC-COR-07` is not an application FAIL and does not require manufacturing invalid persisted
+    state** — reconfirmed unaffected by the attribution correction; `git diff --stat 2f7e1d8..
+    27b6865` touches only the dimension-origin code path and its test file, not
+    `discover_relevant_dimensions_for_candidate()`'s reachability logic.
+
+- **`072` confirms the remaining `AC-COR-08`/`09` accessibility sub-check PASS, real NVDA,
+  `Get-SpeechViewerText` exclusively, at `histfints@27b6865`** — covering both required states in
+  one continuous reading sweep:
+  - **Satisfied** (`DENOMINATION_CURRENCY`): *"...fuera de edición  Current status: satisfied —
+    Currently satisfied for the entered effective period."*
+  - **Missing evidence** (`IDENTIFIER`): *"...fuera de edición  Current status: missing evidence
+    — No relied-upon evidence for this dimension."*
+  - Both reached via real `Down`-arrow browse-mode line reading (the coordinate-based click
+    method used successfully in `070` did not reproduce reliably this pass — bounding-rectangle
+    values were unreliable for this page; the reading-sweep technique already validated for
+    `069`'s `AC-COR-24` was used instead, no screen coordinates required). Speech Viewer buffer
+    reached `13967` characters with no plateau, reconfirming `Get-SpeechViewerText`'s continued
+    correctness at length.
+
+- **Corrected record, per `072` §3, adopted here as the operative account**: `AC-COR-03` — FAIL
+  at `2f7e1d8` (`070`'s original finding, real, not a cache artifact), fixed at `27b6865`,
+  confirmed PASS at `27b6865` (`071`'s raw-HTTP re-verification and `072`'s NVDA capture both
+  independently corroborate the fixed state). `AC-COR-07` — resolved as not independently
+  exercisable, per `071`, unaffected by this correction.
+
+**Gate B: PASS / fully discharged.** All three previously outstanding items are now resolved:
+`AC-COR-03` confirmed PASS at its correct commit (`27b6865`); `AC-COR-07` resolved as not an
+application FAIL, not requiring invalid persisted state; the narrow NVDA per-dimension
+satisfaction check (`AC-COR-08`/`09`) confirmed PASS. Gate C remains pending DFA review — the
+review request is already outstanding, no new instruction to DFA is issued by this record. Gate D
+remains open. **INC-17 remains NOT CLOSED, NOT ACCEPTED** — Gate B's discharge is a gate-level
+technical/validation result, not increment closure or PO acceptance.
+
+**`069`–`072` preserved unedited, per this repository's documentation-lifecycle discipline** —
+`072` is the correction of record for `071`'s attribution error, not a retrofit of `071`'s own
+text. **All prior stage records (§12a–§12l) preserved completely unedited.** No HistFinTS or
+`histfints_uiue` file modified by this record.
 
 ## 13. INC-5 — Corporate-action and economic-event evidence
 
