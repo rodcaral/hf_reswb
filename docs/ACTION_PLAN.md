@@ -153,7 +153,7 @@ States marked **†** are carried from the v5 UIUX review and must be confirmed 
 | INC-16 | `USER_DISABLED` manual-Run prohibition | CLOSED | UIUX + SE/SDT + PO | — | `047_USER_DISABLED_Manual_Run_UX_Specification.md`, `053_USER_DISABLED_Manual_Run_UIUX_Validation_Evidence.md` (histfints_uiue); §8/§16a baseline |
 | INC-17 | `IdentityAdjudication` corrective increment (authoritative-contradiction resolution + case-specific materiality persistence) | **CLOSED / ACCEPTED** — Gate A PASS (`0b111d0`); Gate B PASS (`072`, `AC-COR-03` PASS at `27b6865`, `AC-COR-07` not an application FAIL, real-NVDA `AC-COR-08`/`09` PASS); **Gate C PASS (DFA); Gate D PASS / PO ACCEPTED**. Governing boundary: candidate context + EvidenceSignals → materiality assessment → human adjudication → separately authorized catalog action. Does not close INC-4 overall; does not authorize Tier 3, G1/G9, automated adjudication, or production adjudication without eligible evidence | DFA (§7 ✓) → SDT-HF (design ✓) → [UIUX (contract ✓) \|\| DFA (trigger-map ✓)] → implementation ✓ → corrective fixes ✓ (`2f7e1d8`, `27b6865`) → AC-COR-03/07 resolved ✓ (`071`, corrected by `072`) → Gate B PASS (`072`) → **Gate C PASS (DFA)** → **Gate D PASS (PO)** → **CLOSED/ACCEPTED** | — | `TIER_0_1_2_3_FINANCIAL_IDENTITY_EVIDENCE_METHODOLOGY_REFERENCE_2026-09-01.md` §6b/§7b/§7c; `histfints/docs/future_designs/INC17_CORRECTIVE_INCREMENT_DESIGN.md`; `068`/`069`/`070`/`071`/`072` (histfints_uiue); §8 baseline entry; §12a–§12n detail |
 | INC-15 | Catalog: Cross-Workflow (Search/Discover/Resolve hand-offs) | CLOSED | UIUX + SE/SDT + DFA | — | `040_Catalog_Workflow_Cross_Screen_UX_Assessment.md`, `041_Catalog_Workflow_Cross_Screen_UX_Specification.md`, `045_Catalog_Workflow_AC_XWF_11_Revalidation_Evidence.md` (histfints_uiue); §8/§10a baseline |
-| INC-7 | Core Workbench research capability | BLOCKED overall; **one bounded surface ACTIVE** — AAPL CEDEAR↔underlying single-pair implied-FX/staleness diagnostic (§15a): DFA Domain Review Gate PASS WITH PROVISIONAL LIMITATION, PO ACCEPTED as first surface. `15 days` staleness PROVISIONAL/asymmetric; `P90 CV 0.167` dispersion NOT authorized for operating use; no cross-sectional feature in scope; pair-specific implied FX only, no global eligibility/CCL/fair-value/mispricing/arbitrage/recommendation | DFA → SE/SDT + UIUX | per-analysis evidence prerequisites (met for this one bounded surface — see §15a); UIUX contract next | `SPEC-panel-eligibility.md`; `IMPLEMENTATION-PANEL-ELIGIBILITY.md`; `docs/calibration-evidence-2026-08-18.md`/`.json`; `DECISIONS.md` D-024/D-037/D-042/D-044–D-046; §15a detail |
+| INC-7 | Core Workbench research capability | BLOCKED overall; **one bounded surface CLOSED/PO ACCEPTED** — AAPL CEDEAR↔underlying single-pair implied-FX/staleness diagnostic (§15b): Gate A PASS, Gate B PASS, Gate C PASS WITH LIMITATION (DFA), PO ACCEPTED. `fb7c9df`/`073@81ff017`/`AC-FX-01..51`. `15 days` staleness remains PROVISIONAL; `P90 CV 0.167` dispersion NOT authorized for operating use; no cross-sectional feature; pair-specific implied FX only, no global eligibility/CCL/fair-value/mispricing/arbitrage/recommendation. Production AAPL numeric result remains evidence-blocked (`ratio_effective_from` NULL live) — a standing condition, not a reopening | DFA → SE/SDT + UIUX | closed for this one bounded surface — see §15b; every other INC-7 direction remains blocked on its own evidence prerequisites | `SPEC-panel-eligibility.md`; `IMPLEMENTATION-PANEL-ELIGIBILITY.md`; `docs/calibration-evidence-2026-08-18.md`/`.json`; `DECISIONS.md` D-024/D-037/D-042/D-044–D-046; `histfints_uiue 073`; §8 baseline entry; §15a–§15b detail |
 | INC-8 | Screen-by-screen UIUX expansion | CONTINUOUS | UIUX + SE + DFA | per-screen decision gates | UIUX audits and specifications |
 | INC-9 | Workbench-wide information architecture | DEFERRED | PO, informed by UIUX + DFA + SE | several validated workflows delivered | future PO decision |
 | INC-10 | Four-gate validation | CONTINUOUS | SE + UIUX + DFA + PO | — | §4 |
@@ -233,6 +233,32 @@ Their remaining value is the pattern they establish. Do not reopen; cite them.
 **INC-13 — Catalog: Resolve.** Baseline for a confirmation-and-reversibility layer over an already-adjudication-owning workflow, not only this page today: every disposition (ATTACH/GROUP/SET_UNDERLYING/MERGE) requires an explicit, uniform, tier-independent confirmation step restating operation/subject/candidate/evidence-tier (MERGE additionally discloses absorbed-data consequence); competing candidates for the same subject are grouped and labeled as ambiguity, never silently resolved by resolving a sibling; every disposition remains directly, visibly reversible after reload via the pre-existing reversal mechanism; evidence tier is informational context only, never authorization, at every tier including Tier 0. Accepted 2026-08-29 (Gate A — SDT-WB conformance review; Gate B — UIUX, PASS with two named validation-coverage qualifications, not rounded up; Gate C — DFA; Gate D — PO). Full detail, the SDT-WB implementation-assessment hand-off, and the conformance review: §10. **Does not authorize automatic identity resolution at any evidence tier — the confirmation step accepted here is uniform and unremovable, not a gate that acceptance loosens** — **each future disposition through this mechanism remains subject to its own evidence and adjudication requirements**, and this closure does not extend to another increment without a new decision.
 
 **INC-17 (corrective increment over `IdentityAdjudication`) — Authoritative-contradiction resolution + case-specific materiality persistence.** Baseline for a corrective increment layered on an already-closed capability, not only `IdentityAdjudication` today: a case-specific relevant-dimension inventory (the union of gathered-evidence dimensions and deterministic candidate-context discovery triggers) can be computed and persisted as its own materiality/contradiction-resolution record without reopening or rewriting the capability it corrects; context discovery must remain structurally incapable of supplying evidence — it may only ever trigger a dimension into the relevant set, never satisfy it; a presentation-layer origin-disclosure defect (single-label instead of `evidence`/`context`/`both`) is fixable additively, reusing the existing discovery mechanism, without touching domain/persistence/CLI semantics; and a defensive `ValueError` branch can be correctly diagnosed as structurally unreachable (both by schema `FOREIGN KEY ... ON DELETE RESTRICT`/`CHECK` constraints and by an earlier, identical guard in the calling code's own control flow) without being application-FAIL and without manufacturing invalid persisted state to "prove" it. **The governing boundary this increment enforces and closes on**: `candidate context + EvidenceSignals → explicit materiality assessment → human financial-identity adjudication → separately authorized catalog action` — four genuinely separate, separately-authorized steps, none collapsible into another. Accepted 2026-09-02 (Gate A — SDT-WB, `0b111d0`; Gate B — UIUX, fully discharged via the `069`–`072` chain, including one severe defect found and fixed [`AC-COR-12`, `2f7e1d8`], one presentation defect found and fixed [`AC-COR-03`, `27b6865`], and one defensive-code reachability question resolved as not exercisable [`AC-COR-07`, `071`], plus a genuine attribution error in `071` itself found and corrected in `072`; Gate C — DFA; Gate D — PO). Full detail: §12a–§12n. **Closes only this corrective increment over the `IdentityAdjudication` capability** — does **not** close INC-4 as a whole, authorize Tier 3 processing, authorize the separate on-hold G1/G9 capability, authorize automated (non-human) adjudication, or authorize real production adjudication without eligible evidence; do not reopen or silently extend without a new decision.
+
+**INC-7 (first bounded surface only — AAPL CEDEAR ↔ underlying single-pair implied-FX/staleness
+diagnostic) — Core Workbench research capability.** Baseline for the narrowest possible slice of
+D-024's "pair panel" concept generally, not only AAPL today: a bounded single-pair diagnostic can
+be accepted and closed on its own evidence even while the increment's overall scope (INC-7 as a
+whole, every other analytical direction) remains blocked — the closure names its own boundary
+explicitly rather than letting the increment's overall state imply nothing was ever settled (the
+same discipline `EvidenceSignal`'s own INC-4 closure established); point-calculation observation
+availability and historical-coverage compatibility are genuinely separate evidentiary questions
+that must never be conflated into one blocking concept — the former is sufficient, together with
+ratio applicability and adjustment-basis compatibility, to permit a bounded single-date result on
+its own; historical coverage is reported as one of exactly three canonical, non-blocking
+*endpoint*-only states (`ALIGNED_WITH_KNOWN_BOUNDS`/`SHORTFALL_AGAINST_KNOWN_BOUNDS`/`UNRESOLVED`),
+never a generic `COMPATIBLE`/`COMPLETE`/`FULL_COVERAGE` claim, and neither side of that endpoint
+comparison (provider-claimed bounds vs. actually-stored observation endpoints) may ever be
+inferred from the other; and an accepted capability's own gates can close correctly even while a
+named, standing evidence gap (here: the real pair's `ratio_effective_from` remaining unestablished
+live) leaves its production numeric output blocked — the gap is a condition on that one pair's
+live result, not a reopening condition on the capability itself. Accepted 2026-09-02 (Gate A —
+SDT-WB conformance review against `histfints@fb7c9df`/`073@81ff017`/`AC-FX-01..51`, 1770/1770 full
+suite, 70/70 focused; Gate B — UIUX; Gate C — DFA, PASS WITH LIMITATION; Gate D — PO ACCEPTED).
+Full detail: §15a–§15b. **Closes only this one bounded AAPL CEDEAR↔underlying surface** — does
+**not** close INC-7 as a whole, authorize any cross-sectional dispersion/consensus feature,
+authorize `P90 CV 0.167` as an operating threshold, authorize any panel-eligibility/multi-pair/
+global-admissibility surface, or convert the standing AAPL ratio-evidence gap into a new
+implementation requirement; do not reopen or silently extend without a new decision.
 
 **INC-15 — Catalog: Cross-Workflow.** Baseline for cross-screen hand-offs over an already-adjudication-owning workflow, not only Catalog today: a navigation link between screens (Discover→Resolve, Search→Resolve) is never itself a disposition — reachable only via `GET`, never a route capable of changing resolution state; disposition provenance shown at any echo point states operation + Candidate id as fact, never styled or worded to imply verification; a persistent Undo/Revert control, once offered for an operation, must resolve its target from the one authoritative persisted fact for that operation, never a resolution-time pointer that a later operation type can leave stale (the GROUP-specific lesson this increment's own correction cycle produced — see §10a); reversal preserves the underlying candidate/tier/rule, never erasing evidence history. Accepted 2026-08-31 (Gate A — SDT-WB conformance review, twice — see §10a for why the first pass's PASS did not catch what live runtime validation did; Gate B — UIUX, `044`→`045`, PASS after one concrete defect was found, root-caused, fixed, and re-validated against the identical scenario; Gate C — DFA; Gate D — PO). Full detail: §10a. **Does not authorize automatic identity resolution at any tier** and **does not extend to another increment** without a new decision.
 
@@ -1634,6 +1660,67 @@ built** (the pre-existing, previously-calibrated Phase 1–5 mechanism, unchange
 concrete step is a UIUX contract for the chosen surface, not further HistFinTS or Workbench
 implementation. No HistFinTS or `histfints_uiue` file modified by this record.
 
+## 15b. Durable closure — first bounded INC-7 AAPL CEDEAR ↔ underlying implied-FX/staleness
+capability: CLOSED / PO ACCEPTED (2026-09-02)
+
+**Gates recorded exactly as relayed, attributed to their actual owning authorities — not
+self-certified by SDT-WB.** §15/§15a preserved completely unedited as the prior stage records;
+this is the closure event, not a rewrite of either.
+
+- **HistFinTS implementation candidate accepted: `fb7c9df`.** Independently Gate-A-reviewed by
+  SDT-WB against `073@81ff017`/`AC-FX-01..51` (this session's own prior conformance review):
+  1770/1770 full suite, 70/70 focused implied-FX tests, no HistFinTS/`histfints_uiue`/Workbench
+  file modified by that review.
+- **Authoritative UIUX contract: `073@81ff017`, `AC-FX-01..51`.**
+- **Gate A: PASS** (SDT-WB conformance review, above).
+- **Gate B: PASS** (UIUX, relayed and attributed to its owning authority).
+- **Gate C: PASS WITH LIMITATION** (DFA, relayed and attributed to its owning authority).
+- **PO acceptance: ACCEPTED.**
+
+**Accepted scope, stated precisely, not implied:**
+
+- **Accepted result is pair-specific implied FX only** — no global eligibility flag, CCL rate,
+  fair-value assessment, mispricing signal, arbitrage claim, recommendation, or trade
+  interpretation of any kind (SP-2, SP-11), unchanged from §15a's own scope.
+- **The 15-day staleness cutoff remains explicitly PROVISIONAL** — not promoted to a calibrated,
+  final threshold by this closure; exceeding it still blocks the calculation, being within it
+  still does not prove freshness (§15a, unchanged).
+- **Historical coverage is informational/non-blocking and limited to endpoint-alignment
+  semantics** — exactly `ALIGNED_WITH_KNOWN_BOUNDS`/`SHORTFALL_AGAINST_KNOWN_BOUNDS`/`UNRESOLVED`,
+  no claim about internal gaps, density, continuity, or completeness (Gate A review's own
+  confirmed finding).
+- **Production AAPL numeric result remains evidence-blocked until authoritative
+  conversion-ratio effective-period evidence is established** — the real Series 11305's
+  `ratio_effective_from` is `NULL` in the live production database (confirmed directly by the
+  Gate A review), so every live calculation for this exact pair is correctly blocked today, per
+  `AC-FX-08`. **No current ratio may be projected historically** — this limitation is the
+  contract's own intended behavior operating on genuinely incomplete evidence, not a defect.
+- **This limitation does not reopen the accepted capability.** The capability itself — the
+  mechanism, its gates, its contract conformance — is closed; the evidence gap is a standing,
+  named condition on *this one pair's* live numeric output, not a reason to revisit Gates A–D.
+- **Remaining explicitly outside this accepted increment**: cross-sectional dispersion/consensus
+  of any kind; `P90 CV 0.167` as an operating threshold (calibration evidence only, per §15a,
+  unchanged); global eligibility; CCL/fair-value/mispricing/arbitrage/recommendation/trade
+  semantics.
+- **G1/G9 remains separately DEFERRED / ON HOLD** (§12q) — untouched, unrelated, not extended or
+  narrowed by this closure.
+
+**Brief user-log entry** (project-convention format, as instructed — no prior instance of this
+exact Question/Answer/Immediate-action format exists elsewhere in this repository; introduced
+here at PO's instruction, not represented as a pre-existing convention this record merely
+followed):
+
+> **Question** → Is the first bounded INC-7 AAPL implied-FX/staleness capability acceptable?
+> **Answer** → Yes; PO ACCEPTED after Gate A PASS, Gate B PASS, and DFA Gate C PASS WITH
+> LIMITATION.
+> **Immediate action** → Preserve the live AAPL ratio-applicability evidence gap explicitly;
+> proceed to the next separately authorized increment rather than expanding INC-7 implicitly.
+
+**No HistFinTS or `histfints_uiue` file modified by this record.** The outstanding AAPL
+ratio-applicability evidence limitation is recorded as a standing, named condition — not
+converted into a new implementation requirement, task, or open item by this closure. §5/§8/§20
+updated to match, in the same change.
+
 ## 16. INC-8, INC-9, INC-14 — UIUX programme
 
 **INC-8 — Screen-by-screen expansion. CONTINUOUS**, dependency-driven, no longer globally deferred. Per screen: **audit → DFA/PO decision gate where needed → UX specification → implementation → four-gate validation**. Prioritize by product value and dependency readiness.
@@ -1728,7 +1815,7 @@ Standing rules live in §3 and are cited by ID. Do not restate an SP or UP insid
 - **INC-3** — **CLOSED/ACCEPTED 2026-08-29 (§8/§11).** All four gates disposed (A/C/D PASS-ACCEPT, B N/A). Reusable baseline only from here — do not reopen or silently extend without a new decision.
 - **INC-14** — **CLOSED/ACCEPTED 2026-08-31 (§8/§16).** All four gates disposed (A/B/D PASS-ACCEPT; C N/A, no financial content; Gate B carries two named, not-glossed-over evidence-scope qualifications). Reusable baseline only from here — distinct from INC-15, not touched or advanced by its closure; do not reopen or silently extend without a new decision.
 - **INC-16** — **CLOSED/ACCEPTED 2026-09-01 (§8/§16a).** All four gates disposed (A/B/D PASS-ACCEPT; C N/A, no financial content). Reusable baseline only from here — does not extend to `SUPERSEDED`/`DELISTED_OR_DISCONTINUED`/`PROVIDER_UNAVAILABLE` or any other increment; do not reopen or silently extend without a new decision. `046` remains unchanged as historical pre-decision evidence; `047` remains unchanged as the settled specification.
-- **INC-7** — BLOCKED overall; **one bounded surface ACTIVE, recorded 2026-09-02 (§15a)**: AAPL CEDEAR↔underlying single-pair implied-FX/staleness diagnostic — DFA Domain Review Gate PASS WITH PROVISIONAL LIMITATION, PO ACCEPTED as first surface. `15 days` staleness threshold provisional/asymmetric (exceeding blocks; within does not prove freshness); `P90 CV 0.167` dispersion not authorized for operating use; no cross-sectional dispersion/consensus feature in this bounded scope; result is pair-specific implied FX only, no global eligibility/CCL/fair-value/mispricing/arbitrage/recommendation. Stale "blocked by Q-027/Tranche 2" framing superseded **for this one surface only** — both gates were actually resolved by D-037/D-044/D-045; INC-7 overall remains BLOCKED per-analysis for every other direction. **Next dependency**: PO surface acceptance ✓ → UIUX contract ACTIVE → implementation → validation/conformance → DFA Gate C → PO acceptance. Advance any other analytical workflow only when its own evidence and methodology gates are satisfied.
+- **INC-7** — BLOCKED overall; **one bounded surface CLOSED/PO ACCEPTED, recorded 2026-09-02 (§15b)**: AAPL CEDEAR↔underlying single-pair implied-FX/staleness diagnostic — `fb7c9df`/`073@81ff017`/`AC-FX-01..51`; Gate A PASS, Gate B PASS, Gate C PASS WITH LIMITATION (DFA), PO ACCEPTED. `15 days` staleness remains explicitly PROVISIONAL; `P90 CV 0.167` dispersion not authorized for operating use; no cross-sectional dispersion/consensus feature; result is pair-specific implied FX only, no global eligibility/CCL/fair-value/mispricing/arbitrage/recommendation. **Production AAPL numeric result remains evidence-blocked** (`ratio_effective_from` NULL in the live database) **until authoritative conversion-ratio effective-period evidence is established — a standing condition, not a reopening of this closure.** INC-7 overall remains BLOCKED per-analysis for every other direction; do not expand this closure implicitly. G1/G9 remains separately DEFERRED/ON HOLD (§12q), untouched. Advance any other analytical workflow only when its own evidence and methodology gates are separately satisfied.
 - **§17** — close the remaining evidence/documentation gaps without inferring missing semantics.
 
 **Next SDT increment: SE/PO sequencing decision, not started here.** INC-4/5 are not selected or begun by this plan on its own authority — per §1, sequencing is PO's to settle. (INC-6/INC-12/INC-13/INC-14/INC-15/INC-16, all previously named or newly closed here, are now closed — see above, not candidates for "next.")
