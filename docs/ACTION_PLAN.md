@@ -151,7 +151,7 @@ States marked **†** are carried from the v5 UIUX review and must be confirmed 
 | INC-3 | Publication-aware acquisition-history diagnostic | CLOSED | DFA → SE/SDT | — | D1–D4 rulings; DFA BYMA calendar rulings; §8/§11 baseline |
 | INC-14 | Application-wide dynamic feedback / live regions | CLOSED | UIUX + SE/SDT + PO | — | `043_Application_Wide_Dynamic_Feedback_UX_Specification.md`, `052_Application_Wide_Dynamic_Feedback_AC_DFB_08_Final_Validation_Evidence.md` (histfints_uiue); §8/§16 baseline |
 | INC-16 | `USER_DISABLED` manual-Run prohibition | CLOSED | UIUX + SE/SDT + PO | — | `047_USER_DISABLED_Manual_Run_UX_Specification.md`, `053_USER_DISABLED_Manual_Run_UIUX_Validation_Evidence.md` (histfints_uiue); §8/§16a baseline |
-| INC-17 | `IdentityAdjudication` corrective increment (authoritative-contradiction resolution + case-specific materiality persistence) | **ACTIVE** — Gate A PASS (`0b111d0`); corrective fix (`2f7e1d8`) scoped-revalidated PASS on all 4 requested items (`070`); **Gate B still open** — `070` itself: "cannot be called fully discharged" (new `AC-COR-03` origin-disclosure gap; `AC-COR-07` structurally unreachable, SE/PO's to weigh); Gates C/D open. **NOT CLOSED, NOT ACCEPTED** | DFA (§7 ✓) → SDT-HF (design ✓) → [UIUX (contract ✓) \|\| DFA (trigger-map ✓)] → implementation ✓ (Gate A PASS) → corrective fix ✓ (`2f7e1d8`, `070`) → **Gate B open (AC-COR-03/07)** → conformance/domain gates → PO acceptance | — | `TIER_0_1_2_3_FINANCIAL_IDENTITY_EVIDENCE_METHODOLOGY_REFERENCE_2026-09-01.md` §6b/§7b/§7c; `histfints/docs/future_designs/INC17_CORRECTIVE_INCREMENT_DESIGN.md`; `068`/`069`/`070_INC17_Revalidation_2f7e1d8.md` (histfints_uiue); §12a–§12j detail |
+| INC-17 | `IdentityAdjudication` corrective increment (authoritative-contradiction resolution + case-specific materiality persistence) | **ACTIVE** — Gate A PASS (`0b111d0`); `AC-COR-03` fix applied (`27b6865`, full suite 1688 passed); **Gate B still open pending 3 items**: UIUX revalidation of `AC-COR-03`, `AC-COR-07` reachability resolution, and the narrow NVDA per-dimension-satisfaction check; Gates C/D open. **NOT CLOSED, NOT ACCEPTED** | DFA (§7 ✓) → SDT-HF (design ✓) → [UIUX (contract ✓) \|\| DFA (trigger-map ✓)] → implementation ✓ → corrective fixes ✓ (`2f7e1d8`, `27b6865`) → **Gate B open (3 items)** → conformance/domain gates → PO acceptance | — | `TIER_0_1_2_3_FINANCIAL_IDENTITY_EVIDENCE_METHODOLOGY_REFERENCE_2026-09-01.md` §6b/§7b/§7c; `histfints/docs/future_designs/INC17_CORRECTIVE_INCREMENT_DESIGN.md`; `068`/`069`/`070` (histfints_uiue); §12a–§12k detail |
 | INC-15 | Catalog: Cross-Workflow (Search/Discover/Resolve hand-offs) | CLOSED | UIUX + SE/SDT + DFA | — | `040_Catalog_Workflow_Cross_Screen_UX_Assessment.md`, `041_Catalog_Workflow_Cross_Screen_UX_Specification.md`, `045_Catalog_Workflow_AC_XWF_11_Revalidation_Evidence.md` (histfints_uiue); §8/§10a baseline |
 | INC-7 | Core Workbench research capability | BLOCKED | DFA → SE/SDT + UIUX | per-analysis evidence prerequisites | `SPEC-panel-eligibility.md`; `DECISIONS.md` |
 | INC-8 | Screen-by-screen UIUX expansion | CONTINUOUS | UIUX + SE + DFA | per-screen decision gates | UIUX audits and specifications |
@@ -1090,6 +1090,66 @@ deliberately-scoped revalidation against `2f7e1d8` — the two stand side by sid
 edited into one another.
 
 **All prior stage records (§12a–§12i) preserved completely unedited.** No HistFinTS or
+`histfints_uiue` file modified by this record.
+
+## 12k. AC-COR-03 corrective fix (`histfints@27b6865`) — Gate B still open, three items remain (2026-09-02)
+
+**Verified directly, not taken on the relayed summary.** `histfints@27b6865` ("INC-17 UI
+correction: fix AC-COR-03 dual-origin dimension display (UIUX 070)"), `HEAD` matches, working tree
+clean except unrelated same-day BYMA measurement output.
+
+- **`AC-COR-03`'s confirmed dual-origin presentation defect corrected — confirmed exactly**:
+  `web.py`'s `dimension_origins` is now computed from gathered evidence **and** a new
+  `discover_context_dimensions_for_candidate()` call, yielding `"evidence"`/`"context"`/`"both"`
+  per dimension — read directly in the diff, replacing the prior two-way inference that could not
+  distinguish context-only from both.
+- **Dimension remains deduplicated** — confirmed: `relevant_dimensions` itself is unchanged, still
+  the same plain union/`frozenset`; the diff's own commit message states the fieldset "is still
+  rendered exactly once per dimension," and nothing in the diff touches
+  `discover_relevant_dimensions_for_candidate()`'s own union logic.
+- **The added service method confirmed read-only/additive, reusing the existing discovery
+  mechanism, not a new algorithm** — `discover_context_dimensions_for_candidate()` calls the exact
+  same pre-existing `domain.discover_candidate_context_dimensions()` function
+  `discover_relevant_dimensions_for_candidate()` already used internally; both now share a common
+  `_candidate_context_objects()` helper so they read exactly the same context, never two
+  independently-fetched views; only `.get()` calls anywhere in it, no `.save()`.
+  `discover_relevant_dimensions_for_candidate()`'s own output confirmed unchanged — same logic,
+  refactored only for sharing.
+- **`AC-COR-07` behavior confirmed intentionally untouched** — the `ValueError` condition and
+  message in `discover_relevant_dimensions_for_candidate()` (fires only when the `MatchCandidate`
+  itself doesn't exist) are byte-identical to the prior commit; nothing in this diff addresses the
+  schema-level reachability question `070` raised.
+- **Materiality/satisfaction/contradiction/adjudication/catalog semantics confirmed unchanged** —
+  `_material_dimension_satisfaction()` untouched; no `domain/`/`persistence/`/`cli.py` file in the
+  diff (confined to `identity_adjudication_service.py`, `web.py`, one template, one test file).
+- **Focused presentation tests: 56 PASS, independently re-run and confirmed exactly** —
+  `test_web_identity_adjudication.py` + `test_web_identity_adjudication_materiality.py` together
+  reproduce **56 passed**.
+- **Application identity-adjudication tests: 37 PASS, independently re-run and confirmed
+  exactly** — `test_identity_adjudication_service.py` reproduces **37 passed**.
+- **Full suite independently re-run**: **1688 passed, 0 failed** — matches exactly (up from 1684).
+- **Live database re-checked, unchanged**: `PRAGMA user_version=24` (unchanged); `match_candidate`
+  unchanged (4 resolved/9 unresolved) — consistent with a presentation-only fix.
+
+**Gate A remains PASS (unchanged).**
+
+**Gate B remains open, pending exactly three items, none claimed resolved by this record**:
+
+1. **UIUX revalidation of `AC-COR-03`** itself — the fix is implemented and independently source-
+   verified here, but not yet re-validated live by UIUX.
+2. **Resolution of `AC-COR-07`'s reachability status** — `070`'s own open design question (whether
+   the schema-foreclosed scenario was ever intended to be reachable) remains SE's/PO's/DFA's to
+   settle, untouched by this commit.
+3. **The narrow NVDA check of per-dimension satisfaction output** — `070` §3's own named gap (the
+   `AC-COR-08`/`09` satisfaction paragraph's NVDA announcement specifically, not yet independently
+   captured) remains outstanding.
+
+**Gates C/D remain open. INC-17: NOT CLOSED, NOT ACCEPTED.**
+
+**`069` and `070` preserved unchanged as historical evidence** — neither edited by this record; both
+remain accurate, dated accounts of what they each tested.
+
+**All prior stage records (§12a–§12j) preserved completely unedited.** No HistFinTS or
 `histfints_uiue` file modified by this record.
 
 ## 13. INC-5 — Corporate-action and economic-event evidence
