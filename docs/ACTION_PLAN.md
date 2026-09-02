@@ -151,7 +151,7 @@ States marked **†** are carried from the v5 UIUX review and must be confirmed 
 | INC-3 | Publication-aware acquisition-history diagnostic | CLOSED | DFA → SE/SDT | — | D1–D4 rulings; DFA BYMA calendar rulings; §8/§11 baseline |
 | INC-14 | Application-wide dynamic feedback / live regions | CLOSED | UIUX + SE/SDT + PO | — | `043_Application_Wide_Dynamic_Feedback_UX_Specification.md`, `052_Application_Wide_Dynamic_Feedback_AC_DFB_08_Final_Validation_Evidence.md` (histfints_uiue); §8/§16 baseline |
 | INC-16 | `USER_DISABLED` manual-Run prohibition | CLOSED | UIUX + SE/SDT + PO | — | `047_USER_DISABLED_Manual_Run_UX_Specification.md`, `053_USER_DISABLED_Manual_Run_UIUX_Validation_Evidence.md` (histfints_uiue); §8/§16a baseline |
-| INC-17 | `IdentityAdjudication` corrective increment (authoritative-contradiction resolution + case-specific materiality persistence) | NEXT — all four dependency items COMPLETE (DFA §7, SDT-HF design `2f1da5a`, UIUX contract `068`, DFA trigger-map ruling); implementation AUTHORIZED, operationally held per S6 (Daily Import active) | DFA (§7 ✓) → SDT-HF (design ✓) → [UIUX (contract ✓) \|\| DFA (trigger-map ✓)] → implementation AUTHORIZED (held per S6) → validation | — | `TIER_0_1_2_3_FINANCIAL_IDENTITY_EVIDENCE_METHODOLOGY_REFERENCE_2026-09-01.md` §6b/§7b/§7c; `histfints/docs/future_designs/INC17_CORRECTIVE_INCREMENT_DESIGN.md`; `068_INC17_Materiality_Contradiction_Resolution_UX_Contract.md` (histfints_uiue); §12a–§12e detail |
+| INC-17 | `IdentityAdjudication` corrective increment (authoritative-contradiction resolution + case-specific materiality persistence) | **ACTIVE** — all pre-implementation dependencies COMPLETE (DFA §7, SDT-HF design `2f1da5a`→`3507f68`, UIUX contract `068`, DFA trigger-map ruling); operational hold cleared (Daily Import completed, live-confirmed); implementation ACTIVE, not yet complete | DFA (§7 ✓) → SDT-HF (design ✓) → [UIUX (contract ✓) \|\| DFA (trigger-map ✓)] → implementation **ACTIVE** → validation → conformance/domain gates → PO acceptance | — | `TIER_0_1_2_3_FINANCIAL_IDENTITY_EVIDENCE_METHODOLOGY_REFERENCE_2026-09-01.md` §6b/§7b/§7c; `histfints/docs/future_designs/INC17_CORRECTIVE_INCREMENT_DESIGN.md`; `068_INC17_Materiality_Contradiction_Resolution_UX_Contract.md` (histfints_uiue); §12a–§12f detail |
 | INC-15 | Catalog: Cross-Workflow (Search/Discover/Resolve hand-offs) | CLOSED | UIUX + SE/SDT + DFA | — | `040_Catalog_Workflow_Cross_Screen_UX_Assessment.md`, `041_Catalog_Workflow_Cross_Screen_UX_Specification.md`, `045_Catalog_Workflow_AC_XWF_11_Revalidation_Evidence.md` (histfints_uiue); §8/§10a baseline |
 | INC-7 | Core Workbench research capability | BLOCKED | DFA → SE/SDT + UIUX | per-analysis evidence prerequisites | `SPEC-panel-eligibility.md`; `DECISIONS.md` |
 | INC-8 | Screen-by-screen UIUX expansion | CONTINUOUS | UIUX + SE + DFA | per-screen decision gates | UIUX audits and specifications |
@@ -765,6 +765,61 @@ adds the current stage on top.
 **No HistFinTS or `histfints_uiue` file modified by this record** — the design document's own
 `CONTEXT_DIMENSION_TRIGGERS` table remains SDT-HF's to amend; this record persists DFA's ruling
 against it, it does not apply the amendment to the sibling repository itself.
+
+**Preserved as history, not rewritten**: the paragraph above accurately describes the state as of
+`0aa9668`. §12f below records the current, later stage — it does not edit this section.
+
+## 12f. Operational hold cleared; SDT-HF implementation ACTIVE (2026-09-02)
+
+**Verified both claims directly, not taken on the relayed summary.**
+
+- **Daily Import completion, independently corroborated live.** Queried the live database
+  directly rather than assuming: `import_run` rows for `2026-09-02` show **11,309 SUCCESS, 77
+  FAILED, 1 PARTIAL** — matching this project's own already-documented Daily Import baseline
+  pattern (thousands of SUCCESS, a stable small FAILED count from known unresolved-identifier
+  assignments), and the most recent row (`234068`) ended `12:33:29 UTC` with no newer activity
+  since. Consistent with a completed run, not an in-progress one — the operational hold from §12e
+  (S6, `histfints@b661058`) is cleared on this evidence.
+- **SDT-HF design finalization against DFA's trigger-map ruling — confirmed complete, one commit
+  further than §12e's own review.** `histfints@3507f68` ("INC-17: apply DFA's final
+  `CONTEXT_DIMENSION_TRIGGERS` ruling"), read in full: applies every amendment recorded in §12e
+  precisely — `security_type` converges into `INSTRUMENT_SUBTYPE`; `ProviderSymbol.base_symbol`
+  (not `raw_ticker`, which the design's own class docstring treats as part of `ProviderSymbol`'s
+  own identity, not a context trigger) is the field mapped to `PROVIDER_IDENTIFIER`;
+  `ProviderAssignment.adjustment_basis_override` is confirmed reachable through the Series
+  aggregate's own `series_repo` dependency and mapped to `ADJUSTMENT_BASIS` — answering §12e's own
+  "if available" condition directly: this context **is** reachable with existing repositories, not
+  a gap after all; presence is now an explicit `_is_present()` function (None/empty/whitespace ⇒
+  absent; an explicit stored state such as literal `"UNKNOWN"` ⇒ present; a populated FK ⇒ present
+  regardless of target existence; no semantic validation at trigger time); `ISSUER_SECURITY_
+  IDENTITY` reconfirmed a genuine gap, with label/ticker/normalized-name/country each explicitly
+  named and excluded as derivation sources; corporate-action/effective-date history reconfirmed on
+  the evidence/temporal side. The commit's own message states plainly: "no known financial-domain
+  ambiguity remains" and "implementation is authorized, subject to operational timing at the point
+  implementation begins" — the operational-timing condition this record's first point clears. **No
+  production code changed by `3507f68` either** — still design-document-only, per its own message.
+
+**Both INC-17 pre-implementation dependencies confirmed complete**: UIUX contract `068` ✓ (§12d)
+and DFA's trigger-map ruling ✓ (§12e, confirmed fully applied to the design by `3507f68`).
+
+**Dependency state, updated:**
+
+> DFA methodology ✓ → SDT-HF design ✓ → **[UIUX contract ✓ || DFA trigger-map ✓]** →
+> **implementation ACTIVE** → validation → conformance/domain gates → PO acceptance.
+
+**Preserved distinctions, stated explicitly, not implied:**
+
+- **The previously accepted `IdentityAdjudication` capability remains historically CLOSED/
+  ACCEPTED** — §12's own Gate A/B/C/D closure record, unedited by every subsequent §12a–§12f
+  addition. INC-17 is, and remains, a separate corrective increment.
+- **Implementation ACTIVE is a state, not a completion claim.** This record does **not** claim
+  implementation has completed, validation has occurred, or INC-17 has been accepted — those are
+  the three remaining, distinct steps named in the dependency line above, none of them reached by
+  this record.
+
+**All prior stage records (§12a–§12e) preserved completely unedited.** No HistFinTS or
+`histfints_uiue` file modified by this record — read-only verification only (live database query,
+`git show`).
 
 ## 13. INC-5 — Corporate-action and economic-event evidence
 
