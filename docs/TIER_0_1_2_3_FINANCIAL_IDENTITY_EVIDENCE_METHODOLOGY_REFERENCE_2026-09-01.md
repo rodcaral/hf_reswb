@@ -2,7 +2,7 @@
 
 **Prepared by:** SDT-WB
 **Date:** 2026-09-01
-**Status:** **DRAFT — documentation compilation only. Not yet reviewed or approved by DFA.**
+**Status:** **DRAFT — documentation compilation only. Not yet reviewed or approved by DFA. `docs/28` upstream-source verification complete (§1) — one citation found unrecoverable, not a defect in this compilation but a genuine gap in the historical record; nothing it might have said is assumed.**
 **Purpose:** Answers `ACTION_PLAN.md` §1's open-reference row ("Tier 0/1/2/3 | INC-4 | cite the
 identity-methodology document") and §17 item 6, by compiling — not creating — the methodology
 already settled and implemented across the closed `EvidenceSignal` and `IdentityAdjudication`
@@ -72,13 +72,55 @@ Cross-confirmed by `application/catalog_matcher.py`'s own cascade methods (`_mat
   extension to date has touched Tier 3's own matching logic (independently re-verified,
   `workbench/docs/DECISIONS.md`, multiple 2026-09-01 entries).
 
-**Origin citation gap, named not filled:** `catalog_matcher.py`'s own inline comments cite
-`docs/28 §4-6/§7/§9/§11/§14` (`histfints_uiue/028_Catalog_Discover_Relationship_Presentation_
-Disposition.md`) as the founding source for these tier mechanics. This compilation did **not**
-independently re-verify `028`'s full text against every clause above — `028` was located and its
-section headings confirmed to exist, but its own tier-definition prose was not read in full for
-this pass. **Marked OPEN**: an independent read of `028` in full, to confirm this compilation's
-Tier 0–3 restatement matches it exactly, is still owed.
+**`docs/28` verification — completed. Result: the citation does not resolve to any Tier 0–3
+content; the original source is not recoverable.** `catalog_matcher.py`'s inline comments cite
+`docs/28 §4-6/§7/§9/§11/§14` as the founding source for these tier mechanics, and the commit that
+first implemented Tier 0/1 (`histfints@891a40d`, 2026-08-10) states explicitly in its own message:
+*"docs/26 -> v8, docs/28 -> v4. Both confirm the algorithm as originally designed was
+implementable exactly as written."* — i.e., at that date, "docs/28 v4" genuinely was the matching-
+cascade design document.
+
+**The document currently at that number is a different document.**
+`histfints_uiue/028_Catalog_Discover_Relationship_Presentation_Disposition.md`, read in full for
+this verification pass, is dated 2026-08-26 — sixteen days after the citing commit — and its
+entire content (§1–§7) is a small, unrelated UX completion-scope disposition for Discover's
+tracked/candidate/resolved relationship-state presentation (AC-DIS-05/06). It contains **no Tier
+0/1/2/3 definitions, no matching-cascade rules, no evidence-authority hierarchy, and no section
+numbered past §7** — nothing in it corresponds to the cited §4-6/§7/§9/§11/§14 content. Confirmed
+against `PROJECT_INDEX.yaml`'s own `catalog_discover` sequence: `028` has only ever been this one
+document in the tracked project record (immediately after `027`, immediately before `029`, dated
+consistently) — not a renamed or overwritten file.
+
+**Why the original is unrecoverable, checked rather than assumed:** `histfints_uiue`'s git history
+begins at a single `43abedb` "Initial commit — git init per P3-5" — the repository was not
+git-tracked at all on 2026-08-10, when the citing commit was written, so no earlier version of any
+file (under this number or another) is retrievable from git. Whatever "docs/28 v4" actually
+contained at that date — very likely under a different numbering scheme, from before this
+project's 2026-08-27/28 path restructure (per `workbench`'s own `AGENTS.md` history) — is not
+locatable in any location checked this pass (`histfints_uiue`'s current tree, `histfints`'s own
+`docs/`, `PROJECT_INDEX.yaml`).
+
+**One genuine, additional, directly relevant citation found while checking this** — not present in
+the original draft, added here rather than left out: `024_Catalog_Discover_UX_Specification.md`
+(`histfints_uiue`), **DFA-D03 — Evidence tiers** (verbatim): *"Tier 0 / Tier 1 / Tier 2 classify:
+strength, quality, or authority of evidence under the established evidence model. They are not:
+confidence percentages; financial conclusions; universal guarantees that a relationship is
+correct."* and **DFA-D04 — Auto-resolution**: *"Automatic financial-identity adjudication from
+Tier 0–2 alone is not established as financially legitimate."* This is a real, named,
+independently-checkable DFA ruling (not domain-code docstring paraphrase) directly supporting §9
+below — added there as a second, independent citation.
+
+**Net effect on this compilation's own reliability**: every assertion in §1–§11 that traces to
+`catalog_matcher.py`/`evidence_signal.py`/`identity_adjudication.py`'s own implemented, tested code
+remains independently verified and unaffected — none of those citations depended on `docs/28`'s
+content, only its own inline comments did. What is **not** independently confirmed against a named
+DFA source is the *specific mechanical shape* of Tier 0/1/2 (exact-identifier / bridged-identifier
+/ normalized-pattern) as a deliberate methodology choice, as opposed to an engineering
+implementation of a methodology stated only more generally (as DFA-D03/D04 do) elsewhere. The
+mechanical shape is real, shipped, tested, and has not been contradicted by any DFA ruling found —
+but its own specific rationale citation is genuinely lost, not merely unread. **Marked OPEN, more
+precisely than before**: whether DFA re-affirms the specific Tier 0/1/2 mechanical definitions in
+§1 as still-current methodology, now that their original citation cannot be produced.
 
 ---
 
@@ -232,8 +274,17 @@ alongside a compatible one without that combination itself being treated as a co
 
 ## 9. Distinction between evidence strength and adjudication/confidence/probability
 
-**Source, structural, not merely stated:**
+**Source, structural, not merely stated — including one named DFA ruling, found and added during
+the `docs/28` verification pass (see §1):**
 
+- **DFA-D03 (Evidence tiers) and DFA-D04 (Auto-resolution)** —
+  `024_Catalog_Discover_UX_Specification.md` (`histfints_uiue`), verbatim: *"Tier 0 / Tier 1 /
+  Tier 2 classify: strength, quality, or authority of evidence under the established evidence
+  model. They are not: confidence percentages; financial conclusions; universal guarantees that a
+  relationship is correct."* and *"Automatic financial-identity adjudication from Tier 0–2 alone
+  is not established as financially legitimate."* This is the earliest, most directly-named DFA
+  source for this distinction found in this compilation — independently checkable, not a
+  paraphrase.
 - `identity_adjudication.py`'s `AdjudicationDiagnostics` docstring: *"never a score, rank,
   recommendation, preselection, or synthesized disposition. Every field is a plain fact... or a
   boolean derived directly from `EvidenceSignal`'s own fields, nothing weighted or combined into a
@@ -296,21 +347,44 @@ Already stated in full at §0 above, restated here for completeness of the reque
 
 ---
 
-## 12. Items marked OPEN by this compilation — not completed by inference
+## 12. Finalized list of questions that actually require DFA judgment
 
-1. **§1** — `docs/28`'s own full text (the cited founding source for Tier 0–3's basic mechanics)
-   not independently re-read in full for this compilation; only its section structure was
-   confirmed to exist.
-2. **§7** — which `identity_dimension` values are materially required for `SAME_INSTRUMENT` versus
-   `RELATED_BUT_DISTINCT` specifically. The shipped default (every dimension the candidate's own
-   evidence touches) is a tested implementation choice filling an explicitly-acknowledged gap, not
-   itself a DFA ruling on per-disposition materiality.
-3. **Not addressed by any source found in this compilation**: whether/how a resolved authoritative
-   contradiction (§6) should itself be evidenced (e.g., a new signal superseding an old one) versus
-   simply excluding the conflicting signal from the relied-upon set — `identity_adjudication_
-   service.py`'s own comment states only that "this specification does not define how a conflict is
-   'resolved' beyond that; the UI only re-evaluates the same deterministic condition against
-   whatever is currently relied-upon" (`056` §5, category 2). Left open, not inferred.
+**Verification against `docs/28` is complete (§1). It resolved one uncertainty (confirmed: the
+`docs/28` citation cannot be checked against its original content, which is genuinely lost, not
+merely unread) without resolving — and without attempting to resolve by inference — the two
+substantive open questions below. A third, narrower item from the original draft is retired as
+subsumed by the first.**
+
+1. **Whether DFA re-affirms the specific Tier 0/1/2 mechanical definitions (§1) as still-current
+   methodology, now that their original citation (`docs/28 v4`, pre-dating this repository's git
+   history and 2026-08-27/28 path restructure) cannot be produced.** Nothing found this pass
+   contradicts the shipped definitions — `024`'s DFA-D03/D04 (§9) describe evidence tiers at a more
+   general level fully consistent with them — but the specific mechanical mapping (Tier 0 =
+   exact provider-observed identifier, Tier 1 = bridged identifier, Tier 2 = normalized structural
+   pattern) has no independently-checkable DFA source remaining, only the shipped, tested code
+   itself. **This subsumes the original draft's item 1** (the "not yet re-read" placeholder is now
+   replaced by this more precise, actually-verified finding).
+
+2. **Which `identity_dimension` values are materially required for `SAME_INSTRUMENT` versus
+   `RELATED_BUT_DISTINCT` specifically, and whether the shipped `BLOCKING_REQUIRED_DIMENSIONS`
+   default has financial-methodological authority or is only an implementation default.** §7.
+   `identity_adjudication_service.py`'s own docstring states plainly this is "a DFA methodology
+   question this service does not answer on its own." The current production behavior (every
+   dimension the candidate's own real evidence touches becomes required) is a tested, defensible,
+   conservative engineering default — not itself a DFA ruling on per-disposition materiality. Kept
+   OPEN, not resolved technically, per explicit instruction.
+
+3. **What evidence is required to establish that an authoritative contradiction has itself been
+   resolved.** §6. No source found in this compilation — code, commit, or UIUX document — defines
+   this. `identity_adjudication_service.py`'s own comment states only that the current mechanism
+   "re-evaluates the same deterministic condition against whatever is currently relied-upon,"
+   without defining what evidentiary act constitutes a genuine resolution (a new superseding
+   signal, an explicit reviewer override with its own justification, or something else). Kept
+   OPEN, not resolved technically, per explicit instruction.
+
+**Both #2 and #3 remain exactly as stated in the prior draft** — this verification pass did not
+touch either, consistent with the instruction to keep them open for DFA rather than resolve them
+technically.
 
 ---
 
