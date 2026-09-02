@@ -151,7 +151,7 @@ States marked **†** are carried from the v5 UIUX review and must be confirmed 
 | INC-3 | Publication-aware acquisition-history diagnostic | CLOSED | DFA → SE/SDT | — | D1–D4 rulings; DFA BYMA calendar rulings; §8/§11 baseline |
 | INC-14 | Application-wide dynamic feedback / live regions | CLOSED | UIUX + SE/SDT + PO | — | `043_Application_Wide_Dynamic_Feedback_UX_Specification.md`, `052_Application_Wide_Dynamic_Feedback_AC_DFB_08_Final_Validation_Evidence.md` (histfints_uiue); §8/§16 baseline |
 | INC-16 | `USER_DISABLED` manual-Run prohibition | CLOSED | UIUX + SE/SDT + PO | — | `047_USER_DISABLED_Manual_Run_UX_Specification.md`, `053_USER_DISABLED_Manual_Run_UIUX_Validation_Evidence.md` (histfints_uiue); §8/§16a baseline |
-| INC-17 | `IdentityAdjudication` corrective increment (authoritative-contradiction resolution + case-specific materiality persistence) | **ACTIVE** — all pre-implementation dependencies COMPLETE (DFA §7, SDT-HF design `2f1da5a`→`3507f68`, UIUX contract `068`, DFA trigger-map ruling); operational hold cleared (Daily Import completed, live-confirmed); implementation ACTIVE, not yet complete | DFA (§7 ✓) → SDT-HF (design ✓) → [UIUX (contract ✓) \|\| DFA (trigger-map ✓)] → implementation **ACTIVE** → validation → conformance/domain gates → PO acceptance | — | `TIER_0_1_2_3_FINANCIAL_IDENTITY_EVIDENCE_METHODOLOGY_REFERENCE_2026-09-01.md` §6b/§7b/§7c; `histfints/docs/future_designs/INC17_CORRECTIVE_INCREMENT_DESIGN.md`; `068_INC17_Materiality_Contradiction_Resolution_UX_Contract.md` (histfints_uiue); §12a–§12f detail |
+| INC-17 | `IdentityAdjudication` corrective increment (authoritative-contradiction resolution + case-specific materiality persistence) | **ACTIVE** — implementation COMPLETE at `0b111d0` (migration `0024` live, full suite 1676 passed), Gate A technical conformance independently reviewed and PASSED, no discrepancy found; **not validated, not accepted** | DFA (§7 ✓) → SDT-HF (design ✓) → [UIUX (contract ✓) \|\| DFA (trigger-map ✓)] → implementation ✓ (Gate A PASS) → validation → conformance/domain gates → PO acceptance | — | `TIER_0_1_2_3_FINANCIAL_IDENTITY_EVIDENCE_METHODOLOGY_REFERENCE_2026-09-01.md` §6b/§7b/§7c; `histfints/docs/future_designs/INC17_CORRECTIVE_INCREMENT_DESIGN.md`; `068_INC17_Materiality_Contradiction_Resolution_UX_Contract.md` (histfints_uiue); §12a–§12g detail |
 | INC-15 | Catalog: Cross-Workflow (Search/Discover/Resolve hand-offs) | CLOSED | UIUX + SE/SDT + DFA | — | `040_Catalog_Workflow_Cross_Screen_UX_Assessment.md`, `041_Catalog_Workflow_Cross_Screen_UX_Specification.md`, `045_Catalog_Workflow_AC_XWF_11_Revalidation_Evidence.md` (histfints_uiue); §8/§10a baseline |
 | INC-7 | Core Workbench research capability | BLOCKED | DFA → SE/SDT + UIUX | per-analysis evidence prerequisites | `SPEC-panel-eligibility.md`; `DECISIONS.md` |
 | INC-8 | Screen-by-screen UIUX expansion | CONTINUOUS | UIUX + SE + DFA | per-screen decision gates | UIUX audits and specifications |
@@ -820,6 +820,93 @@ and DFA's trigger-map ruling ✓ (§12e, confirmed fully applied to the design b
 **All prior stage records (§12a–§12e) preserved completely unedited.** No HistFinTS or
 `histfints_uiue` file modified by this record — read-only verification only (live database query,
 `git show`).
+
+## 12g. INC-17 implementation milestone + independent Gate A conformance review — PASS, not validated/accepted (2026-09-02)
+
+**Milestone persisted first, per instruction, then independently verified — not accepted on the
+implementation report alone.** `histfints@0b111d0` ("INC-17: implement DFA case-specific
+materiality + contradiction resolution"), migration `0024`, reported full suite 1676 passed.
+
+**Gate A — technical conformance: PASS.** Full independent review performed; no discrepancy found
+against the governing methodology, the finalized design (`3507f68`), the DFA trigger-map ruling, or
+UIUX contract `068`.
+
+- **Persisted case-specific relevant-dimension inventory/materiality semantics** — confirmed:
+  `IdentityAdjudication` gains additive `materiality_determinations: tuple[DimensionMateriality,
+  ...]` and `relied_upon_resolution_ids: tuple[int, ...]` fields (default empty, the pre-existing
+  INC-4 shape unchanged for any caller not supplying them); `record_adjudication()` passes both
+  through to the persisted row; `DimensionMateriality.__post_init__` enforces rationale required
+  iff `NON_MATERIAL`, read directly in source.
+- **Deterministic context discovery, every named rule confirmed against source, not summary**:
+  `CONTEXT_DIMENSION_TRIGGERS` read in full — `security_type: "INSTRUMENT_SUBTYPE"` (converged, a
+  comment states so explicitly) and `base_symbol: "PROVIDER_IDENTIFIER"` both present exactly as
+  ruled; `ADJUSTMENT_BASIS_DIMENSION` triggered via `ProviderAssignment.adjustment_basis_override`,
+  reached through `series.provider_assignments` in `_series_context_triggers()` — confirmed
+  reachable with only `series_repo`, no new repository; `ISSUER_SECURITY_IDENTITY` is named in a
+  code comment as "explicitly NOT a trigger... a genuine typed-candidate-context gap," with label/
+  raw_ticker/normalized-name/country each explicitly named and excluded as derivation sources —
+  matching the ruling precisely, not merely absent by omission.
+- **Context never satisfying an evidence requirement — confirmed structurally**:
+  `discover_candidate_context_dimensions()` returns `frozenset[str]` only; its own docstring and
+  the code itself show no path by which its output could be passed as `relied_upon_signal_ids` or
+  otherwise satisfy a dimension — independently re-confirmed, not merely re-read from the design.
+- **Persisted rationale for `NON_MATERIAL` determinations** — confirmed at both the domain layer
+  (`DimensionMateriality.__post_init__`, raises `ValueError` if absent) and the schema
+  (`identity_adjudication_dimension_materiality`'s own `CHECK (classification = 'MATERIAL' OR
+  rationale IS NOT NULL)`) — defense in depth, not just an application-layer promise.
+- **Candidate-wide authoritative-contradiction enforcement, confirmed closing the exact bypass
+  a prior read-only assessment named**: `_validation_failures()`'s new gate 2 loads `all_signals =
+  tuple(self._evidence_signal_repo.list_for_candidate(candidate_id))` — the candidate's **full**
+  evidence set, not merely caller-supplied `relied`/`contradictory` — and requires each
+  authoritative `CONTRADICTS` signal on a `MATERIAL` dimension to be named in a relied-upon
+  `ContradictionResolution` matching both signal id and dimension; omission, deselection, tier,
+  source preference, majority, or recency are named explicitly in the blocking-reason text as
+  insufficient. Read directly in source, not accepted from the commit message.
+- **Structured resolution provenance, only the four approved mechanisms** — `ResolutionKind` has
+  exactly four members, no fifth escape hatch; `ContradictionResolution.__post_init__` enforces
+  the exact XOR field requirement per kind (evidence-backed kinds require `resolving_signal_ids`
+  and reject `governing_rule_reference`; `AUTHORITY_PRECEDENCE` requires the reverse) — confirmed
+  read directly, matching UIUX `AC-COR-12` precisely.
+- **Stronger-disposition blocking on completeness/evidence/temporal/contradiction failure,
+  `UNRESOLVED` exemption** — confirmed: `_validation_failures()` still returns `()` immediately for
+  `UNRESOLVED`, before any of the new or pre-existing gates run; every other failure mode (missing
+  classification, uncovered contradiction, temporal conflict, missing/unsatisfied material
+  dimension, absent adjudication period) independently confirmed present in the gate logic.
+- **Common preview/record validity logic and web/CLI semantic parity** — confirmed structurally,
+  not merely claimed: both `preview_adjudication()` and `record_adjudication()` call the identical
+  `self._validation_failures(...)`; `web.py` and `cli.py` both call the identical
+  `discover_relevant_dimensions_for_candidate()` service method (grepped directly — no independent
+  parallel computation anywhere in either presentation layer).
+- **Append-only/additive migration behavior, preservation of original evidence** — migration
+  `0024`'s full SQL read: four new tables only, `0023`'s own tables untouched, no `UPDATE`/`DELETE`
+  anywhere. Live-confirmed: `PRAGMA user_version=24`; all four new tables present, each 0 rows;
+  `identity_adjudication`/`evidence_signal` (the `0023` tables) unchanged at 0 rows;
+  `match_candidate` unchanged (4 resolved/9 unresolved, same as every prior check this session);
+  `observation`/`import_run` show only continued organic growth (no rewrite — counts only
+  increased, never decreased or altered in place); `entity_change_log` unchanged (`Provider` 12,
+  `ProviderAssignment` 1, `ProviderSymbol` 2).
+- **No automatic catalog action, scoring, Tier 3, or G1/G9 behavior** — grepped directly across
+  both new/changed files: zero `resolve_*`/`reverse_*`/`MatchCandidateRepository.save()` calls
+  (only the pre-existing prohibitive docstring sentence remains); zero references to
+  `identity_evidence.py`'s `FinancialIdentityConclusion`/`EvidenceItem`/`EvidenceAuthority` beyond
+  the same pre-existing separation docstrings, unchanged; zero `tier == 3`/`Tier 3` references
+  anywhere in the new code; every "score"/"rank"/"confidence" occurrence found is inside a "never
+  a score" disclaimer, none an actual computation.
+- **Full suite independently re-run, not accepted from the report**: **1676 passed, 0 failed** —
+  matches exactly.
+
+**No discrepancies found.** Every named requirement independently confirmed against source, the
+live database, or a passing test — none taken on the implementation report's own claim alone.
+
+**Preserved distinctions, stated explicitly**: the previously accepted `IdentityAdjudication`
+capability (INC-4) remains historically CLOSED/ACCEPTED, §12's own Gate A/B/C/D record unedited by
+this review; INC-17 remains its own, separate corrective increment. **Implementation is complete,
+not validated or accepted** — Gates B (UIUX runtime/accessibility validation), C (DFA), and D (PO)
+are not addressed by this review and remain open; this record does not claim INC-17 closure.
+
+**All prior stage records (§12a–§12f) preserved completely unedited.** No HistFinTS or
+`histfints_uiue` file modified by this record — read-only verification throughout (`git show`,
+direct read-only SQL against the live database, full test-suite re-run).
 
 ## 13. INC-5 — Corporate-action and economic-event evidence
 
