@@ -151,7 +151,7 @@ States marked **†** are carried from the v5 UIUX review and must be confirmed 
 | INC-3 | Publication-aware acquisition-history diagnostic | CLOSED | DFA → SE/SDT | — | D1–D4 rulings; DFA BYMA calendar rulings; §8/§11 baseline |
 | INC-14 | Application-wide dynamic feedback / live regions | CLOSED | UIUX + SE/SDT + PO | — | `043_Application_Wide_Dynamic_Feedback_UX_Specification.md`, `052_Application_Wide_Dynamic_Feedback_AC_DFB_08_Final_Validation_Evidence.md` (histfints_uiue); §8/§16 baseline |
 | INC-16 | `USER_DISABLED` manual-Run prohibition | CLOSED | UIUX + SE/SDT + PO | — | `047_USER_DISABLED_Manual_Run_UX_Specification.md`, `053_USER_DISABLED_Manual_Run_UIUX_Validation_Evidence.md` (histfints_uiue); §8/§16a baseline |
-| INC-17 | `IdentityAdjudication` corrective increment (authoritative-contradiction resolution + case-specific materiality persistence) | **ACTIVE** — Gate A PASS (`0b111d0`); **Gate B FAIL/open** (`069`: `AC-COR-12` severe, root-caused; `AC-COR-08/09` FAIL; adjacent `NON_MATERIAL` round-trip finding), pending a bounded UI correction + UIUX revalidation; Gates C/D open. **NOT CLOSED, NOT ACCEPTED** | DFA (§7 ✓) → SDT-HF (design ✓) → [UIUX (contract ✓) \|\| DFA (trigger-map ✓)] → implementation ✓ (Gate A PASS) → **Gate B FAIL/open** → conformance/domain gates → PO acceptance | — | `TIER_0_1_2_3_FINANCIAL_IDENTITY_EVIDENCE_METHODOLOGY_REFERENCE_2026-09-01.md` §6b/§7b/§7c; `histfints/docs/future_designs/INC17_CORRECTIVE_INCREMENT_DESIGN.md`; `068`/`069_INC17_AC_COR_Validation_Evidence.md` (histfints_uiue); §12a–§12h detail |
+| INC-17 | `IdentityAdjudication` corrective increment (authoritative-contradiction resolution + case-specific materiality persistence) | **ACTIVE** — Gate A PASS (`0b111d0`); corrective UI fix applied (`2f7e1d8`, full suite 1684 passed) for `AC-COR-12`/`08`/`09`/`NON_MATERIAL` round-trip; **Gate B still open pending UIUX revalidation**; Gates C/D open. **NOT CLOSED, NOT ACCEPTED** | DFA (§7 ✓) → SDT-HF (design ✓) → [UIUX (contract ✓) \|\| DFA (trigger-map ✓)] → implementation ✓ (Gate A PASS) → corrective fix applied (`2f7e1d8`) → **Gate B revalidation pending** → conformance/domain gates → PO acceptance | — | `TIER_0_1_2_3_FINANCIAL_IDENTITY_EVIDENCE_METHODOLOGY_REFERENCE_2026-09-01.md` §6b/§7b/§7c; `histfints/docs/future_designs/INC17_CORRECTIVE_INCREMENT_DESIGN.md`; `068`/`069_INC17_AC_COR_Validation_Evidence.md` (histfints_uiue); §12a–§12i detail |
 | INC-15 | Catalog: Cross-Workflow (Search/Discover/Resolve hand-offs) | CLOSED | UIUX + SE/SDT + DFA | — | `040_Catalog_Workflow_Cross_Screen_UX_Assessment.md`, `041_Catalog_Workflow_Cross_Screen_UX_Specification.md`, `045_Catalog_Workflow_AC_XWF_11_Revalidation_Evidence.md` (histfints_uiue); §8/§10a baseline |
 | INC-7 | Core Workbench research capability | BLOCKED | DFA → SE/SDT + UIUX | per-analysis evidence prerequisites | `SPEC-panel-eligibility.md`; `DECISIONS.md` |
 | INC-8 | Screen-by-screen UIUX expansion | CONTINUOUS | UIUX + SE + DFA | per-screen decision gates | UIUX audits and specifications |
@@ -976,6 +976,50 @@ treated as resolved by this record; no patch has yet been applied to `histfints`
 
 **All prior stage records (§12a–§12g) preserved completely unedited.** No HistFinTS or
 `histfints_uiue` file modified by this record.
+
+## 12i. Corrective implementation milestone (`histfints@2f7e1d8`) — Gate B still open, pending revalidation (2026-09-02)
+
+**Verified directly, not taken on the relayed summary.** `histfints@2f7e1d8` ("INC-17 UI
+correction: fix AC-COR-12, AC-COR-08/09, NON_MATERIAL round-trip (UIUX 069)"), `HEAD` matches,
+working tree clean except unrelated same-day BYMA measurement output.
+
+- **Scope confirmed presentation-layer only, by the diff's own file list**: `web.py`, one template
+  (`identity_adjudication_evidence.html`), one test file — zero `domain/`, `application/`,
+  `persistence/`, or `cli.py` files touched. Confirms "no domain/service/migration/catalog/CLI
+  semantics changed" structurally, not merely by the commit's own claim.
+- **`AC-COR-12` fix confirmed exactly**: `render_template()` now passes `signals=state["signals"]`
+  — the single missing variable `069` root-caused — read directly in the diff.
+- **`AC-COR-08`/`09` fix confirmed to reuse existing predicates, not invent new financial-validity
+  logic**: the new `_material_dimension_satisfaction()` helper calls `signal_covers_period()` (the
+  exact function the service's own coverage gate already uses) and mirrors the service's own gate
+  2/3 predicates directly — read in full; its own docstring states this explicitly ("if the
+  service's own logic changes, this can drift only by omission, never by inventing a different
+  answer").
+- **`NON_MATERIAL` round-trip fix confirmed**: `_parse_materiality_determinations()` now preserves
+  the reviewer's raw classification/rationale text through an invalid submission and reports an
+  accurate "rationale is missing" reason, rather than discarding the selection and reporting "not
+  classified."
+- **Focused tests: 52 PASS, independently re-run and confirmed exactly** — running
+  `test_web_identity_adjudication.py` + `test_web_identity_adjudication_materiality.py` together
+  (the two web-layer test files this fix touches) reproduces **52 passed** precisely.
+- **Full suite independently re-run**: **1684 passed, 0 failed** — matches exactly (up from 1676).
+- **Live database re-checked, unchanged**: `PRAGMA user_version=24` (unchanged); `identity_
+  adjudication_dimension_materiality`/`identity_contradiction_resolution` still 0 rows;
+  `match_candidate` unchanged (4 resolved/9 unresolved) — consistent with a presentation-only fix
+  that touches no data.
+
+**Gate B remains open, pending UIUX revalidation — not claimed PASS by this record**, per explicit
+instruction and consistent with the fix commit's own message ("Does not claim Gate B PASS or
+INC-17 closure — corrective implementation only"). **Gates C/D remain open.
+INC-17: NOT CLOSED, NOT ACCEPTED.**
+
+**`069` preserved exactly as the failed-validation record, not rewritten.** It stands as an
+accurate account of what `histfints@0b111d0` showed at the time — this corrective commit is a
+later, separate fact, not a retroactive edit to `069`'s own findings.
+
+**All prior stage records (§12a–§12h) preserved completely unedited.** No HistFinTS or
+`histfints_uiue` file modified by this record — read-only verification throughout (`git show`,
+full test-suite re-run, direct read-only SQL against the live database).
 
 ## 13. INC-5 — Corporate-action and economic-event evidence
 
