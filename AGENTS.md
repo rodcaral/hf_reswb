@@ -114,6 +114,21 @@ candidate.
   "Documentation discipline" section).
 - **Update the applicable index/register in the same change as any structural move** — never
   leave `docs/README.md`/`EVIDENCE_LOG.md`/`docs/DECISIONS.md`'s changelog stale even briefly.
+- **Persist/push cadence — adopted 2026-09-02, per PO and SE.** Persisting and pushing had
+  become too frequent, adding noise without improving traceability. Minimum rule going forward:
+  - Persist immediately only durable PO/DFA decisions, methodology/architecture changes,
+    incident conclusions that would otherwise be lost, and capability/gate closure.
+  - Bundle routine progress reports, intermediate validations, implementation milestones, and
+    superseding corrections into the next meaningful project-state update, rather than a new
+    `ACTION_PLAN.md` entry for every turn.
+  - Push when a bounded stage completes, when another actor must rely on the committed state,
+    or when ending a work session with material unpushed work — ordinary intermediate
+    documentation commits do not need an immediate push.
+  - Actor-owned technical evidence can stay in its owning repo; Workbench needs pointers and
+    current state, not copies of every report.
+  - **Applied first to the G1/G9 decision**: durable and gate-closure-shaped, so it must be
+    recorded, but per this same rule it is bundled into the next project-stage update rather
+    than forcing a standalone persist/push cycle of its own.
 
 **7. Reporting.** Reports to SE — settled policy, not inferred: `ACTOR_MODEL.md`'s "Confirmed
 relationships" states it directly, not §5.3's dependency sequence.
