@@ -151,7 +151,7 @@ States marked **†** are carried from the v5 UIUX review and must be confirmed 
 | INC-3 | Publication-aware acquisition-history diagnostic | CLOSED | DFA → SE/SDT | — | D1–D4 rulings; DFA BYMA calendar rulings; §8/§11 baseline |
 | INC-14 | Application-wide dynamic feedback / live regions | CLOSED | UIUX + SE/SDT + PO | — | `043_Application_Wide_Dynamic_Feedback_UX_Specification.md`, `052_Application_Wide_Dynamic_Feedback_AC_DFB_08_Final_Validation_Evidence.md` (histfints_uiue); §8/§16 baseline |
 | INC-16 | `USER_DISABLED` manual-Run prohibition | CLOSED | UIUX + SE/SDT + PO | — | `047_USER_DISABLED_Manual_Run_UX_Specification.md`, `053_USER_DISABLED_Manual_Run_UIUX_Validation_Evidence.md` (histfints_uiue); §8/§16a baseline |
-| INC-17 | `IdentityAdjudication` corrective increment (authoritative-contradiction resolution + case-specific materiality persistence) | NEXT — SDT-HF design proposed (`cf5463a`), its own §7 boundary question now DFA-ruled, design mapping against the ruling not yet done | SDT-HF (design, `cf5463a`) → DFA (§7 ruling, done) → SDT-HF (map ruling to design) → PO/DFA (domain-ambiguity check) → UIUX (contract) → SDT-HF (implementation) | — | `TIER_0_1_2_3_FINANCIAL_IDENTITY_EVIDENCE_METHODOLOGY_REFERENCE_2026-09-01.md` §6b/§7b/§7c; `histfints/docs/future_designs/INC17_CORRECTIVE_INCREMENT_DESIGN.md`; §12a/§12b detail |
+| INC-17 | `IdentityAdjudication` corrective increment (authoritative-contradiction resolution + case-specific materiality persistence) | NEXT — SDT-HF design proposed (`cf5463a`), its own §7 boundary question now DFA-ruled, design mapping against the ruling not yet done | DFA (§7 ruling, done) → SDT-HF (map ruling to design/finalize) → *conditional* PO/DFA clarification, only if SDT-HF finds a remaining ambiguity → UIUX (contract) → SDT-HF (implementation) → validation | — | `TIER_0_1_2_3_FINANCIAL_IDENTITY_EVIDENCE_METHODOLOGY_REFERENCE_2026-09-01.md` §6b/§7b/§7c; `histfints/docs/future_designs/INC17_CORRECTIVE_INCREMENT_DESIGN.md`; §12a/§12b detail |
 | INC-15 | Catalog: Cross-Workflow (Search/Discover/Resolve hand-offs) | CLOSED | UIUX + SE/SDT + DFA | — | `040_Catalog_Workflow_Cross_Screen_UX_Assessment.md`, `041_Catalog_Workflow_Cross_Screen_UX_Specification.md`, `045_Catalog_Workflow_AC_XWF_11_Revalidation_Evidence.md` (histfints_uiue); §8/§10a baseline |
 | INC-7 | Core Workbench research capability | BLOCKED | DFA → SE/SDT + UIUX | per-analysis evidence prerequisites | `SPEC-panel-eligibility.md`; `DECISIONS.md` |
 | INC-8 | Screen-by-screen UIUX expansion | CONTINUOUS | UIUX + SE + DFA | per-screen decision gates | UIUX audits and specifications |
@@ -531,12 +531,17 @@ against the design's own `candidate_context_dimensions` completeness check (§3.
 `materiality_determinations` structure (§1), which is engineering/design work this record does not
 do or anticipate on SDT-HF's behalf.
 
-**Dependency order — continued from §12a, this step inserted precisely where it occurred:**
+**Dependency order — corrected 2026-09-01 (was recorded too strongly at `a3ebe70`: a second
+DFA/PO review was stated as an unconditional next step; it is conditional, not mandatory).**
 
-> ... SDT-HF technical design (`cf5463a`, named the §7 boundary question) → **DFA's ruling on that
-> question (this record)** → **SDT-HF maps the ruling against the persisted design (current step,
-> not yet done)** → PO/DFA domain-ambiguity check on the mapped result → UIUX contract →
-> implementation.
+> DFA §7 ruling (this record) → SDT-HF design mapping/finalization (current step, not yet done) →
+> **conditional** DFA/PO clarification, **only if** SDT-HF's mapping identifies a remaining
+> domain/product ambiguity the ruling does not settle → UIUX contract → implementation →
+> validation.
+
+If SDT-HF reports that the ruling fully settles the design boundary, the conditional step does
+not occur — the sequence proceeds directly from SDT-HF's design finalization to the UIUX contract,
+with no second DFA/PO review implied as mandatory.
 
 **State: the boundary question is DFA-ruled; the design mapping against it is not yet done.** Not
 implemented; not accepted; does not itself change the persisted design document, which remains
