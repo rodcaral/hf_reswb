@@ -151,7 +151,7 @@ States marked **†** are carried from the v5 UIUX review and must be confirmed 
 | INC-3 | Publication-aware acquisition-history diagnostic | CLOSED | DFA → SE/SDT | — | D1–D4 rulings; DFA BYMA calendar rulings; §8/§11 baseline |
 | INC-14 | Application-wide dynamic feedback / live regions | CLOSED | UIUX + SE/SDT + PO | — | `043_Application_Wide_Dynamic_Feedback_UX_Specification.md`, `052_Application_Wide_Dynamic_Feedback_AC_DFB_08_Final_Validation_Evidence.md` (histfints_uiue); §8/§16 baseline |
 | INC-16 | `USER_DISABLED` manual-Run prohibition | CLOSED | UIUX + SE/SDT + PO | — | `047_USER_DISABLED_Manual_Run_UX_Specification.md`, `053_USER_DISABLED_Manual_Run_UIUX_Validation_Evidence.md` (histfints_uiue); §8/§16a baseline |
-| INC-17 | `IdentityAdjudication` corrective increment (authoritative-contradiction resolution + case-specific materiality persistence) | NEXT — SDT-HF design proposed (`cf5463a`), its own §7 boundary question now DFA-ruled, design mapping against the ruling not yet done | DFA (§7 ruling, done) → SDT-HF (map ruling to design/finalize) → *conditional* PO/DFA clarification, only if SDT-HF finds a remaining ambiguity → UIUX (contract) → SDT-HF (implementation) → validation | — | `TIER_0_1_2_3_FINANCIAL_IDENTITY_EVIDENCE_METHODOLOGY_REFERENCE_2026-09-01.md` §6b/§7b/§7c; `histfints/docs/future_designs/INC17_CORRECTIVE_INCREMENT_DESIGN.md`; §12a/§12b detail |
+| INC-17 | `IdentityAdjudication` corrective increment (authoritative-contradiction resolution + case-specific materiality persistence) | NEXT — DFA §7 ruling and SDT-HF design finalization (`2f1da5a`) both COMPLETE; UIUX contract + DFA trigger-map confirmation open in parallel | DFA (§7 ruling ✓) → SDT-HF (design finalization ✓) → [UIUX (contract) \|\| DFA (trigger-map confirmation)] → SDT-HF (implementation) → validation | — | `TIER_0_1_2_3_FINANCIAL_IDENTITY_EVIDENCE_METHODOLOGY_REFERENCE_2026-09-01.md` §6b/§7b/§7c; `histfints/docs/future_designs/INC17_CORRECTIVE_INCREMENT_DESIGN.md`; §12a/§12b/§12c detail |
 | INC-15 | Catalog: Cross-Workflow (Search/Discover/Resolve hand-offs) | CLOSED | UIUX + SE/SDT + DFA | — | `040_Catalog_Workflow_Cross_Screen_UX_Assessment.md`, `041_Catalog_Workflow_Cross_Screen_UX_Specification.md`, `045_Catalog_Workflow_AC_XWF_11_Revalidation_Evidence.md` (histfints_uiue); §8/§10a baseline |
 | INC-7 | Core Workbench research capability | BLOCKED | DFA → SE/SDT + UIUX | per-analysis evidence prerequisites | `SPEC-panel-eligibility.md`; `DECISIONS.md` |
 | INC-8 | Screen-by-screen UIUX expansion | CONTINUOUS | UIUX + SE + DFA | per-screen decision gates | UIUX audits and specifications |
@@ -546,6 +546,72 @@ with no second DFA/PO review implied as mandatory.
 **State: the boundary question is DFA-ruled; the design mapping against it is not yet done.** Not
 implemented; not accepted; does not itself change the persisted design document, which remains
 SDT-HF's to update. No HistFinTS or `histfints_uiue` file modified by this record.
+
+**Preserved as history, not rewritten**: the paragraph above accurately describes the state as of
+`a3ebe70`/`f23bcbe`. §12c below records the current, later stage — it does not edit this section.
+
+## 12c. SDT-HF design finalization complete (`histfints@2f1da5a`) — UIUX contract stage now open (2026-09-02)
+
+**Verified directly before recording, not taken on the relayed summary.** `histfints@2f1da5a`
+("INC-17: apply DFA's §7 ruling to the corrective-increment design"), read in full: `HEAD` matches
+(one later commit, `b661058`, is an unrelated operational checkpoint about Daily Import timing, not
+INC-17 substance). `docs/future_designs/INC17_CORRECTIVE_INCREMENT_DESIGN.md`'s own header now
+reads: *"§7's boundary question has been ruled on by DFA and this revision applies that ruling
+directly... the boundary question itself is closed."* No production code changed; `histfints_uiue`
+untouched.
+
+- **DFA §7 methodology ruling — COMPLETE.** Unchanged from §12b, restated here as the first
+  fixed point in the now-current chain.
+- **SDT-HF design mapping/finalization — COMPLETE at `2f1da5a`.** §7 was **rewritten**, not
+  approximated to either of the design's own original alternatives — confirmed directly: the
+  design's own text states neither (a) fixed-taxonomy-always-material nor (b) scoped-strictly-to-
+  gathered-evidence matches DFA's ruling, so the section states the actual third rule directly
+  rather than forcing it into either label.
+- **The mechanism is now settled, verified against the design's own §7/§1a**: the relevant-
+  dimension inventory for a candidate is the **union** of (i) every dimension the candidate's
+  gathered `EvidenceSignal`s touch and (ii) every dimension mechanically discoverable from the
+  candidate's own financially-typed context fields (a new `CONTEXT_DIMENSION_TRIGGERS` table,
+  §1a) — regardless of whether evidence was ever gathered for it. **Context discovers questions,
+  never supplies evidence**: confirmed structurally, not merely stated — the design's own
+  `discover_candidate_context_dimensions()` returns `frozenset[str]` (dimension *names* only),
+  never an `EvidenceSignal`, with no code path by which its output could be passed as
+  `relied_upon_signal_ids` or otherwise satisfy a dimension. The design's own table (§7) draws the
+  line precisely: deterministic discovery reads only whether a typed field **is populated**, never
+  its *value* — a field's actual value is never read to infer materiality, only its presence, to
+  decide whether a dimension needs asking about at all.
+- **One narrow DFA confirmation remains open — confirmed genuinely narrow, not a re-litigation
+  of the mechanism**: whether the proposed finite `CONTEXT_DIMENSION_TRIGGERS` field→dimension
+  table (built from this project's own already-existing typed fields — `Series.currency`/
+  `country`/`instrument_subtype`/`settlement_mechanism`/`underlying_series_id`,
+  `ProviderSymbol.currency`/`settlement_mechanism`/`venue`/`share_class`/`security_type`) is
+  complete against DFA's own understanding of the governing financial taxonomy. The design's own
+  text states this explicitly: a confirm-or-amend question against a concrete, finite table, not
+  an open design question.
+- **UIUX contract drafting is now authorized and may proceed independently, in parallel** — the
+  design's own §9 states "ready for the UIUX contract stage," with the trigger-table confirmation
+  named as proceeding in parallel, not gating it, "since it changes only the *contents* of a
+  lookup table, not the mechanism, persistence shape, or service API documented here."
+- **Production implementation is not yet authorized** — the design's own §9, verbatim: "Nothing in
+  this document authorizes starting implementation yet." Depends on **both** the completed UIUX
+  contract **and** the DFA trigger-map confirmation.
+- **Real production adjudication remains separately blocked by the absence of naturally-occurring
+  Tier 0/1/2 `EvidenceSignal`s** — unchanged from every prior record in this chain; live row
+  counts re-verified by the design document itself at `2f1da5a`'s own writing (still 0/0/0),
+  unrelated to and not blocking any step above.
+
+**Dependency line, updated:**
+
+> DFA §7 ruling ✓ → SDT-HF design finalization ✓ → **[UIUX contract || DFA trigger-map
+> confirmation]** → implementation → validation.
+
+The two bracketed items are independent and run in parallel, not sequentially — neither blocks the
+other, and both must complete before implementation is authorized.
+
+**For the other actors, no new instruction is needed yet, per explicit note**: SDT-HF should
+return the extracted trigger table; UIUX should return the INC-17 contract.
+
+**State: NEXT — design finalized, two parallel tracks open, neither complete.** Not implemented;
+not accepted. No HistFinTS or `histfints_uiue` file modified by this record.
 
 ## 13. INC-5 — Corporate-action and economic-event evidence
 
