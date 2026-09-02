@@ -151,7 +151,7 @@ States marked **†** are carried from the v5 UIUX review and must be confirmed 
 | INC-3 | Publication-aware acquisition-history diagnostic | CLOSED | DFA → SE/SDT | — | D1–D4 rulings; DFA BYMA calendar rulings; §8/§11 baseline |
 | INC-14 | Application-wide dynamic feedback / live regions | CLOSED | UIUX + SE/SDT + PO | — | `043_Application_Wide_Dynamic_Feedback_UX_Specification.md`, `052_Application_Wide_Dynamic_Feedback_AC_DFB_08_Final_Validation_Evidence.md` (histfints_uiue); §8/§16 baseline |
 | INC-16 | `USER_DISABLED` manual-Run prohibition | CLOSED | UIUX + SE/SDT + PO | — | `047_USER_DISABLED_Manual_Run_UX_Specification.md`, `053_USER_DISABLED_Manual_Run_UIUX_Validation_Evidence.md` (histfints_uiue); §8/§16a baseline |
-| INC-17 | `IdentityAdjudication` corrective increment (authoritative-contradiction resolution + case-specific materiality persistence) | **ACTIVE** — implementation COMPLETE at `0b111d0` (migration `0024` live, full suite 1676 passed), Gate A technical conformance independently reviewed and PASSED, no discrepancy found; **not validated, not accepted** | DFA (§7 ✓) → SDT-HF (design ✓) → [UIUX (contract ✓) \|\| DFA (trigger-map ✓)] → implementation ✓ (Gate A PASS) → validation → conformance/domain gates → PO acceptance | — | `TIER_0_1_2_3_FINANCIAL_IDENTITY_EVIDENCE_METHODOLOGY_REFERENCE_2026-09-01.md` §6b/§7b/§7c; `histfints/docs/future_designs/INC17_CORRECTIVE_INCREMENT_DESIGN.md`; `068_INC17_Materiality_Contradiction_Resolution_UX_Contract.md` (histfints_uiue); §12a–§12g detail |
+| INC-17 | `IdentityAdjudication` corrective increment (authoritative-contradiction resolution + case-specific materiality persistence) | **ACTIVE** — Gate A PASS (`0b111d0`); **Gate B FAIL/open** (`069`: `AC-COR-12` severe, root-caused; `AC-COR-08/09` FAIL; adjacent `NON_MATERIAL` round-trip finding), pending a bounded UI correction + UIUX revalidation; Gates C/D open. **NOT CLOSED, NOT ACCEPTED** | DFA (§7 ✓) → SDT-HF (design ✓) → [UIUX (contract ✓) \|\| DFA (trigger-map ✓)] → implementation ✓ (Gate A PASS) → **Gate B FAIL/open** → conformance/domain gates → PO acceptance | — | `TIER_0_1_2_3_FINANCIAL_IDENTITY_EVIDENCE_METHODOLOGY_REFERENCE_2026-09-01.md` §6b/§7b/§7c; `histfints/docs/future_designs/INC17_CORRECTIVE_INCREMENT_DESIGN.md`; `068`/`069_INC17_AC_COR_Validation_Evidence.md` (histfints_uiue); §12a–§12h detail |
 | INC-15 | Catalog: Cross-Workflow (Search/Discover/Resolve hand-offs) | CLOSED | UIUX + SE/SDT + DFA | — | `040_Catalog_Workflow_Cross_Screen_UX_Assessment.md`, `041_Catalog_Workflow_Cross_Screen_UX_Specification.md`, `045_Catalog_Workflow_AC_XWF_11_Revalidation_Evidence.md` (histfints_uiue); §8/§10a baseline |
 | INC-7 | Core Workbench research capability | BLOCKED | DFA → SE/SDT + UIUX | per-analysis evidence prerequisites | `SPEC-panel-eligibility.md`; `DECISIONS.md` |
 | INC-8 | Screen-by-screen UIUX expansion | CONTINUOUS | UIUX + SE + DFA | per-screen decision gates | UIUX audits and specifications |
@@ -907,6 +907,75 @@ are not addressed by this review and remain open; this record does not claim INC
 **All prior stage records (§12a–§12f) preserved completely unedited.** No HistFinTS or
 `histfints_uiue` file modified by this record — read-only verification throughout (`git show`,
 direct read-only SQL against the live database, full test-suite re-run).
+
+## 12h. Gate B: FAIL/open — UIUX `069` (2026-09-02)
+
+**Verified `histfints_uiue/069_INC17_AC_COR_Validation_Evidence.md` directly, not taken on the
+relayed summary.** Read in full: validates `histfints@0b111d0` against `068`/`AC-COR-01..25`,
+status "Mixed... Not INC-17 closure — SE's/DFA's/PO's to weigh," no fix implemented for any
+finding.
+
+**Gate B: FAIL/open**, due to two confirmed application defects:
+
+- **`AC-COR-12` — severe, root-caused.** `identity_adjudication_evidence_page`'s
+  `render_template()` call never passes a `signals` variable (only `signals_by_id`, a dict); the
+  template's resolution-recording form loops `{% for signal in signals %}` twice for its
+  "Conflicting"/"Resolving EvidenceSignal(s)" fieldsets — Jinja2 silently renders zero iterations
+  for an undefined loop variable, no error raised. Both fieldsets confirmed live to render their
+  `<legend>` with no checkboxes at all. **Consequence: the contradiction-resolution recording
+  workflow is unreachable through the shipped UI entirely.**
+- **`AC-COR-08`/`AC-COR-09` — FAIL, live-confirmed.** Per-`MATERIAL`-dimension satisfaction state
+  (satisfied / missing evidence / temporally uncovered) is shown **only** in the aggregate
+  per-disposition blocking-reason list at the bottom of the page — no satisfaction indicator
+  exists on the `<fieldset class="relevant-dimension">` itself. `AC-COR-09`'s required visual
+  distinction between an unsatisfied `MATERIAL` dimension and a `NON_MATERIAL` one is consequently
+  also unmet, since neither state renders per-dimension at all.
+
+**Backend/service logic confirmed sound when exercised directly, preserved precisely as `069`
+itself states it — not merely restated as a general claim.** `069` bypassed only the broken
+template, calling `IdentityAdjudicationService.record_contradiction_resolution()` directly against
+the same live database, using the real running service/repository code: the resolution recorded
+correctly, appeared correctly in resolution history, and correctly unblocked
+`SAME_INSTRUMENT`/`RELATED_BUT_DISTINCT` once relied upon. `069`'s own words: "This confirms the
+backend/service logic for `AC-COR-11/13/14/15` is sound; the defect is confined to this one
+template-binding omission" — matching this Gate A's own already-independently-verified finding
+(§12g) exactly: the service layer was reviewed and passed on its own merits before this UI defect
+was found, and remains correct now.
+
+**The `NON_MATERIAL` rationale round-trip issue — recorded as an adjacent UX defect, not folded
+into `AC-COR-05`/`06`'s own PASS status.** `069` §3: submitting `JURISDICTION=NON_MATERIAL` with
+no rationale correctly blocks (the rationale requirement itself genuinely holds — `AC-COR-05`
+remains PASS), but two real usability defects accompany it: the resulting blocking-reason text
+inaccurately reads "have not been classified" when the reviewer *did* classify it (only the
+rationale was missing); and the `JURISDICTION` radio group re-renders with **neither** option
+checked, silently discarding the reviewer's own just-made selection with no visible explanation.
+`069` itself frames this precisely — not a strict binary FAIL of `AC-COR-05`/`06`'s own letter, but
+a real finding adjacent to it. **Per this SE hand-off, this is expected to be corrected in the same
+bounded patch as `AC-COR-12`/`08`/`09` — not yet applied; `histfints` `HEAD` remains `0b111d0`,
+confirmed unchanged, no such patch exists yet.**
+
+**Preserved exactly, per explicit instruction, none rounded up or promoted**:
+
+- **`AC-COR-03`/`AC-COR-07` were not independently live-tested in `069`** — both confirmed via
+  source review only (`069`'s own §5 table states so explicitly: "Not independently live-tested").
+  Recorded here as such, not silently promoted to PASS by omission.
+- **Every other validated AC** confirmed PASS in `069`, including real-NVDA evidence for
+  `AC-COR-22..25` captured exclusively via the corrected `Get-SpeechViewerText`
+  (`histfints@0a8377a`) — buffer lengths observed up to 13,976 characters with no plateau,
+  `AutomationElement.Current.Name` not used anywhere in this validation pass.
+
+**Current state, recorded exactly:**
+
+> Gate A — PASS (§12g, unchanged). Gate B — **FAIL/open**, pending a bounded UI correction
+> (`AC-COR-12`, `AC-COR-08/09`, and the adjacent `NON_MATERIAL` round-trip finding) and UIUX
+> revalidation. Gates C/D — open, unaddressed. **INC-17: NOT CLOSED, NOT ACCEPTED.**
+
+**Not rewritten as if already fixed.** `069` stands exactly as written — no finding in it is
+treated as resolved by this record; no patch has yet been applied to `histfints` (`HEAD` confirmed
+`0b111d0`, unchanged).
+
+**All prior stage records (§12a–§12g) preserved completely unedited.** No HistFinTS or
+`histfints_uiue` file modified by this record.
 
 ## 13. INC-5 — Corporate-action and economic-event evidence
 
