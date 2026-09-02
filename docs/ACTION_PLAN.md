@@ -151,6 +151,7 @@ States marked **†** are carried from the v5 UIUX review and must be confirmed 
 | INC-3 | Publication-aware acquisition-history diagnostic | CLOSED | DFA → SE/SDT | — | D1–D4 rulings; DFA BYMA calendar rulings; §8/§11 baseline |
 | INC-14 | Application-wide dynamic feedback / live regions | CLOSED | UIUX + SE/SDT + PO | — | `043_Application_Wide_Dynamic_Feedback_UX_Specification.md`, `052_Application_Wide_Dynamic_Feedback_AC_DFB_08_Final_Validation_Evidence.md` (histfints_uiue); §8/§16 baseline |
 | INC-16 | `USER_DISABLED` manual-Run prohibition | CLOSED | UIUX + SE/SDT + PO | — | `047_USER_DISABLED_Manual_Run_UX_Specification.md`, `053_USER_DISABLED_Manual_Run_UIUX_Validation_Evidence.md` (histfints_uiue); §8/§16a baseline |
+| INC-17 | `IdentityAdjudication` corrective increment (authoritative-contradiction resolution + case-specific materiality persistence) | NEXT — SDT-HF technical design justified, not started | SDT-HF (design) → PO/DFA (domain-ambiguity check) → UIUX (contract) → SDT-HF (implementation) | — | `TIER_0_1_2_3_FINANCIAL_IDENTITY_EVIDENCE_METHODOLOGY_REFERENCE_2026-09-01.md` §6b/§7b/§7c; §12a detail |
 | INC-15 | Catalog: Cross-Workflow (Search/Discover/Resolve hand-offs) | CLOSED | UIUX + SE/SDT + DFA | — | `040_Catalog_Workflow_Cross_Screen_UX_Assessment.md`, `041_Catalog_Workflow_Cross_Screen_UX_Specification.md`, `045_Catalog_Workflow_AC_XWF_11_Revalidation_Evidence.md` (histfints_uiue); §8/§10a baseline |
 | INC-7 | Core Workbench research capability | BLOCKED | DFA → SE/SDT + UIUX | per-analysis evidence prerequisites | `SPEC-panel-eligibility.md`; `DECISIONS.md` |
 | INC-8 | Screen-by-screen UIUX expansion | CONTINUOUS | UIUX + SE + DFA | per-screen decision gates | UIUX audits and specifications |
@@ -405,6 +406,55 @@ Per PO's own direct instruction ("PO has ACCEPTED the bounded INC-4 `MatchCandid
 
 **No HistFinTS or `histfints_uiue` file modified by this record.**
 
+## 12a. INC-17 — `IdentityAdjudication` corrective increment (2026-09-01, NEXT — not implemented, not accepted)
+
+**Correction to a stale statement recorded at `8bcab60`.** §20's own current-focus line for INC-4
+previously stated "no SDT-HF task is currently justified." That was accurate at the time it was
+written but is now stale: DFA's subsequent canonical adjudication-record ruling establishes two
+real, forward-looking implementation gaps in the already-closed `IdentityAdjudication` capability —
+**a bounded corrective increment is now justified.** This section records that justification only;
+it does not design, implement, or accept anything.
+
+**The two gaps, already named — not newly discovered here — in the governing methodology
+reference's own "Implementation status" notes** (`TIER_0_1_2_3_FINANCIAL_IDENTITY_EVIDENCE_
+METHODOLOGY_REFERENCE_2026-09-01.md`, adopted `8bcab60`):
+
+1. **Case-specific materiality persistence** (reference §7b/§7c). The shipped code derives
+   `required_dimensions` fresh, per request, from whatever the candidate's evidence happens to
+   touch (`web.py`'s `_adjudication_form_state()`) — it does not persist, as its own recorded fact,
+   *which* dimensions were actually determined material for a *specific* adjudication once one is
+   recorded, nor does it yet distinguish a `SAME_INSTRUMENT`-shaped materiality question from a
+   `RELATED_BUT_DISTINCT`-shaped one per §7c's ruling.
+2. **Affirmative authoritative-contradiction resolution** (reference §6b). The shipped
+   `diagnose()`/`_validation_failures()` code detects an authoritative contradiction as a flat
+   boolean and blocks on it; it has no mechanism to record which of the four DFA-ruled resolution
+   acts (correction/supersession; temporal separation; subject/scope disambiguation; established
+   domain-valid authority precedence) applies, no record type for a correction/supersession
+   assertion distinct from an ordinary signal, and no authority-precedence table exists anywhere.
+
+**Sequencing, stated exactly as instructed, not decided further here:**
+`SDT-HF technical design → PO/DFA domain-ambiguity check → UIUX contract → implementation`. SDT-WB
+does not produce the technical design (SDT-HF's own repository and ownership); this record only
+establishes that the design step is now justified and names the two gaps it must address.
+
+**Preserved distinctions, stated explicitly, not implied:**
+
+- **The previously accepted `IdentityAdjudication` capability remains historically CLOSED/
+  ACCEPTED — not silently reopened.** §12's own closure record above (Gates A/B/C/D, all PASS-
+  ACCEPT) is unedited by this section. This increment is a *new*, separate, corrective piece of
+  work responding to a *later* DFA ruling — the same posture INC-6's Finnhub boundary condition
+  and INC-4's own `EvidenceSignal`-then-`IdentityAdjudication` sequencing already established: a
+  closure records what was true and accepted at that time; a subsequent ruling can justify new,
+  separately-gated work without retroactively undoing the earlier acceptance.
+- **Real production adjudication still waits for naturally-occurring eligible Tier 0/1/2 evidence
+  — unaffected, unrelated to this increment's own justification.** `evidence_signal`: 0 rows,
+  live-confirmed at closure and unchanged since. That absence does **not** block technical
+  design/implementation of this corrective increment — the two named gaps exist in the mechanism
+  itself, checkable and fixable independent of whether any real candidate has yet exercised it.
+
+**State: NEXT.** Not implemented; not accepted. No HistFinTS or `histfints_uiue` file modified by
+this record.
+
 ## 13. INC-5 — Corporate-action and economic-event evidence
 
 **State:** the live Yahoo/FRED provider-event capture capability: **CLOSED/ACCEPTED (2026-09-01).** Gate disposition: A — PASS. C — PASS (DFA). D — ACCEPT (PO, below). Gate B remains deferred to first user-facing surface (unchanged). — **Owner:** SE/SDT + DFA — **Source:** `REQUEST-event-capture.md`
@@ -609,7 +659,7 @@ Standing rules live in §3 and are cited by ID. Do not restate an SP or UP insid
 - **INC-12** — **CLOSED/ACCEPTED 2026-08-29 (§8/§9).** All four gates disposed (A/B/C/D PASS-ACCEPT). Reusable baseline only from here — does not extend to Resolve (INC-13) or authorize automatic identity resolution; do not reopen or silently extend without a new decision.
 - **INC-13** — **CLOSED/ACCEPTED 2026-08-29 (§8/§10).** All four gates disposed (A/B/C/D PASS-ACCEPT; Gate B carries two named, not-rounded-up NVDA validation-coverage qualifications). Reusable baseline only from here — does not authorize automatic identity resolution at any tier, and each future disposition remains subject to its own evidence/adjudication requirements; do not reopen or silently extend without a new decision.
 - **INC-15** — **CLOSED/ACCEPTED 2026-08-31 (§8/§10a).** All four gates disposed (A/B/C/D PASS-ACCEPT; Gate B carries a named defect-and-correction cycle, `044` FAIL → `045` PASS — not glossed over). Reusable baseline only from here — does not extend to INC-12/INC-13/INC-14 or authorize automatic identity resolution; do not reopen or silently extend without a new decision.
-- **INC-4** — ACTIVE overall; two bounded capabilities **CLOSED/ACCEPTED 2026-09-01 (§8/§12)**: `MatchCandidate → EvidenceSignal` (A/C/D PASS-ACCEPT; the empty `evidence_signal` table — no real production signal yet — is not a reopening condition, a future occurrence is additional validation only) and manual financial-identity adjudication (`IdentityAdjudication`, A/B/C/D PASS-ACCEPT; Gate B fully discharged only after a genuine capture-tooling defect, distinct from a genuine application defect, was separately found and fixed — see §12). Reusable baselines only for those bounded capabilities — neither closes INC-4 as a whole, validates/expands Tier 3, changes Resolve/adjudication semantics, or authorizes automatic/automated identity resolution; do not reopen or silently extend without a new decision. **Tier 0/1/2 methodology GAP RESOLVED 2026-09-01** (§1/§12) — governing reference adopted, `docs/28` provenance limitation preserved; shipped implementation not yet claimed conformant to the newly-incorporated authoritative-contradiction-resolution/disposition-materiality rulings — a future conformance pass, not started here. No SDT-HF task is currently justified: real adjudication waits until a genuinely eligible Tier 0/1/2 `EvidenceSignal` appears naturally or new evidence changes the candidate set.
+- **INC-4** — ACTIVE overall; two bounded capabilities **CLOSED/ACCEPTED 2026-09-01 (§8/§12)**: `MatchCandidate → EvidenceSignal` (A/C/D PASS-ACCEPT; the empty `evidence_signal` table — no real production signal yet — is not a reopening condition, a future occurrence is additional validation only) and manual financial-identity adjudication (`IdentityAdjudication`, A/B/C/D PASS-ACCEPT; Gate B fully discharged only after a genuine capture-tooling defect, distinct from a genuine application defect, was separately found and fixed — see §12). Reusable baselines only for those bounded capabilities — neither closes INC-4 as a whole, validates/expands Tier 3, changes Resolve/adjudication semantics, or authorizes automatic/automated identity resolution; do not reopen or silently extend without a new decision. **Tier 0/1/2 methodology GAP RESOLVED 2026-09-01** (§1/§12) — governing reference adopted, `docs/28` provenance limitation preserved; shipped implementation not yet claimed conformant to the newly-incorporated authoritative-contradiction-resolution/disposition-materiality rulings. **Correction (2026-09-01): stale as of `8bcab60`.** DFA's subsequent canonical adjudication-record ruling establishes two real, forward-looking implementation gaps (case-specific materiality persistence; affirmative authoritative-contradiction resolution) — a bounded corrective increment, **INC-17**, is now justified for SDT-HF technical design (§12a). The previously-closed `IdentityAdjudication` capability remains historically CLOSED/ACCEPTED, not reopened. Real production adjudication still waits on a genuinely eligible Tier 0/1/2 `EvidenceSignal` occurring naturally — that remains true and unrelated, and does not itself block INC-17's design/implementation.
 - **INC-5** — live Yahoo/FRED capture capability **CLOSED/ACCEPTED 2026-09-01 (§8/§13)**, all applicable gates disposed (A/C/D PASS-ACCEPT; B deferred to first user-facing surface, unchanged). 859 real captured events preserved as operational evidence, evidence-only; capture-run provenance via shared `acquired_at` explicitly not equivalent to `ImportRun`'s FK pattern. Reusable baseline only — does not extend to comparability/causal-attribution/adjudication or any other increment; continue only the further prerequisite work defined financial questions require beyond this capability.
 - **INC-6** — **CLOSED/ACCEPTED 2026-09-01 (§8/§14), provider-level `adjustment_basis` field scope only.** All three applicable gates disposed (A/C/D PASS-ACCEPT). Reusable baseline only from here — does not extend to cross-provider comparability, historical splicing, corporate-action correctness, or UI implementation; Finnhub's `NULL` boundary condition stands as a permanent, self-expiring standing note, not discharged by this closure; do not reopen or silently extend without a new decision.
 - **INC-3** — **CLOSED/ACCEPTED 2026-08-29 (§8/§11).** All four gates disposed (A/C/D PASS-ACCEPT, B N/A). Reusable baseline only from here — do not reopen or silently extend without a new decision.
