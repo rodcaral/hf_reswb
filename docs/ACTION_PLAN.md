@@ -151,7 +151,7 @@ States marked **†** are carried from the v5 UIUX review and must be confirmed 
 | INC-3 | Publication-aware acquisition-history diagnostic | CLOSED | DFA → SE/SDT | — | D1–D4 rulings; DFA BYMA calendar rulings; §8/§11 baseline |
 | INC-14 | Application-wide dynamic feedback / live regions | CLOSED | UIUX + SE/SDT + PO | — | `043_Application_Wide_Dynamic_Feedback_UX_Specification.md`, `052_Application_Wide_Dynamic_Feedback_AC_DFB_08_Final_Validation_Evidence.md` (histfints_uiue); §8/§16 baseline |
 | INC-16 | `USER_DISABLED` manual-Run prohibition | CLOSED | UIUX + SE/SDT + PO | — | `047_USER_DISABLED_Manual_Run_UX_Specification.md`, `053_USER_DISABLED_Manual_Run_UIUX_Validation_Evidence.md` (histfints_uiue); §8/§16a baseline |
-| INC-17 | `IdentityAdjudication` corrective increment (authoritative-contradiction resolution + case-specific materiality persistence) | **ACTIVE** — Gate A PASS (`0b111d0`); **Gate B PASS / fully discharged** per `072`: `AC-COR-03` PASS confirmed at its correct commit `27b6865` (correcting `071`'s attribution error — the fix is not in `2f7e1d8`), `AC-COR-07` resolved as not independently exercisable / not an application FAIL, real-NVDA `AC-COR-08`/`09` confirmation PASS; **Gate C pending DFA (review request already outstanding)**; Gate D open. **NOT CLOSED, NOT ACCEPTED** | DFA (§7 ✓) → SDT-HF (design ✓) → [UIUX (contract ✓) \|\| DFA (trigger-map ✓)] → implementation ✓ → corrective fixes ✓ (`2f7e1d8`, `27b6865`) → AC-COR-03/07 resolved ✓ (`071`, corrected by `072`) → NVDA confirmation ✓ (`072`) → **Gate B PASS** → **Gate C pending DFA** → Gate D → PO acceptance | — | `TIER_0_1_2_3_FINANCIAL_IDENTITY_EVIDENCE_METHODOLOGY_REFERENCE_2026-09-01.md` §6b/§7b/§7c; `histfints/docs/future_designs/INC17_CORRECTIVE_INCREMENT_DESIGN.md`; `068`/`069`/`070`/`071`/`072` (histfints_uiue); §12a–§12m detail |
+| INC-17 | `IdentityAdjudication` corrective increment (authoritative-contradiction resolution + case-specific materiality persistence) | **CLOSED / ACCEPTED** — Gate A PASS (`0b111d0`); Gate B PASS (`072`, `AC-COR-03` PASS at `27b6865`, `AC-COR-07` not an application FAIL, real-NVDA `AC-COR-08`/`09` PASS); **Gate C PASS (DFA); Gate D PASS / PO ACCEPTED**. Governing boundary: candidate context + EvidenceSignals → materiality assessment → human adjudication → separately authorized catalog action. Does not close INC-4 overall; does not authorize Tier 3, G1/G9, automated adjudication, or production adjudication without eligible evidence | DFA (§7 ✓) → SDT-HF (design ✓) → [UIUX (contract ✓) \|\| DFA (trigger-map ✓)] → implementation ✓ → corrective fixes ✓ (`2f7e1d8`, `27b6865`) → AC-COR-03/07 resolved ✓ (`071`, corrected by `072`) → Gate B PASS (`072`) → **Gate C PASS (DFA)** → **Gate D PASS (PO)** → **CLOSED/ACCEPTED** | — | `TIER_0_1_2_3_FINANCIAL_IDENTITY_EVIDENCE_METHODOLOGY_REFERENCE_2026-09-01.md` §6b/§7b/§7c; `histfints/docs/future_designs/INC17_CORRECTIVE_INCREMENT_DESIGN.md`; `068`/`069`/`070`/`071`/`072` (histfints_uiue); §8 baseline entry; §12a–§12n detail |
 | INC-15 | Catalog: Cross-Workflow (Search/Discover/Resolve hand-offs) | CLOSED | UIUX + SE/SDT + DFA | — | `040_Catalog_Workflow_Cross_Screen_UX_Assessment.md`, `041_Catalog_Workflow_Cross_Screen_UX_Specification.md`, `045_Catalog_Workflow_AC_XWF_11_Revalidation_Evidence.md` (histfints_uiue); §8/§10a baseline |
 | INC-7 | Core Workbench research capability | BLOCKED | DFA → SE/SDT + UIUX | per-analysis evidence prerequisites | `SPEC-panel-eligibility.md`; `DECISIONS.md` |
 | INC-8 | Screen-by-screen UIUX expansion | CONTINUOUS | UIUX + SE + DFA | per-screen decision gates | UIUX audits and specifications |
@@ -231,6 +231,8 @@ Their remaining value is the pattern they establish. Do not reopen; cite them.
 **INC-16 — `USER_DISABLED` manual-Run prohibition.** Baseline for bringing a manual-action path into alignment with an existing, already-correct automated/scheduled path, not only Run today: an eligibility rule enforced on one path (scheduled Run's `status == ACTIVE` filter) is not automatically enforced on a manually-triggered equivalent unless independently checked at that path's own choke point; a rejection message surfaced verbatim to a user (a flash, an error string) must be reviewed for leaked internal rationale/spec-reference text even when the underlying behavior it describes is already correct — a defect in wording is not a defect in logic and does not need to reopen or re-validate the logic, only the string. Accepted 2026-09-01 (Gate A — SDT-WB; Gate B — UIUX, `053`, full AC-UD-01–12 PASS plus a narrower, appropriately-scoped follow-up for the adjacent wording cleanup, not re-run in full; Gate C — N/A, no financial content; Gate D — PO). Full detail and the two-stage validation record: §16a. **Does not extend to `SUPERSEDED`, `DELISTED_OR_DISCONTINUED`, or `PROVIDER_UNAVAILABLE`**, and **does not extend to any other increment**; do not reopen or silently extend without a new decision.
 
 **INC-13 — Catalog: Resolve.** Baseline for a confirmation-and-reversibility layer over an already-adjudication-owning workflow, not only this page today: every disposition (ATTACH/GROUP/SET_UNDERLYING/MERGE) requires an explicit, uniform, tier-independent confirmation step restating operation/subject/candidate/evidence-tier (MERGE additionally discloses absorbed-data consequence); competing candidates for the same subject are grouped and labeled as ambiguity, never silently resolved by resolving a sibling; every disposition remains directly, visibly reversible after reload via the pre-existing reversal mechanism; evidence tier is informational context only, never authorization, at every tier including Tier 0. Accepted 2026-08-29 (Gate A — SDT-WB conformance review; Gate B — UIUX, PASS with two named validation-coverage qualifications, not rounded up; Gate C — DFA; Gate D — PO). Full detail, the SDT-WB implementation-assessment hand-off, and the conformance review: §10. **Does not authorize automatic identity resolution at any evidence tier — the confirmation step accepted here is uniform and unremovable, not a gate that acceptance loosens** — **each future disposition through this mechanism remains subject to its own evidence and adjudication requirements**, and this closure does not extend to another increment without a new decision.
+
+**INC-17 (corrective increment over `IdentityAdjudication`) — Authoritative-contradiction resolution + case-specific materiality persistence.** Baseline for a corrective increment layered on an already-closed capability, not only `IdentityAdjudication` today: a case-specific relevant-dimension inventory (the union of gathered-evidence dimensions and deterministic candidate-context discovery triggers) can be computed and persisted as its own materiality/contradiction-resolution record without reopening or rewriting the capability it corrects; context discovery must remain structurally incapable of supplying evidence — it may only ever trigger a dimension into the relevant set, never satisfy it; a presentation-layer origin-disclosure defect (single-label instead of `evidence`/`context`/`both`) is fixable additively, reusing the existing discovery mechanism, without touching domain/persistence/CLI semantics; and a defensive `ValueError` branch can be correctly diagnosed as structurally unreachable (both by schema `FOREIGN KEY ... ON DELETE RESTRICT`/`CHECK` constraints and by an earlier, identical guard in the calling code's own control flow) without being application-FAIL and without manufacturing invalid persisted state to "prove" it. **The governing boundary this increment enforces and closes on**: `candidate context + EvidenceSignals → explicit materiality assessment → human financial-identity adjudication → separately authorized catalog action` — four genuinely separate, separately-authorized steps, none collapsible into another. Accepted 2026-09-02 (Gate A — SDT-WB, `0b111d0`; Gate B — UIUX, fully discharged via the `069`–`072` chain, including one severe defect found and fixed [`AC-COR-12`, `2f7e1d8`], one presentation defect found and fixed [`AC-COR-03`, `27b6865`], and one defensive-code reachability question resolved as not exercisable [`AC-COR-07`, `071`], plus a genuine attribution error in `071` itself found and corrected in `072`; Gate C — DFA; Gate D — PO). Full detail: §12a–§12n. **Closes only this corrective increment over the `IdentityAdjudication` capability** — does **not** close INC-4 as a whole, authorize Tier 3 processing, authorize the separate on-hold G1/G9 capability, authorize automated (non-human) adjudication, or authorize real production adjudication without eligible evidence; do not reopen or silently extend without a new decision.
 
 **INC-15 — Catalog: Cross-Workflow.** Baseline for cross-screen hand-offs over an already-adjudication-owning workflow, not only Catalog today: a navigation link between screens (Discover→Resolve, Search→Resolve) is never itself a disposition — reachable only via `GET`, never a route capable of changing resolution state; disposition provenance shown at any echo point states operation + Candidate id as fact, never styled or worded to imply verification; a persistent Undo/Revert control, once offered for an operation, must resolve its target from the one authoritative persisted fact for that operation, never a resolution-time pointer that a later operation type can leave stale (the GROUP-specific lesson this increment's own correction cycle produced — see §10a); reversal preserves the underlying candidate/tier/rule, never erasing evidence history. Accepted 2026-08-31 (Gate A — SDT-WB conformance review, twice — see §10a for why the first pass's PASS did not catch what live runtime validation did; Gate B — UIUX, `044`→`045`, PASS after one concrete defect was found, root-caused, fixed, and re-validated against the identical scenario; Gate C — DFA; Gate D — PO). Full detail: §10a. **Does not authorize automatic identity resolution at any tier** and **does not extend to another increment** without a new decision.
 
@@ -1280,6 +1282,68 @@ technical/validation result, not increment closure or PO acceptance.
 **`069`–`072` preserved unedited, per this repository's documentation-lifecycle discipline** —
 `072` is the correction of record for `071`'s attribution error, not a retrofit of `071`'s own
 text. **All prior stage records (§12a–§12l) preserved completely unedited.** No HistFinTS or
+`histfints_uiue` file modified by this record.
+
+## 12n. Gate C PASS (DFA), Gate D PASS / PO ACCEPTED — INC-17 CLOSED / ACCEPTED (2026-09-02)
+
+**Recorded as relayed by SE/PO, attributed to its actual owning authority — not self-certified by
+SDT-WB.** Per this repository's standing discipline, Gate C (DFA) and Gate D (PO) are never
+SDT-WB's to certify; this record persists them as instructed and correctly attributed, exactly as
+every prior four-gate closure in this document (§8) has done.
+
+**Final gate state:**
+
+- **Gate A — PASS** (SDT-WB, `0b111d0` — recorded §12g).
+- **Gate B — PASS / fully discharged** (UIUX, the `069`–`072` chain — recorded §12h–§12m).
+- **Gate C — PASS** (DFA).
+- **Gate D — PASS / PO ACCEPTED** (PO).
+
+**INC-17: CLOSED / ACCEPTED.**
+
+**The governing boundary this closure enforces, recorded exactly as instructed**:
+
+> candidate context + EvidenceSignals → explicit materiality assessment → human financial-identity
+> adjudication → separately authorized catalog action
+
+Four genuinely separate, separately-authorized steps. Context discovery triggers a dimension into
+the relevant set; it never supplies evidence for it (§12b's DFA ruling, unchanged throughout).
+Materiality is an explicit, rationale-bearing human classification, not inferred. Adjudication is
+a human disposition (`IdentityAdjudication`'s own, pre-existing type boundary — INC-4 §12,
+"never cast to or from" an automated evaluator's disposition vocabulary). Catalog action remains a
+separately authorized step downstream of adjudication, unaffected by this closure.
+
+**What this closure does not do, exactly as instructed:**
+
+- **Does not close INC-4 overall.** INC-4's two bounded capabilities (`MatchCandidate →
+  EvidenceSignal`, closed 2026-09-01; `IdentityAdjudication` itself, closed 2026-09-01) remain
+  separately CLOSED/ACCEPTED baselines, unchanged and not reopened by this record — INC-17 closes
+  only as a corrective increment layered on top of the latter, per §12a's own original framing.
+- **Does not authorize Tier 3 processing** — remains explicitly out of scope, per `docs/README.md`
+  reading order and the Tier 0/1/2/3 methodology reference's own preserved deferral.
+- **Does not authorize the separate, on-hold G1/G9 capability** — remains untouched, its own
+  distinct vocabulary and hold status unaffected.
+- **Does not authorize automated (non-human) adjudication** — `IdentityAdjudicationService`'s
+  disposition vocabulary remains structurally distinct from any automated evaluator's, per INC-4's
+  own closure baseline; this closure does not blur or extend that boundary.
+- **Does not authorize real production adjudication without eligible evidence** — every DFA
+  validity gate (missing material evidence, authoritative contradiction, temporal incompatibility,
+  absent adjudication period) remains enforced through the one shared code path
+  (`_validation_failures()`) `IdentityAdjudication`'s own closure established; this record does
+  not relax, bypass, or reinterpret any of them.
+
+**Full historical chain preserved, cited not restated**: DFA §7 ruling (§12b) → SDT-HF design
+finalization (§12c) → UIUX contract `068` (§12d) → DFA trigger-map ruling (§12e) → operational
+hold cleared, implementation (§12f) → implementation milestone + Gate A PASS, `0b111d0` (§12g) →
+Gate B FAIL/open per `069` (§12h) → corrective fix `2f7e1d8` (§12i) → scoped revalidation per `070`
+(§12j) → AC-COR-03 corrective fix `27b6865` (§12k) → AC-COR-07 resolved / AC-COR-03 correction per
+`071` (§12l) → real-NVDA AC-COR-08/09 confirmation, `071`'s attribution error corrected, Gate B
+PASS per `072` (§12m) → **Gate C PASS (DFA), Gate D PASS/PO ACCEPTED, INC-17 CLOSED/ACCEPTED
+(this record)**. The prior CLOSED/ACCEPTED INC-4 `IdentityAdjudication` capability (§12, Accepted
+2026-09-01) is preserved unchanged as the baseline INC-17 corrects, not reopened or restated here.
+
+**All prior stage records (§12a–§12m) preserved completely unedited, including `069`–`072` and
+`070`/`071`'s own text.** §8's reusable-baseline entry updated in the same change (new entry added
+above, not editing any existing baseline entry). §5 master row updated to match. No HistFinTS or
 `histfints_uiue` file modified by this record.
 
 ## 13. INC-5 — Corporate-action and economic-event evidence
