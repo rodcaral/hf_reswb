@@ -151,7 +151,7 @@ States marked **†** are carried from the v5 UIUX review and must be confirmed 
 | INC-3 | Publication-aware acquisition-history diagnostic | CLOSED | DFA → SE/SDT | — | D1–D4 rulings; DFA BYMA calendar rulings; §8/§11 baseline |
 | INC-14 | Application-wide dynamic feedback / live regions | CLOSED | UIUX + SE/SDT + PO | — | `043_Application_Wide_Dynamic_Feedback_UX_Specification.md`, `052_Application_Wide_Dynamic_Feedback_AC_DFB_08_Final_Validation_Evidence.md` (histfints_uiue); §8/§16 baseline |
 | INC-16 | `USER_DISABLED` manual-Run prohibition | CLOSED | UIUX + SE/SDT + PO | — | `047_USER_DISABLED_Manual_Run_UX_Specification.md`, `053_USER_DISABLED_Manual_Run_UIUX_Validation_Evidence.md` (histfints_uiue); §8/§16a baseline |
-| INC-17 | `IdentityAdjudication` corrective increment (authoritative-contradiction resolution + case-specific materiality persistence) | NEXT — DFA §7 ruling, SDT-HF design finalization (`2f1da5a`), and UIUX contract (`068`, AC-COR-01..25) all COMPLETE; DFA trigger-map confirmation still OPEN | DFA (§7 ruling ✓) → SDT-HF (design finalization ✓) → [UIUX (contract ✓) \|\| DFA (trigger-map confirmation OPEN)] → SDT-HF (implementation) → validation | — | `TIER_0_1_2_3_FINANCIAL_IDENTITY_EVIDENCE_METHODOLOGY_REFERENCE_2026-09-01.md` §6b/§7b/§7c; `histfints/docs/future_designs/INC17_CORRECTIVE_INCREMENT_DESIGN.md`; `068_INC17_Materiality_Contradiction_Resolution_UX_Contract.md` (histfints_uiue); §12a/§12b/§12c/§12d detail |
+| INC-17 | `IdentityAdjudication` corrective increment (authoritative-contradiction resolution + case-specific materiality persistence) | NEXT — all four dependency items COMPLETE (DFA §7, SDT-HF design `2f1da5a`, UIUX contract `068`, DFA trigger-map ruling); implementation AUTHORIZED, operationally held per S6 (Daily Import active) | DFA (§7 ✓) → SDT-HF (design ✓) → [UIUX (contract ✓) \|\| DFA (trigger-map ✓)] → implementation AUTHORIZED (held per S6) → validation | — | `TIER_0_1_2_3_FINANCIAL_IDENTITY_EVIDENCE_METHODOLOGY_REFERENCE_2026-09-01.md` §6b/§7b/§7c; `histfints/docs/future_designs/INC17_CORRECTIVE_INCREMENT_DESIGN.md`; `068_INC17_Materiality_Contradiction_Resolution_UX_Contract.md` (histfints_uiue); §12a–§12e detail |
 | INC-15 | Catalog: Cross-Workflow (Search/Discover/Resolve hand-offs) | CLOSED | UIUX + SE/SDT + DFA | — | `040_Catalog_Workflow_Cross_Screen_UX_Assessment.md`, `041_Catalog_Workflow_Cross_Screen_UX_Specification.md`, `045_Catalog_Workflow_AC_XWF_11_Revalidation_Evidence.md` (histfints_uiue); §8/§10a baseline |
 | INC-7 | Core Workbench research capability | BLOCKED | DFA → SE/SDT + UIUX | per-analysis evidence prerequisites | `SPEC-panel-eligibility.md`; `DECISIONS.md` |
 | INC-8 | Screen-by-screen UIUX expansion | CONTINUOUS | UIUX + SE + DFA | per-screen decision gates | UIUX audits and specifications |
@@ -680,6 +680,91 @@ issuing a new one.
 **State: NEXT — one of two parallel tracks complete (UIUX ✓), the DFA trigger-map confirmation
 still OPEN.** Not implemented; not accepted. No HistFinTS or `histfints_uiue` file modified by
 this record.
+
+**Preserved as history, not rewritten**: the paragraph above accurately describes the state as of
+`877f2b0`. §12e below records the current, later stage — it does not edit this section.
+
+## 12e. DFA's trigger-map ruling — both parallel tracks now COMPLETE; implementation AUTHORIZED, operationally held (2026-09-02)
+
+**Verified the base table being amended directly before recording, not taken on the relayed
+summary alone.** `histfints@2f1da5a` (`HEAD` unchanged since `877f2b0`'s own record; `b661058`
+remains the only later commit, still the unrelated Daily Import operational checkpoint) —
+`docs/future_designs/INC17_CORRECTIVE_INCREMENT_DESIGN.md` §1a's `CONTEXT_DIMENSION_TRIGGERS`
+table, read again in full to confirm exactly what DFA's ruling amends:
+
+```
+"currency": "DENOMINATION_CURRENCY", "country": "JURISDICTION",
+"instrument_subtype": "INSTRUMENT_SUBTYPE", "settlement_mechanism": "SETTLEMENT_MECHANISM",
+"underlying_series_id": "UNDERLYING_RELATIONSHIP", "venue": "VENUE",
+"share_class": "SHARE_CLASS", "security_type": "SECURITY_TYPE"
+```
+
+**DFA's ruling, relayed by SE/PO — recorded as amendments against this exact table, each named
+precisely, not approximated:**
+
+- **`ProviderSymbol.security_type → INSTRUMENT_SUBTYPE`.** Corrects the table's own current
+  mapping, which sends `security_type` to a separate `SECURITY_TYPE` dimension — DFA rules
+  `security_type` and `Series.instrument_subtype` represent the same identity dimension
+  conceptually and must map to the **same** dimension name, `INSTRUMENT_SUBTYPE`, mirroring the
+  table's own existing "one dimension per concept, regardless of which object the field happened
+  to be populated on" convention (already applied there to `currency`/`settlement_mechanism`).
+  `SECURITY_TYPE` as a distinct dimension is retired by this ruling.
+- **A provider identifier field now triggers `PROVIDER_IDENTIFIER`** — a genuinely new addition,
+  not present in the table above at all. Recorded here as its own dimension name, distinct from
+  `EvidenceSignal`'s own pre-existing `IDENTIFIER` dimension (a Tier 0/1 *evaluated, matched*
+  identifier fact) — `PROVIDER_IDENTIFIER` is the *context-discovery trigger* for the provider's
+  own raw identifier field being populated, not itself an identifier match; the two must not be
+  conflated as the same dimension.
+- **Trigger semantics refined: explicit typed-value/state presence, not raw `not None`.**
+  Amends the design's own current framing ("the field's own value is never inspected... only
+  whether it carries data at all," `1a`'s code comment) — a domain-typed field's own notion of
+  "has a real value" governs presence, not a blind Python `is not None` check. A field carrying a
+  sentinel "unset"/"unknown" *state* (distinct from Python `None`) must be treated as absent for
+  triggering purposes, consistent with, and an extension of, `EffectiveApplicability.UNKNOWN`'s own
+  established "explicit missing-state, not a null check" precedent (governing reference §8).
+- **`ISSUER_SECURITY_IDENTITY` remains a typed candidate-context gap — ruled explicitly, not
+  silently left open.** No existing `Series`/`ProviderSymbol` typed field triggers it (confirmed:
+  absent from the table above). DFA rules it must **not** be inferred from labels (e.g. a Series'
+  own free-text label/name) — closing a specific loophole the design's own "never inspects a
+  field's value" boundary did not explicitly name: label text is itself a value, and inferring an
+  identity dimension from it would be exactly the prohibited inference the design otherwise
+  guards against.
+- **`ADJUSTMENT_BASIS` is surfaced only from applicable typed provider/path context, if
+  available — otherwise a context-assembly gap, not silently ignored.** Ties directly to INC-6's
+  own already-closed `Provider.adjustment_basis`/`adjustment_basis_evidence` fields
+  (`ACTION_PLAN.md` §14) — when a candidate's own applicable provider/path context carries a real,
+  typed `adjustment_basis` value, that presence triggers the `ADJUSTMENT_BASIS` dimension for
+  review; where no applicable typed context exists for a given candidate, the dimension is
+  correctly absent from the inventory, named here as a standing gap rather than defaulted either
+  way.
+- **Corporate-action/effective-date history remains evidence/temporal-validation territory —
+  explicitly not folded into candidate-context discovery.** Ties to INC-5's own closed
+  `ProviderEvent` capture capability (`ACTION_PLAN.md` §13) and the governing methodology's own
+  §7a/§8 (temporal applicability, `EffectiveSignal`-level). DFA rules this stays in the
+  evidence/temporal domain — corporate-action facts are handled as `EvidenceSignal`-level evidence
+  and temporal-applicability checks, not added as a new candidate-context trigger dimension.
+
+**Dependency state, updated:**
+
+> DFA §7 ruling ✓ → SDT-HF design finalization ✓ → **[UIUX contract ✓ || DFA trigger-map ✓]** →
+> **implementation AUTHORIZED — operationally held** (per the standing S6 checkpoint,
+> `histfints@b661058`: write/heavy execution postponed while the morning Daily Import is active;
+> read-only inspection and documentation are unaffected) → validation.
+
+**Both parallel tracks are now complete.** Implementation is authorized in the sense that no
+outstanding design/methodology dependency remains — it is **not** itself claimed to have occurred,
+and INC-17 is **not** claimed accepted. The operational hold is a standing, unrelated scheduling
+checkpoint (§6 of the S6 note), not a design or methodology gate — distinct from every prior
+dependency-chain item recorded above, and lifted by the Daily Import's own completion, not by
+anything this record settles.
+
+**Preserved, all prior stage records unedited**: §12a–§12d stand exactly as written, each an
+accurate account of its own point-in-time state; this record does not rewrite any of them, only
+adds the current stage on top.
+
+**No HistFinTS or `histfints_uiue` file modified by this record** — the design document's own
+`CONTEXT_DIMENSION_TRIGGERS` table remains SDT-HF's to amend; this record persists DFA's ruling
+against it, it does not apply the amendment to the sibling repository itself.
 
 ## 13. INC-5 — Corporate-action and economic-event evidence
 
