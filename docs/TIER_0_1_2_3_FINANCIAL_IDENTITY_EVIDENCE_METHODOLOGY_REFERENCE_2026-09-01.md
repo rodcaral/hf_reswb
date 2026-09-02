@@ -1,18 +1,38 @@
-# Tier 0/1/2/3 Financial-Identity Evidence Methodology — Consolidated Reference (DRAFT)
+# Tier 0/1/2 Financial-Identity Evidence Methodology — Governing Reference
 
 **Prepared by:** SDT-WB
-**Date:** 2026-09-01
-**Status:** **DRAFT — documentation compilation only. Not yet reviewed or approved by DFA. `docs/28` upstream-source verification complete (§1) — one citation found unrecoverable, not a defect in this compilation but a genuine gap in the historical record; nothing it might have said is assumed.**
-**Purpose:** Answers `ACTION_PLAN.md` §1's open-reference row ("Tier 0/1/2/3 | INC-4 | cite the
-identity-methodology document") and §17 item 6, by compiling — not creating — the methodology
-already settled and implemented across the closed `EvidenceSignal` and `IdentityAdjudication`
-capabilities. Every rule below is cited to a specific, checkable source: implemented and tested
-domain code, a commit, or a UIUX validation document. Where no such source exists, the item is
-marked **OPEN** rather than completed by inference, per explicit instruction.
+**Date:** 2026-09-01 (originally drafted), **updated and adopted 2026-09-01** per DFA's rulings,
+relayed by SE/PO
+**Status:** **GOVERNING — the current Tier 0/1/2 methodology reference for `EvidenceSignal`/
+`IdentityAdjudication`.** Tier 3 remains explicitly deferred/out of scope (§1). Adopted on the
+strength of DFA's rulings incorporated in this update (§6/§7/§13) plus the previously-compiled,
+independently-verified citations (§1–§5, §8–§11) — **not** on the strength of this document having
+authored new methodology itself; where a section below states a DFA ruling, that ruling is the
+authority, and this document is its record, not its source.
+**Purpose:** Resolves `ACTION_PLAN.md` §1's open-reference row ("Tier 0/1/2/3 | INC-4 | cite the
+identity-methodology document") and §17 item 6 **for Tier 0/1/2**. Originally a pure compilation of
+already-implemented methodology (2026-09-01, `59a03b3`); the `docs/28` upstream-source
+verification (`9431f4d`) then found the original historical citation for the mechanical Tier 0/1/2
+definitions unrecoverable (§1) and surfaced two genuine open financial-methodology questions, which
+DFA has now ruled on (§6/§7/§13, this update). Every rule is cited either to implemented/tested
+code (already-settled methodology) or explicitly attributed to this update's DFA ruling
+(newly-settled methodology) — never blended without saying which.
 
-**This document does not itself settle anything.** It is a citation map. Where DFA review surfaces
-a disagreement with how a rule is stated here, the *source* (code, ruling, ADR) governs, not this
-compilation.
+**Authority derivation, stated precisely.** This document's authority for the mechanical Tier 0/1/2
+definitions (§1) rests **only** on the surviving cited rulings: `024`'s DFA-D03/D04 (general
+evidence-tier framing, §9) and the implemented/tested domain code itself, since the original
+`docs/28 v4` citation for the specific mechanical mapping is confirmed unrecoverable (§1) — this
+document does not manufacture the missing provenance, and does not claim greater certainty for §1
+than those surviving sources actually support. Its authority for §6/§7/§13 rests on DFA's own
+rulings, incorporated in this update.
+
+**Does not itself claim the shipped implementation already conforms to §6/§7/§13's newly-
+incorporated rulings.** Several of those rulings (the authoritative-contradiction resolution
+mechanism in particular, §6) describe requirements the current `histfints` code does not yet
+implement — see each section's own "Implementation status" note. Adopting this document as the
+governing methodology reference is not a claim that `histfints` already conforms to it; that is a
+separate, future conformance question for SDT-HF/SDT-WB to assess against this reference once
+implementation work is scoped.
 
 ---
 
@@ -203,6 +223,8 @@ contradiction gate, §6).
 
 ## 6. Authoritative contradiction handling
 
+### 6a. Detection — already implemented (compiled, unchanged from the original draft)
+
 **Source:** `domain/identity_adjudication.py`, `diagnose()`'s `authoritative_contradiction_signal_
 ids`: every `CONTRADICTS`-stance signal whose `authority_class` is `DIRECT_AUTHORITATIVE` or
 `INDEPENDENT_PRIMARY` — explicitly **not** triggered by a `TECHNICAL_PATTERN`/`DERIVATIVE_PROVIDER`
@@ -221,9 +243,65 @@ disposition can be recorded — a reviewer cannot rely on other evidence while i
 contradiction that exists. UIUX-specified presentation requirement, layered on top of the
 domain-level blocking rule; both independently confirmed live (`057`/`058`, `histfints_uiue`).
 
+### 6b. Resolution — DFA ruling incorporated 2026-09-01. Not yet implemented — see status note.
+
+**This section answers the second of the two questions the `docs/28` verification pass left open
+for DFA (`9431f4d` §12 item 3: "what evidence is required to establish that an authoritative
+contradiction has itself been resolved").** Ruled by DFA, relayed by SE/PO, this update:
+
+- **A detected authoritative contradiction is resolved only by one of four evidentiary acts**,
+  each itself a fact about the evidence, never a procedural workaround:
+  1. **Correction or supersession** — a party that produced one of the conflicting signals issues
+     a corrected or superseding assertion, itself captured as its own new, dated `EvidenceSignal`,
+     not an edit to the original (append-only, per §11's boundary).
+  2. **Temporal separation** — the conflicting signals are shown to concern genuinely different,
+     non-overlapping effective periods (distinguished from §8's own temporal-*incompatibility*
+     rule, which is about whether evidence can satisfy an *adjudicated* period at all; this is
+     about whether two signals that looked contradictory were actually never disagreeing about
+     the same point in time to begin with).
+  3. **Subject/scope disambiguation** — the conflicting signals are shown to concern genuinely
+     different subjects, dimensions, or scopes that were only superficially aligned (e.g., two
+     signals both tagged `IDENTIFIER` but actually addressing distinguishable identifiers or
+     instruments once examined) — the contradiction is resolved by establishing it was never a
+     contradiction about the same fact, not by picking a side.
+  4. **Established domain-valid authority precedence** — a governing, already-established
+     authority ordering (not invented ad hoc for one case) determines which signal controls when
+     a genuine, same-subject, same-period disagreement remains after (1)–(3) are ruled out. This
+     precedence must itself be a standing, citable rule — not a one-off judgment call for the case
+     at hand.
+- **What does NOT resolve an authoritative contradiction — ruled explicitly, none of these
+  suffice alone:** deselecting one of the conflicting signals from the relied-upon set;
+  preferring one source over another without an established, citable authority-precedence rule
+  (distinct from item 4 above, which requires the precedence itself to be standing and governing,
+  not chosen per case); majority vote among however many signals exist; a higher tier (e.g. Tier 0
+  over Tier 1) alone; or a later retrieval/observation timestamp alone. None of these constitutes
+  resolving the contradiction — each is either a form of picking a side without evidentiary basis,
+  or already excluded elsewhere in this methodology (quantity/tier alone was already ruled
+  insufficient for independence, §2; this ruling extends the same discipline to contradiction
+  resolution).
+- **Required preservation on resolution**: both originally-conflicting signals remain in the
+  evidence record, immutable, exactly as `EvidenceSignal`'s own append-only posture already
+  requires (§1/§11) — resolution never deletes or edits either one. The resolution itself must be
+  recorded as its own affirmative evidence: what resolved it (which of the four acts above), the
+  rationale, and the effective period the resolution applies to — the same three elements
+  `IdentityAdjudication` already requires for a disposition generally (§10), applied specifically
+  to a contradiction-resolution act.
+
+**Implementation status — explicitly not claimed as conforming.** The current `diagnose()`/
+`_validation_failures()` code (§6a) detects an authoritative contradiction as a flat boolean
+condition and blocks on it; it has **no mechanism today** for recording which of the four
+resolution acts applies, no `EvidenceSignal`/record type for a correction-or-supersession
+assertion distinct from an ordinary signal, and no established, citable authority-precedence table
+(item 4) exists anywhere in the codebase. This is a real gap between the now-governing methodology
+and the shipped implementation — named here explicitly, not glossed over, and not something this
+document's adoption resolves on its own. A future implementation-assessment pass against this
+section is SDT-HF's/SDT-WB's to scope, not performed here.
+
 ---
 
 ## 7. Required temporal applicability for relied-upon material identity dimensions
+
+### 7a. Temporal-coverage mechanism — already implemented (compiled, unchanged)
 
 **Source:** `domain/identity_adjudication.py`, `signal_covers_period()`, docstring verbatim:
 *"does this `EvidenceSignal` actually establish coverage for the period a human is about to assert
@@ -233,17 +311,55 @@ a disposition over?"* A signal only "covers" an adjudicated period if its own ef
 entry, if no relied-upon signal for that dimension covers the adjudicated period, the dimension
 counts as unsatisfied and blocks a stronger disposition.
 
-**Which dimensions are "material" for which disposition — OPEN, not completed by inference.**
-`identity_adjudication_service.py`'s own `BLOCKING_REQUIRED_DIMENSIONS` constant is
-`frozenset()` (empty) by explicit design, with its own docstring stating: *"Which dimension(s) are
-actually material for a given disposition is a DFA methodology question this service does not
-answer on its own."* The current production wiring (`histfints@b2a0ef5`, `web.py`'s
-`_adjudication_form_state()`) derives `required_dimensions` per candidate as *every* dimension
-that candidate's own real `EvidenceSignal` set touches (any stance) — a defensible, tested,
-conservative default that closes a real production gap (`057`/`058`), but this is an
-**implementation choice filling an explicitly-acknowledged DFA gap, not itself a DFA ruling** on
-which dimensions are inherently material to `SAME_INSTRUMENT` vs. `RELATED_BUT_DISTINCT`. Marked
-**OPEN**.
+### 7b. Which dimensions are material — DFA ruling incorporated 2026-09-01
+
+**This section answers the first of the two questions the `docs/28` verification pass left open
+for DFA (`9431f4d` §12 item 2).** Ruled by DFA, relayed by SE/PO, this update:
+
+- **The case-specific material identity dimension rule.** Materiality is determined **per case**
+  — by the actual identity question the specific `MatchCandidate`/subject presents — not by a
+  single fixed, global list of dimensions applied uniformly to every candidate regardless of what
+  is actually at issue for it. A dimension is material to a given adjudication when the candidate's
+  own presenting question genuinely turns on it (e.g. instrument-identity questions turn on
+  `IDENTIFIER`-dimension evidence; a structural-relationship question may turn on
+  `NORMALIZED_ATTRIBUTES` evidence instead or as well) — not a property fixed in advance of any
+  specific case.
+- **`BLOCKING_REQUIRED_DIMENSIONS` (the shipped empty-`frozenset()` default) is ruled an
+  implementation default, not independent financial authority.** DFA does not adopt the current
+  code's own default as itself the materiality rule; the rule is §7b's case-specific principle
+  above. The current production wiring (`histfints@b2a0ef5`, deriving `required_dimensions` per
+  candidate as every dimension that candidate's real evidence touches) happens to approximate
+  case-specificity in practice — it is not contradicted by this ruling — but it is an engineering
+  heuristic, not the methodology itself, and must not be cited as DFA authority on its own.
+
+### 7c. Disposition-specific conditions for `SAME_INSTRUMENT` and `RELATED_BUT_DISTINCT` — DFA ruling incorporated 2026-09-01
+
+- **`SAME_INSTRUMENT`** requires relied-upon evidence, materially covering the case-specific
+  dimensions that candidate's identity question turns on (§7b), that is **jointly**: sufficient
+  under Tier 0/Tier 1-independence/Tier 2-non-promotion rules already settled (§1/§2/§4); free of
+  any unresolved authoritative contradiction on a material dimension (§6); and temporally
+  applicable to the adjudicated effective period (§7a/§8) — i.e., establishing that the subject and
+  the candidate Series are, for the adjudicated period, the same instrument.
+- **`RELATED_BUT_DISTINCT`** requires relied-upon evidence establishing a genuine structural
+  relationship between the subject and the candidate Series (not identity) **and** a material
+  distinction that rules out `SAME_INSTRUMENT` for the same adjudicated period — evidence
+  sufficient to support a relationship claim does not by itself support an identity claim, and the
+  same evidentiary discipline (Tier rules, contradiction-freedom, temporal applicability) applies
+  to whichever material dimensions that relationship-and-distinction question turns on for the
+  specific case.
+- **Neither disposition is gated behind more friction than the other** — both are subject to the
+  same class of evidentiary sufficiency test (case-specific material coverage, contradiction-
+  freedom, temporal applicability), applied to each disposition's own substantive question, never
+  to one preferentially over the other. This is consistent with, and does not alter,
+  `056` §10 item 2's own equal-footing framing (`histfints_uiue`, already independently verified
+  live, `058`).
+- **Implementation status — explicitly not claimed as conforming.** The current shipped code
+  enforces the shared mechanical gates (Tier-2-alone insufficiency, authoritative contradiction,
+  temporal coverage) identically for both dispositions via one shared `_validation_failures()` path
+  — it does not yet encode a *disposition-specific* distinction between an identity question and a
+  relationship-plus-distinction question; both currently pass or fail the same generic test. Named
+  here as a real gap between this now-governing methodology and the shipped implementation, not
+  resolved by this document's adoption.
 
 ---
 
@@ -347,53 +463,58 @@ Already stated in full at §0 above, restated here for completeness of the reque
 
 ---
 
-## 12. Finalized list of questions that actually require DFA judgment
+## 12. Resolution of the two questions previously open for DFA — closed 2026-09-01
 
-**Verification against `docs/28` is complete (§1). It resolved one uncertainty (confirmed: the
-`docs/28` citation cannot be checked against its original content, which is genuinely lost, not
-merely unread) without resolving — and without attempting to resolve by inference — the two
-substantive open questions below. A third, narrower item from the original draft is retired as
-subsumed by the first.**
+Both substantive open financial-methodology questions this document previously carried
+(`9431f4d` §12 items 2–3) are now ruled by DFA, incorporated above, and are recorded here as
+closed — not reopened, not left duplicated as still-open text:
 
-1. **Whether DFA re-affirms the specific Tier 0/1/2 mechanical definitions (§1) as still-current
-   methodology, now that their original citation (`docs/28 v4`, pre-dating this repository's git
-   history and 2026-08-27/28 path restructure) cannot be produced.** Nothing found this pass
-   contradicts the shipped definitions — `024`'s DFA-D03/D04 (§9) describe evidence tiers at a more
-   general level fully consistent with them — but the specific mechanical mapping (Tier 0 =
-   exact provider-observed identifier, Tier 1 = bridged identifier, Tier 2 = normalized structural
-   pattern) has no independently-checkable DFA source remaining, only the shipped, tested code
-   itself. **This subsumes the original draft's item 1** (the "not yet re-read" placeholder is now
-   replaced by this more precise, actually-verified finding).
+1. **Which `identity_dimension` values are materially required per disposition, and whether
+   `BLOCKING_REQUIRED_DIMENSIONS` carries independent financial authority.** Ruled: §7b — the
+   case-specific material identity dimension rule; `BLOCKING_REQUIRED_DIMENSIONS` is ruled an
+   implementation default, not independent financial authority.
+2. **What evidence is required to establish that an authoritative contradiction has itself been
+   resolved.** Ruled: §6b — the four-act resolution rule (correction/supersession; temporal
+   separation; subject/scope disambiguation; established domain-valid authority precedence), the
+   explicit exclusion of deselection/source-preference-without-precedence/majority-vote/higher-
+   tier-alone/later-retrieval-alone as resolving mechanisms, and the required preservation of both
+   conflicting signals plus the affirmative resolution evidence/rationale/effective period.
 
-2. **Which `identity_dimension` values are materially required for `SAME_INSTRUMENT` versus
-   `RELATED_BUT_DISTINCT` specifically, and whether the shipped `BLOCKING_REQUIRED_DIMENSIONS`
-   default has financial-methodological authority or is only an implementation default.** §7.
-   `identity_adjudication_service.py`'s own docstring states plainly this is "a DFA methodology
-   question this service does not answer on its own." The current production behavior (every
-   dimension the candidate's own real evidence touches becomes required) is a tested, defensible,
-   conservative engineering default — not itself a DFA ruling on per-disposition materiality. Kept
-   OPEN, not resolved technically, per explicit instruction.
+**The one remaining item is not a question requiring further DFA judgment, but a standing
+provenance limitation, preserved rather than resolved:** the original `docs/28 v4` citation for
+the specific mechanical Tier 0/1/2 definitions (§1) remains genuinely unrecoverable. This document
+does not ask DFA to re-derive that lost text; §1's definitions stand on the surviving sources named
+there (implemented/tested code, `024`'s DFA-D03/D04) and on this update's own incorporated rulings,
+not on a reconstruction of what `docs/28 v4` said.
 
-3. **What evidence is required to establish that an authoritative contradiction has itself been
-   resolved.** §6. No source found in this compilation — code, commit, or UIUX document — defines
-   this. `identity_adjudication_service.py`'s own comment states only that the current mechanism
-   "re-evaluates the same deterministic condition against whatever is currently relied-upon,"
-   without defining what evidentiary act constitutes a genuine resolution (a new superseding
-   signal, an explicit reviewer override with its own justification, or something else). Kept
-   OPEN, not resolved technically, per explicit instruction.
+---
 
-**Both #2 and #3 remain exactly as stated in the prior draft** — this verification pass did not
-touch either, consistent with the instruction to keep them open for DFA rather than resolve them
-technically.
+## 13. Tier 3 and G1/G9 — reaffirmed, not altered by this update
+
+- **Tier 3 remains explicitly deferred and outside this governing reference's own scope.**
+  Unchanged from §1: `EvidenceSignal.__post_init__` structurally rejects `tier == 3`;
+  `_match_tier3()` is untouched by every commit reviewed across this whole INC-4 chain; Tier 3
+  produces zero `EvidenceSignal` rows by construction. This update's DFA rulings (§6b/§7b/§7c)
+  apply only to the accepted Tier 0/1/2 capability — nothing here extends, redefines, or begins
+  validating Tier 3.
+- **G1/G9's separate `Tier 1–4` hierarchy remains distinct and still on hold.** Unchanged from §0:
+  `docs/evidence/G1_G9_Final_Domain_Ruling.md`'s own differently-numbered evidence hierarchy, for
+  the separate, dormant, automated `IdentityEvidenceEvaluator` capability, is not activated,
+  reinterpreted, or merged with this Tier 0/1/2 reference by this update. Every ruling incorporated
+  above (§6b/§7b/§7c) concerns only the human-adjudication `IdentityAdjudication` capability this
+  document governs.
 
 ---
 
 ## What this document does not do
 
-Does not create, alter, or approve any methodology — every rule above is cited to an already-
-implemented, already-tested, already-independently-verified source. Does not ask DFA to approve
-this compilation. Does not reopen `EvidenceSignal` or `IdentityAdjudication` (both remain
-CLOSED/ACCEPTED, unaffected). Does not resolve `ACTION_PLAN.md` §1's GAP row — that row should be
-updated to cite this document only once DFA has reviewed it and confirmed nothing here
-misrepresents a ruling; until then this remains a draft citation map, not the answer to the GAP.
-Does not modify HistFinTS or `histfints_uiue`.
+**Does not claim the current `histfints` implementation already conforms to §6b/§7b/§7c's
+newly-incorporated rulings** — each of those sections names its own, real implementation gap
+explicitly, not glossed over. Sections §1–§5/§8–§11 continue to describe already-implemented,
+already-tested, already-independently-verified methodology, unchanged from the original
+compilation. Does not reopen `EvidenceSignal` or `IdentityAdjudication` (both remain
+CLOSED/ACCEPTED, unaffected by this document's adoption). Does not alter, redefine, or extend Tier
+3, or activate/merge G1/G9's separate `Tier 1–4` hierarchy (§13). Does not modify HistFinTS or
+`histfints_uiue`. Does not itself scope, authorize, or begin any implementation work against
+§6b/§7b/§7c's newly-governing requirements — that is a separate, future conformance/
+implementation-assessment step.
