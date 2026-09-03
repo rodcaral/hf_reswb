@@ -153,7 +153,7 @@ States marked **†** are carried from the v5 UIUX review and must be confirmed 
 | INC-16 | `USER_DISABLED` manual-Run prohibition | CLOSED | UIUX + SE/SDT + PO | — | `047_USER_DISABLED_Manual_Run_UX_Specification.md`, `053_USER_DISABLED_Manual_Run_UIUX_Validation_Evidence.md` (histfints_uiue); §8/§16a baseline |
 | INC-17 | `IdentityAdjudication` corrective increment (authoritative-contradiction resolution + case-specific materiality persistence) | **CLOSED / ACCEPTED** — Gate A PASS (`0b111d0`); Gate B PASS (`072`, `AC-COR-03` PASS at `27b6865`, `AC-COR-07` not an application FAIL, real-NVDA `AC-COR-08`/`09` PASS); **Gate C PASS (DFA); Gate D PASS / PO ACCEPTED**. Governing boundary: candidate context + EvidenceSignals → materiality assessment → human adjudication → separately authorized catalog action. Does not close INC-4 overall; does not authorize Tier 3, G1/G9, automated adjudication, or production adjudication without eligible evidence | DFA (§7 ✓) → SDT-HF (design ✓) → [UIUX (contract ✓) \|\| DFA (trigger-map ✓)] → implementation ✓ → corrective fixes ✓ (`2f7e1d8`, `27b6865`) → AC-COR-03/07 resolved ✓ (`071`, corrected by `072`) → Gate B PASS (`072`) → **Gate C PASS (DFA)** → **Gate D PASS (PO)** → **CLOSED/ACCEPTED** | — | `TIER_0_1_2_3_FINANCIAL_IDENTITY_EVIDENCE_METHODOLOGY_REFERENCE_2026-09-01.md` §6b/§7b/§7c; `histfints/docs/future_designs/INC17_CORRECTIVE_INCREMENT_DESIGN.md`; `068`/`069`/`070`/`071`/`072` (histfints_uiue); §8 baseline entry; §12a–§12n detail |
 | INC-15 | Catalog: Cross-Workflow (Search/Discover/Resolve hand-offs) | CLOSED | UIUX + SE/SDT + DFA | — | `040_Catalog_Workflow_Cross_Screen_UX_Assessment.md`, `041_Catalog_Workflow_Cross_Screen_UX_Specification.md`, `045_Catalog_Workflow_AC_XWF_11_Revalidation_Evidence.md` (histfints_uiue); §8/§10a baseline |
-| INC-7 | Core Workbench research capability | BLOCKED overall; **one bounded surface CLOSED/PO ACCEPTED** — AAPL CEDEAR↔underlying single-pair implied-FX/staleness diagnostic (§15b): Gate A PASS, Gate B PASS, Gate C PASS WITH LIMITATION (DFA), PO ACCEPTED. `fb7c9df`/`073@81ff017`/`AC-FX-01..51`. `15 days` staleness remains PROVISIONAL; `P90 CV 0.167` dispersion NOT authorized for operating use; no cross-sectional feature; pair-specific implied FX only, no global eligibility/CCL/fair-value/mispricing/arbitrage/recommendation. Production AAPL numeric result remains evidence-blocked (`ratio_effective_from` NULL live) — a standing condition, not a reopening. **AAPL ratio-history evidence stage: STOP — EVIDENCE LIMIT REACHED (§15c)** — `10:1` through `2024-01-25` and `20:1` from `2024-01-26` each established as endpoint facts, plus an independent `20:1` point fact on `2026-09-02`; uninterrupted continuity between them `UNRESOLVED`; no interval may be curated from the endpoints; current schema cannot represent "start established, continuity unresolved" without overclaiming; modeling gap only, no model extension or new implementation requirement authorized. **2026-08-18 primary 5-pair dispersion/CV calibration downgraded to RETAIN AS UNVERIFIED / NON-DECISION-BEARING HISTORICAL ARTIFACT (§15d)** — computational provenance unavailable, `P90 CV 0.167` not current evidence and not an operating threshold; AAPL-only calibration and the accepted AAPL INC-7 closure both confirmed unaffected | DFA → SE/SDT + UIUX | closed for this one bounded surface — see §15b; every other INC-7 direction remains blocked on its own evidence prerequisites | `SPEC-panel-eligibility.md`; `IMPLEMENTATION-PANEL-ELIGIBILITY.md`; `docs/calibration-evidence-2026-08-18.md`/`.json`; `DECISIONS.md` D-024/D-037/D-042/D-044–D-046; `histfints_uiue 073`; §8 baseline entry; §15a–§15d detail |
+| INC-7 | Core Workbench research capability | BLOCKED overall; **one bounded surface CLOSED/PO ACCEPTED** — AAPL CEDEAR↔underlying single-pair implied-FX/staleness diagnostic (§15b): Gate A PASS, Gate B PASS, Gate C PASS WITH LIMITATION (DFA), PO ACCEPTED. `fb7c9df`/`073@81ff017`/`AC-FX-01..51`. `15 days` staleness remains PROVISIONAL; `P90 CV 0.167` dispersion NOT authorized for operating use; no cross-sectional feature; pair-specific implied FX only, no global eligibility/CCL/fair-value/mispricing/arbitrage/recommendation. Production AAPL numeric result remains evidence-blocked (`ratio_effective_from` NULL live) — a standing condition, not a reopening. **AAPL ratio-history evidence stage: STOP — EVIDENCE LIMIT REACHED (§15c)** — `10:1` through `2024-01-25` and `20:1` from `2024-01-26` each established as endpoint facts, plus an independent `20:1` point fact on `2026-09-02`; uninterrupted continuity between them `UNRESOLVED`; no interval may be curated from the endpoints; current schema cannot represent "start established, continuity unresolved" without overclaiming; modeling gap only, no model extension or new implementation requirement authorized. **2026-08-18 primary 5-pair dispersion/CV calibration downgraded to RETAIN AS UNVERIFIED / NON-DECISION-BEARING HISTORICAL ARTIFACT (§15d)** — computational provenance unavailable, `P90 CV 0.167` not current evidence and not an operating threshold; AAPL-only calibration and the accepted AAPL INC-7 closure both confirmed unaffected. **PO decision (D-048, §15e): point-date ratio applicability — ACTIVE MODEL CAPABILITY NEEDED** — POINT vs. PERIOD distinguished, no-continuity-inference binding, Banco Bradesco `2024-07-08`→`1:1` the first acceptance case; no historical reconstruction/dispersion/CCL/fair-value/mispricing/recommendation/trade authorized; implementation pending technical design + UIUX contract, NOT implemented/accepted | DFA → SE/SDT + UIUX | closed for this one bounded surface — see §15b; every other INC-7 direction remains blocked on its own evidence prerequisites | `SPEC-panel-eligibility.md`; `IMPLEMENTATION-PANEL-ELIGIBILITY.md`; `docs/calibration-evidence-2026-08-18.md`/`.json`; `DECISIONS.md` D-024/D-037/D-042/D-044–D-046/D-048; `histfints_uiue 073`; §8 baseline entry; §15a–§15e detail |
 | INC-8 | Screen-by-screen UIUX expansion | CONTINUOUS | UIUX + SE + DFA | per-screen decision gates | UIUX audits and specifications |
 | INC-9 | Workbench-wide information architecture | DEFERRED | PO, informed by UIUX + DFA + SE | several validated workflows delivered | future PO decision |
 | INC-10 | Four-gate validation | CONTINUOUS | SE + UIUX + DFA + PO | — | §4 |
@@ -1835,6 +1835,40 @@ repository's established amendment pattern, e.g. `IMPLEMENTATION-PANEL-ELIGIBILI
 
 **No HistFinTS or `histfints_uiue` file modified by this record.** No recalculation performed.
 No previously accepted decision changed — §15b/§15c preserved exactly as recorded.
+
+## 15e. PO product decision — Point-date ratio applicability: ACTIVE MODEL CAPABILITY NEEDED
+(D-048, 2026-09-03)
+
+**Recorded exactly as relayed and attributed to PO — not self-certified by SDT-WB.** §15/§15a/
+§15b/§15c/§15d preserved completely unedited. Full substance recorded at `DECISIONS.md` D-048;
+this record is the `ACTION_PLAN.md`-side pointer and summary, not a second independent statement
+of the decision.
+
+**Status: ACTIVE MODEL CAPABILITY NEEDED** — grows directly out of §15c's own STOP — EVIDENCE
+LIMIT REACHED finding, now promoted from a named, non-active modeling gap to an authorized-but-
+not-yet-implemented capability.
+
+- **POINT vs. PERIOD applicability distinguished**: a POINT fact ("on date `D`, the ratio was
+  `R`") asserts nothing about any other date; a PERIOD claim requires its own affirmative
+  continuity evidence, never inferred from its two endpoints alone (the exact §15c finding).
+- **No-continuity-inference rule binding on this capability**: a POINT fact never implies PERIOD
+  applicability; two POINT facts never by themselves establish continuity between them; continuity
+  is never inferred from silence, absence of contradiction, or current values projected backward
+  or forward.
+- **Provenance/conflict requirements binding on this capability**: every ratio fact carries its own
+  explicit source; a conflict between sourced facts is surfaced, never silently resolved by
+  recency, source count, or preference (consistent with INC-17's own contradiction-resolution
+  discipline for a structurally different fact type).
+- **First concrete acceptance case: Banco Bradesco, `2024-07-08` → `1:1`** — accepted as exactly
+  one dated, sourced POINT fact, not a period, not a claim about any other date.
+- **Explicitly not authorized**: historical reconstruction between/around POINT facts;
+  cross-sectional dispersion (remains DEFERRED, §15d); CCL, fair value, mispricing,
+  recommendation, or trade semantics of any kind (SP-2, SP-11).
+- **Implementation status: pending technical design and a UIUX contract.** **This decision does
+  not mark the capability implemented or accepted.** SDT-HF technical design and a UIUX contract
+  are the next steps, neither performed by this record.
+
+**No HistFinTS or `histfints_uiue` file modified by this record.**
 
 ## 16. INC-8, INC-9, INC-14 — UIUX programme
 

@@ -3043,6 +3043,76 @@ created; INC-17's own execution is unaffected and unchanged by this decision.
 
 ---
 
+### D-048 — Point-date ratio applicability: ACTIVE MODEL CAPABILITY NEEDED — POINT vs. PERIOD
+distinguished, no-continuity-inference binding, Banco Bradesco 2024-07-08 → 1:1 the first
+concrete acceptance case
+
+*Decided 2026-09-03. PO product decision, persisted per SE relay. Requires no further DFA/PO
+approval to stand as recorded; implementation itself remains gated on technical design and a UIUX
+contract, per this decision's own terms below.*
+
+**Status: ACTIVE MODEL CAPABILITY NEEDED.** Grows directly out of §15c's own STOP — EVIDENCE
+LIMIT REACHED finding (`ACTION_PLAN.md`): two established endpoint facts (a `10:1`
+predecessor-through-date, a `20:1` effective-start date) do not by themselves establish
+uninterrupted continuity between them, and the current `ratio_effective_from`/`ratio_effective_to`
+schema has no vocabulary for "a point fact is known; interval continuity is not," without
+overclaiming. This decision authorizes that gap to become an active model capability — not merely
+a named, non-active limitation — while explicitly not authorizing its implementation yet.
+
+**The governing distinction: POINT vs. PERIOD applicability.**
+
+- **POINT applicability** — a specific, dated, sourced fact: "on date `D`, the ratio was `R`."
+  Nothing is asserted about any date other than `D`. A point fact is never, by itself, evidence
+  for any other date, before or after `D`.
+- **PERIOD applicability** — a bounded (or explicitly open-ended, evidenced) interval over which a
+  ratio is asserted to have applied continuously, itself requiring its own affirmative evidence of
+  continuity, not merely of its two endpoints.
+- **These are different evidentiary claims requiring different evidence.** A model that can only
+  express PERIOD applicability (the current schema) cannot honestly represent a POINT fact without
+  either inventing a false period around it or discarding the fact entirely — the exact defect
+  §15c named for AAPL's own `2024-01-26`/`2026-09-02` endpoints.
+
+**No-continuity-inference rule, binding on this capability from its first design onward:**
+
+> A POINT fact never implies PERIOD applicability. Two POINT facts, however close in time or
+> however consistent in value, never by themselves establish continuity of the interval between
+> them. Continuity must be its own affirmatively evidenced claim, never inferred from endpoints,
+> from silence, from the absence of a contradicting source, or from current/present-day values
+> projected backward or forward.
+
+**Provenance/conflict requirements, binding on this capability:**
+
+- Every POINT (and, once evidenced, every PERIOD) ratio fact must carry its own explicit
+  source/provenance — never accepted as an unsourced assertion.
+- A conflict between two sourced facts (two different values claimed for overlapping or adjacent
+  dates) must be surfaced as a conflict, never silently resolved by recency, source count, or
+  preference — consistent with this project's own standing evidentiary discipline (D-009/D-009b,
+  the authoritative-contradiction-resolution discipline INC-17 already established for a
+  structurally different fact type).
+
+**First concrete acceptance case: Banco Bradesco, `2024-07-08` → `1:1`.** A single, dated, sourced
+POINT ratio fact — accepted as exactly that, a point fact, not a period, not a continuity claim
+about any date before or after `2024-07-08`, and not a claim that `1:1` is Bradesco's ratio today
+or was its ratio at any other historical date.
+
+**Explicitly not authorized by this decision:**
+
+- **No historical reconstruction** — this decision does not authorize inferring, interpolating, or
+  reconstructing ratio history between or around POINT facts.
+- **No cross-sectional dispersion** — unrelated to and not reactivated by this decision (remains
+  DEFERRED per §15d).
+- **No CCL, fair value, mispricing, recommendation, or trade semantics** — none of these are
+  authorized, implied, or brought closer by this decision, consistent with every prior INC-7/AAPL
+  record's own standing prohibition (SP-2, SP-11).
+
+**Implementation status: pending technical design and a UIUX contract.** **This decision does
+not mark the capability implemented or accepted** — it is a product-level authorization that the
+capability is needed and governs its shape once designed; SDT-HF technical design and a UIUX
+contract remain the next steps, neither performed by this decision. No HistFinTS or `histfints_uiue`
+file is modified by this decision.
+
+---
+
 ### Inherited principles (ratified, not re-decided)
 
 These come from the specification and are treated as binding constraints on all
@@ -3825,6 +3895,7 @@ Binding across spec, code and conversation.
 
 | Date | Change |
 |---|---|
+| 2026-09-03 | **Recorded the durable PO product decision D-048 — point-date ratio applicability: ACTIVE MODEL CAPABILITY NEEDED — §1 D-048, `ACTION_PLAN.md` §15e, §5.** Per SE/PO directive. Recorded exactly as relayed and attributed to PO — not self-certified by SDT-WB. §15/§15a/§15b/§15c/§15d preserved completely unedited; this decision grows directly out of §15c's own STOP — EVIDENCE LIMIT REACHED finding, promoting its named modeling gap to an authorized-but-not-yet-implemented capability. **Governing distinction recorded exactly as instructed**: **POINT applicability** (a specific, dated, sourced fact — "on date `D`, the ratio was `R`" — asserting nothing about any other date) vs. **PERIOD applicability** (a bounded or evidenced open-ended interval requiring its own affirmative continuity evidence, never inferred from its two endpoints alone). **No-continuity-inference rule**: a POINT fact never implies PERIOD applicability; two POINT facts never by themselves establish continuity between them; continuity is never inferred from silence, absence of contradiction, or current values projected backward or forward. **Provenance/conflict requirements**: every ratio fact carries its own explicit source; a conflict between sourced facts is surfaced, never silently resolved by recency, source count, or preference. **First concrete acceptance case: Banco Bradesco, `2024-07-08` → `1:1`** — one dated, sourced POINT fact, not a period, not a claim about any other date. **Explicitly not authorized**: historical reconstruction between/around POINT facts; cross-sectional dispersion (remains DEFERRED, §15d); CCL, fair value, mispricing, recommendation, or trade semantics of any kind (SP-2, SP-11). **Implementation status: pending technical design and a UIUX contract — this decision does not mark the capability implemented or accepted.** §5 updated to match, in the same change. **No HistFinTS or `histfints_uiue` file modified.** |
 | 2026-09-03 | **Recorded the durable evidentiary downgrade of the 2026-08-18 primary 5-pair CEDEAR dispersion/CV calibration — RETAIN AS UNVERIFIED / NON-DECISION-BEARING HISTORICAL ARTIFACT — `ACTION_PLAN.md` §15d, `docs/evidence/calibration-evidence-cohort-analysis-2026-08-18.md`, §5.** Per SE/PO directive, relaying DFA's ruling, following this session's own prior read-only retrospective impact review. Recorded exactly as relayed and attributed to DFA — not self-certified or re-derived by SDT-WB. §15/§15a/§15b/§15c preserved completely unedited; this record does not reopen, close, or reverse any of them. **The original artifact is preserved unchanged** — an additive status block added at its top (this repository's established amendment pattern), its own reported numbers and body left byte-for-byte as written below the block. **Recorded exactly as instructed**: artifact status RETAIN AS UNVERIFIED / NON-DECISION-BEARING HISTORICAL ARTIFACT; calculation provenance, reproducible inputs, and inspectable computational methodology are unavailable (the authoring commit `7f7f73c` added only two markdown documents, no code, and a third claimed deliverable was never actually added); the Evidence → Calculation → Analytical Finding chain cannot presently be verified for the dispersion/CV section (staleness section unaffected, structurally independent of `Series.ratio`); **median `0.062`, mean `0.078`, P95 `0.189`, and P90 `0.167` remain historically reported values only**; **`P90 CV 0.167` specifically is an unverified historical provisional result, not current calibration evidence and not an operating threshold**; **the newly discovered BABA/BIDU/UBER/GLD ratio contradictions increase uncertainty if ratio normalization was used, but do not prove those values contaminated the undocumented calculation**; **no recalculation is authorized now**; **if cross-sectional dispersion is later reactivated, a new auditable calibration must be produced using the then-governing normalized methodology and historically applicable ratio evidence rather than attempting merely to reproduce `0.167`**; **current BYMA ratios must not be projected retrospectively into historical calibration dates**; AAPL-only calibration remains unaffected; accepted AAPL INC-7 remains CLOSED/PO ACCEPTED (§15b); `F-033`'s seven-Series cohort remains independently blocked; the ADR/local-share cohort remains unaffected; cross-sectional dispersion remains DEFERRED. **Brief user-log entry added, same introduced format as prior entries'**: *Question* → Can the 2026-08-18 five-pair dispersion/CV study continue to serve as calibration evidence? *Answer* → No. DFA classified it as an unverified, non-decision-bearing historical artifact because its computational provenance is unavailable; ratio contradictions add uncertainty but do not establish the original defect mechanism. *Immediate action* → Preserve the original artifact and numbers with an explicit evidentiary downgrade; do not recalculate unless cross-sectional dispersion is separately reactivated. §5 updated to match, in the same change. **No HistFinTS or `histfints_uiue` file modified.** No recalculation performed. No previously accepted decision changed. |
 | 2026-09-02 | **Recorded the durable stopping point for the AAPL ratio-history evidence stage — STOP — EVIDENCE LIMIT REACHED — `ACTION_PLAN.md` §15c, §5, §20.** Per SE/PO directive, relaying DFA's ruling. Recorded exactly as relayed and attributed to DFA — not self-certified or re-derived by SDT-WB. §15/§15a/§15b preserved completely unedited; this record does not reopen, close, or reverse §15b's closure — it records a separate, subsequent evidence-gathering stage's own stopping point, sharpening the account of the same standing evidence-blocked condition §15b already named. **Recorded exactly as instructed**: `10:1` predecessor through `2024-01-25` established; authoritative transition boundary `2024-01-26`; `20:1` effective-start fact on `2024-01-26` established; independent `20:1` point fact on `2026-09-02` established; **uninterrupted `20:1` continuity from `2024-01-26` through `2026-09-02`: `UNRESOLVED`** — two established endpoint facts do not by themselves establish the interval between them. **No open-ended or continuous production ratio interval is authorized.** **The accepted live AAPL implied-FX capability (§15b) therefore remains evidence-blocked and correctly returns "cannot be established"** — not a new limitation, a more precisely characterized account of the same one. **Current HistFinTS `ratio_effective_from`/`ratio_effective_to` representation cannot preserve "effective start established; later continuity unresolved" without overclaiming continuity** — the schema's two-date-bound model has no vocabulary for this evidentiary shape. **Classified as a modeling gap / possible future capability, not an active implementation requirement.** **No model extension is authorized by this finding. No broad CNV evidence campaign is authorized.** **At most, a future, separately authorized targeted Banco Comafi or BYMA search may look for primary evidence explicitly stating `20:1` has applied since `2024-01-26`; absence of such a source must not be treated as continuity evidence.** **Brief user-log entry added, same introduced format as the prior entry's**: *Question* → Can the established AAPL 2024 transition evidence be curated into the current production ratio-interval model? *Answer* → No. DFA ruled STOP — EVIDENCE LIMIT REACHED: the transition is established, but post-transition continuity is unresolved and the current model would overstate the evidence. *Immediate action* → Preserve the evidence/provenance, make no production ratio-period write, keep the numeric AAPL diagnostic evidence-blocked, and record the partial-period representation issue as a non-active modeling gap. §5/§20 updated to match, in the same change. **No HistFinTS or `histfints_uiue` file modified.** No production ratio-period write occurs or is authorized. |
 | 2026-09-02 | **Recorded the durable closure of the first bounded INC-7 AAPL CEDEAR↔underlying implied-FX/staleness capability — CLOSED/PO ACCEPTED — `ACTION_PLAN.md` §15b, §8, §5, §20.** Per SE/PO directive. Gates recorded exactly as relayed and attributed to their owning authorities — not self-certified by SDT-WB. §15/§15a preserved completely unedited as the prior stage records. **Recorded exactly as instructed**: HistFinTS implementation candidate accepted `fb7c9df`; authoritative UIUX contract `073@81ff017`, `AC-FX-01..51`; Gate A PASS (SDT-WB's own prior independent conformance review — 1770/1770 full suite, 70/70 focused implied-FX tests); Gate B PASS (UIUX); Gate C PASS WITH LIMITATION (DFA); PO acceptance ACCEPTED. **Accepted result is pair-specific implied FX only** — no global eligibility, CCL, fair-value, mispricing, arbitrage, recommendation, or trade interpretation. **The 15-day staleness cutoff remains explicitly PROVISIONAL** — not promoted by this closure. **Historical coverage remains informational/non-blocking, limited to endpoint-alignment semantics** — the three canonical states only, no claim about internal gaps/density/completeness. **Production AAPL numeric result remains evidence-blocked until authoritative conversion-ratio effective-period evidence is established** — the real Series 11305's `ratio_effective_from` confirmed `NULL` in the live production database by the Gate A review; **no current ratio may be projected historically**. **This limitation does not reopen the accepted capability** — a standing, named condition on this one pair's live output, not a defect in or reversal of the closure. **Remaining explicitly outside this accepted increment**: cross-sectional dispersion/consensus, `P90 CV 0.167` as an operating threshold, global eligibility, CCL/fair-value/mispricing/arbitrage/recommendation/trade semantics. **G1/G9 remains separately DEFERRED/ON HOLD** (§12q), untouched. **New §8 reusable-baseline entry added** for this bounded INC-7 surface, following the established style. **Brief user-log entry added, per PO's instruction** — no prior instance of this Question/Answer/Immediate-action format exists elsewhere in this repository; introduced here as instructed, not represented as a pre-existing convention this record merely followed: *Question* → Is the first bounded INC-7 AAPL implied-FX/staleness capability acceptable? *Answer* → Yes; PO ACCEPTED after Gate A PASS, Gate B PASS, and DFA Gate C PASS WITH LIMITATION. *Immediate action* → Preserve the live AAPL ratio-applicability evidence gap explicitly; proceed to the next separately authorized increment rather than expanding INC-7 implicitly. §5/§20 updated to match, in the same change. **No HistFinTS or `histfints_uiue` file modified.** The outstanding AAPL ratio-applicability evidence limitation is recorded as a standing, named condition — not converted into a new implementation requirement, task, or open item. |
