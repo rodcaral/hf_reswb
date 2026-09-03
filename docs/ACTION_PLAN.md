@@ -153,7 +153,7 @@ States marked **†** are carried from the v5 UIUX review and must be confirmed 
 | INC-16 | `USER_DISABLED` manual-Run prohibition | CLOSED | UIUX + SE/SDT + PO | — | `047_USER_DISABLED_Manual_Run_UX_Specification.md`, `053_USER_DISABLED_Manual_Run_UIUX_Validation_Evidence.md` (histfints_uiue); §8/§16a baseline |
 | INC-17 | `IdentityAdjudication` corrective increment (authoritative-contradiction resolution + case-specific materiality persistence) | **CLOSED / ACCEPTED** — Gate A PASS (`0b111d0`); Gate B PASS (`072`, `AC-COR-03` PASS at `27b6865`, `AC-COR-07` not an application FAIL, real-NVDA `AC-COR-08`/`09` PASS); **Gate C PASS (DFA); Gate D PASS / PO ACCEPTED**. Governing boundary: candidate context + EvidenceSignals → materiality assessment → human adjudication → separately authorized catalog action. Does not close INC-4 overall; does not authorize Tier 3, G1/G9, automated adjudication, or production adjudication without eligible evidence | DFA (§7 ✓) → SDT-HF (design ✓) → [UIUX (contract ✓) \|\| DFA (trigger-map ✓)] → implementation ✓ → corrective fixes ✓ (`2f7e1d8`, `27b6865`) → AC-COR-03/07 resolved ✓ (`071`, corrected by `072`) → Gate B PASS (`072`) → **Gate C PASS (DFA)** → **Gate D PASS (PO)** → **CLOSED/ACCEPTED** | — | `TIER_0_1_2_3_FINANCIAL_IDENTITY_EVIDENCE_METHODOLOGY_REFERENCE_2026-09-01.md` §6b/§7b/§7c; `histfints/docs/future_designs/INC17_CORRECTIVE_INCREMENT_DESIGN.md`; `068`/`069`/`070`/`071`/`072` (histfints_uiue); §8 baseline entry; §12a–§12n detail |
 | INC-15 | Catalog: Cross-Workflow (Search/Discover/Resolve hand-offs) | CLOSED | UIUX + SE/SDT + DFA | — | `040_Catalog_Workflow_Cross_Screen_UX_Assessment.md`, `041_Catalog_Workflow_Cross_Screen_UX_Specification.md`, `045_Catalog_Workflow_AC_XWF_11_Revalidation_Evidence.md` (histfints_uiue); §8/§10a baseline |
-| INC-7 | Core Workbench research capability | BLOCKED overall; **one bounded surface CLOSED/PO ACCEPTED** — AAPL CEDEAR↔underlying single-pair implied-FX/staleness diagnostic (§15b): Gate A PASS, Gate B PASS, Gate C PASS WITH LIMITATION (DFA), PO ACCEPTED. `fb7c9df`/`073@81ff017`/`AC-FX-01..51`. `15 days` staleness remains PROVISIONAL; `P90 CV 0.167` dispersion NOT authorized for operating use; no cross-sectional feature; pair-specific implied FX only, no global eligibility/CCL/fair-value/mispricing/arbitrage/recommendation. Production AAPL numeric result remains evidence-blocked (`ratio_effective_from` NULL live) — a standing condition, not a reopening | DFA → SE/SDT + UIUX | closed for this one bounded surface — see §15b; every other INC-7 direction remains blocked on its own evidence prerequisites | `SPEC-panel-eligibility.md`; `IMPLEMENTATION-PANEL-ELIGIBILITY.md`; `docs/calibration-evidence-2026-08-18.md`/`.json`; `DECISIONS.md` D-024/D-037/D-042/D-044–D-046; `histfints_uiue 073`; §8 baseline entry; §15a–§15b detail |
+| INC-7 | Core Workbench research capability | BLOCKED overall; **one bounded surface CLOSED/PO ACCEPTED** — AAPL CEDEAR↔underlying single-pair implied-FX/staleness diagnostic (§15b): Gate A PASS, Gate B PASS, Gate C PASS WITH LIMITATION (DFA), PO ACCEPTED. `fb7c9df`/`073@81ff017`/`AC-FX-01..51`. `15 days` staleness remains PROVISIONAL; `P90 CV 0.167` dispersion NOT authorized for operating use; no cross-sectional feature; pair-specific implied FX only, no global eligibility/CCL/fair-value/mispricing/arbitrage/recommendation. Production AAPL numeric result remains evidence-blocked (`ratio_effective_from` NULL live) — a standing condition, not a reopening. **AAPL ratio-history evidence stage: STOP — EVIDENCE LIMIT REACHED (§15c)** — `10:1` through `2024-01-25` and `20:1` from `2024-01-26` each established as endpoint facts, plus an independent `20:1` point fact on `2026-09-02`; uninterrupted continuity between them `UNRESOLVED`; no interval may be curated from the endpoints; current schema cannot represent "start established, continuity unresolved" without overclaiming; modeling gap only, no model extension or new implementation requirement authorized | DFA → SE/SDT + UIUX | closed for this one bounded surface — see §15b; every other INC-7 direction remains blocked on its own evidence prerequisites | `SPEC-panel-eligibility.md`; `IMPLEMENTATION-PANEL-ELIGIBILITY.md`; `docs/calibration-evidence-2026-08-18.md`/`.json`; `DECISIONS.md` D-024/D-037/D-042/D-044–D-046; `histfints_uiue 073`; §8 baseline entry; §15a–§15c detail |
 | INC-8 | Screen-by-screen UIUX expansion | CONTINUOUS | UIUX + SE + DFA | per-screen decision gates | UIUX audits and specifications |
 | INC-9 | Workbench-wide information architecture | DEFERRED | PO, informed by UIUX + DFA + SE | several validated workflows delivered | future PO decision |
 | INC-10 | Four-gate validation | CONTINUOUS | SE + UIUX + DFA + PO | — | §4 |
@@ -1721,6 +1721,68 @@ ratio-applicability evidence limitation is recorded as a standing, named conditi
 converted into a new implementation requirement, task, or open item by this closure. §5/§8/§20
 updated to match, in the same change.
 
+## 15c. Durable stopping point — AAPL ratio-history evidence stage: STOP — EVIDENCE LIMIT
+REACHED (2026-09-02)
+
+**Recorded exactly as relayed and attributed to DFA — not self-certified or re-derived by
+SDT-WB.** §15/§15a/§15b preserved completely unedited; this record does not reopen, close, or
+reverse the §15b closure — it records a separate, subsequent evidence-gathering stage's own
+stopping point.
+
+**AAPL ratio-history evidence stage: STOP — EVIDENCE LIMIT REACHED.**
+
+- **`10:1` predecessor through `2024-01-25`: established.**
+- **Authoritative transition boundary: `2024-01-26`.**
+- **`20:1` effective-start fact on `2024-01-26`: established.**
+- **Independent `20:1` point fact on `2026-09-02`: established.**
+- **Uninterrupted `20:1` continuity from `2024-01-26` through `2026-09-02`: `UNRESOLVED`.** Two
+  established endpoint facts do not, by themselves, establish the interval between them — the
+  same endpoint-vs-interior discipline this session's own historical-coverage work (§15b, Gate A
+  review, `AC-FX-46`) already applies to a structurally different fact.
+- **No open-ended or continuous production ratio interval is authorized.** Neither endpoint fact,
+  nor both together, may be curated into a `ratio_effective_from=2024-01-26`/no-end (or any other)
+  production interval claim.
+- **The accepted live AAPL implied-FX capability (§15b) therefore remains evidence-blocked and
+  correctly returns "cannot be established."** This is not a new or different limitation from
+  §15b's own recorded one — it is the same standing condition, now with its underlying evidence
+  picture more fully characterized: the gap is not merely "no effective-period recorded," it is
+  "the two endpoints are each established but the interval between them is not," a materially
+  different and more precise account of the same non-reopening condition.
+- **Current HistFinTS `ratio_effective_from`/`ratio_effective_to` representation cannot preserve
+  "effective start established; later continuity unresolved" without overclaiming continuity.**
+  The schema's own two-date-bound model has no vocabulary for "a start date is known, and a later
+  point fact is also known, but the span between them is not." Using it here would necessarily
+  assert (or fail to distinguish from asserting) an interval that isn't itself evidenced.
+- **This limitation is classified as a modeling gap / possible future capability, not an active
+  implementation requirement.** Consistent with this project's own standing discipline against
+  manufacturing authority or closure (§17) and against inventing universal thresholds/coverage
+  claims (SP-5) — the gap is named, not filled by stretching an existing representation.
+- **No model extension is authorized by this finding.** Recording the gap is not itself a request,
+  specification, or authorization to add a new schema concept, interval type, or evidence-tier
+  distinction to represent "endpoint-established, interior-unresolved" data.
+- **No broad CNV evidence campaign is authorized.** This record does not open a general historical
+  ratio-research initiative.
+- **At most, a future, separately authorized targeted Banco Comafi or BYMA search may look for
+  primary evidence explicitly stating `20:1` has applied since `2024-01-26`** — narrowly scoped,
+  not authorized to begin by this record itself, and **absence of such a source must not be
+  treated as continuity evidence** (silence is not confirmation, consistent with this project's
+  standing evidentiary discipline throughout D-009/D-009b and every closed increment's own "never
+  infer from absence" rule).
+
+**Brief user-log entry, per PO's instruction, same introduced format as §15b's:**
+
+> **Question** → Can the established AAPL 2024 transition evidence be curated into the current
+> production ratio-interval model?
+> **Answer** → No. DFA ruled STOP — EVIDENCE LIMIT REACHED: the transition is established, but
+> post-transition continuity is unresolved and the current model would overstate the evidence.
+> **Immediate action** → Preserve the evidence/provenance, make no production ratio-period write,
+> keep the numeric AAPL diagnostic evidence-blocked, and record the partial-period representation
+> issue as a non-active modeling gap.
+
+**No HistFinTS or `histfints_uiue` file modified by this record.** No production ratio-period
+write occurs or is authorized. §15b's closure is not reopened, reversed, or extended — this
+record only sharpens the account of the same standing evidence-blocked condition it already named.
+
 ## 16. INC-8, INC-9, INC-14 — UIUX programme
 
 **INC-8 — Screen-by-screen expansion. CONTINUOUS**, dependency-driven, no longer globally deferred. Per screen: **audit → DFA/PO decision gate where needed → UX specification → implementation → four-gate validation**. Prioritize by product value and dependency readiness.
@@ -1815,7 +1877,7 @@ Standing rules live in §3 and are cited by ID. Do not restate an SP or UP insid
 - **INC-3** — **CLOSED/ACCEPTED 2026-08-29 (§8/§11).** All four gates disposed (A/C/D PASS-ACCEPT, B N/A). Reusable baseline only from here — do not reopen or silently extend without a new decision.
 - **INC-14** — **CLOSED/ACCEPTED 2026-08-31 (§8/§16).** All four gates disposed (A/B/D PASS-ACCEPT; C N/A, no financial content; Gate B carries two named, not-glossed-over evidence-scope qualifications). Reusable baseline only from here — distinct from INC-15, not touched or advanced by its closure; do not reopen or silently extend without a new decision.
 - **INC-16** — **CLOSED/ACCEPTED 2026-09-01 (§8/§16a).** All four gates disposed (A/B/D PASS-ACCEPT; C N/A, no financial content). Reusable baseline only from here — does not extend to `SUPERSEDED`/`DELISTED_OR_DISCONTINUED`/`PROVIDER_UNAVAILABLE` or any other increment; do not reopen or silently extend without a new decision. `046` remains unchanged as historical pre-decision evidence; `047` remains unchanged as the settled specification.
-- **INC-7** — BLOCKED overall; **one bounded surface CLOSED/PO ACCEPTED, recorded 2026-09-02 (§15b)**: AAPL CEDEAR↔underlying single-pair implied-FX/staleness diagnostic — `fb7c9df`/`073@81ff017`/`AC-FX-01..51`; Gate A PASS, Gate B PASS, Gate C PASS WITH LIMITATION (DFA), PO ACCEPTED. `15 days` staleness remains explicitly PROVISIONAL; `P90 CV 0.167` dispersion not authorized for operating use; no cross-sectional dispersion/consensus feature; result is pair-specific implied FX only, no global eligibility/CCL/fair-value/mispricing/arbitrage/recommendation. **Production AAPL numeric result remains evidence-blocked** (`ratio_effective_from` NULL in the live database) **until authoritative conversion-ratio effective-period evidence is established — a standing condition, not a reopening of this closure.** INC-7 overall remains BLOCKED per-analysis for every other direction; do not expand this closure implicitly. G1/G9 remains separately DEFERRED/ON HOLD (§12q), untouched. Advance any other analytical workflow only when its own evidence and methodology gates are separately satisfied.
+- **INC-7** — BLOCKED overall; **one bounded surface CLOSED/PO ACCEPTED, recorded 2026-09-02 (§15b)**: AAPL CEDEAR↔underlying single-pair implied-FX/staleness diagnostic — `fb7c9df`/`073@81ff017`/`AC-FX-01..51`; Gate A PASS, Gate B PASS, Gate C PASS WITH LIMITATION (DFA), PO ACCEPTED. `15 days` staleness remains explicitly PROVISIONAL; `P90 CV 0.167` dispersion not authorized for operating use; no cross-sectional dispersion/consensus feature; result is pair-specific implied FX only, no global eligibility/CCL/fair-value/mispricing/arbitrage/recommendation. **Production AAPL numeric result remains evidence-blocked** (`ratio_effective_from` NULL in the live database) **until authoritative conversion-ratio effective-period evidence is established — a standing condition, not a reopening of this closure.** **AAPL ratio-history evidence stage: STOP — EVIDENCE LIMIT REACHED, recorded 2026-09-02 (§15c)** — `10:1`/`20:1` transition endpoints (through `2024-01-25`, from `2024-01-26`) and an independent `2026-09-02` `20:1` point fact are each established; uninterrupted continuity between them is `UNRESOLVED`; no interval may be curated from the endpoints alone; current `ratio_effective_from`/`_to` representation cannot express "start established, continuity unresolved" without overclaiming — classified as a modeling gap only, no model extension, no broad CNV campaign, and no new implementation requirement authorized; at most a future, separately authorized targeted Banco Comafi/BYMA search may look for explicit continuity evidence, and its absence must never be treated as continuity proof. INC-7 overall remains BLOCKED per-analysis for every other direction; do not expand this closure implicitly. G1/G9 remains separately DEFERRED/ON HOLD (§12q), untouched. Advance any other analytical workflow only when its own evidence and methodology gates are separately satisfied.
 - **§17** — close the remaining evidence/documentation gaps without inferring missing semantics.
 
 **Next SDT increment: SE/PO sequencing decision, not started here.** INC-4/5 are not selected or begun by this plan on its own authority — per §1, sequencing is PO's to settle. (INC-6/INC-12/INC-13/INC-14/INC-15/INC-16, all previously named or newly closed here, are now closed — see above, not candidates for "next.")
