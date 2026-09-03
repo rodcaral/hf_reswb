@@ -1,6 +1,53 @@
 # CALIBRATION EVIDENCE: PRIMARY CEDEAR COHORT
 ## Empirical Analysis — Staleness & Dispersion Distributions
 
+> **Evidentiary status update, 2026-09-03 (additive — everything below this block is
+> unedited).** Per DFA's ruling (relayed by SE/PO), following a read-only retrospective impact
+> review that found the authoring commit (`7f7f73c`, 2026-08-18) added only this document and
+> `calibration-evidence-secondary-cohort-2026-08-18.md` — no code, script, or notebook for the
+> dispersion/CV computation below was ever committed, and a third deliverable that commit's own
+> message claims (`CALIBRATION_COHORT_CLASSIFICATION.md`) was never actually added either.
+>
+> **Artifact status: RETAIN AS UNVERIFIED / NON-DECISION-BEARING HISTORICAL ARTIFACT.**
+> Calculation provenance, reproducible inputs, and inspectable computational methodology are
+> unavailable — the "compute consensus (median price across 5 pairs)" methodology line below is
+> the only surviving description of what was actually computed. **The Evidence → Calculation →
+> Analytical Finding chain cannot presently be verified for the dispersion/CV section of this
+> document.** The staleness-distribution section is unaffected by this downgrade — staleness is a
+> pure inter-observation-gap-in-time metric, confirmed structurally independent of `Series.ratio`.
+>
+> The reported **median `0.062`, mean `0.078`, P95 `0.189`, and P90 `0.167`** values below remain
+> **historically reported values only** — read as a dated artifact, not current evidence.
+> **`P90 CV 0.167` in particular is an unverified historical provisional result — not current
+> calibration evidence and not an operating threshold** (consistent with every prior record of it
+> in this repository, which already declined to authorize it operationally).
+>
+> **Newly discovered BABA/BIDU/UBER/GLD `ratio=1.0` contradictions** (found live in the production
+> database, contradicting authoritative sources) **increase uncertainty if ratio normalization was
+> used in the undocumented calculation below, but do not prove those values contaminated it** — the
+> defect mechanism itself (whether ratio ever entered this specific computation) is unestablished,
+> not confirmed either way.
+>
+> **No recalculation is authorized now.** If cross-sectional dispersion is ever separately
+> reactivated, **a new, auditable calibration must be produced using the then-governing normalized
+> methodology and historically applicable ratio evidence** — not an attempt to merely reproduce
+> `0.167`. **Current BYMA ratios must not be projected retrospectively into historical calibration
+> dates.**
+>
+> **Unaffected by this downgrade, confirmed separately**: the AAPL-only single-pair calibration
+> (`calibration-evidence-2026-08-18.md`, real `ratio=20.0`); the accepted AAPL INC-7 capability
+> (`fb7c9df`/`073@81ff017`, CLOSED/PO ACCEPTED, §15b — structurally isolated, single-pair only);
+> `F-033`'s already-independently-blocked seven-Series cohort (MU/MSFT/AMD/MELI/QQQ/AMZN/NU — no
+> calibration distribution was ever reported for it, for a separate, already-documented reason);
+> the ADR/local-share secondary cohort (uses external mapping, not `Series.ratio`, unaffected by
+> construction). **Cross-sectional dispersion remains DEFERRED** — this downgrade does not itself
+> reactivate it.
+>
+> Full detail: `workbench/docs/ACTION_PLAN.md` §15d; `workbench/docs/DECISIONS.md`, 2026-09-03
+> entry.
+
+---
+
 **Analysis Date:** 2026-08-18  
 **Cohort:** Primary CEDEAR ↔ Foreign Underlying (5 pairs)  
 **Population:** 1,617 (AAPL) + 1,569 (BABA) + 1,568 (BIDU) + 989 (UBER) + 470 (GLD) = **6,213 observations**  

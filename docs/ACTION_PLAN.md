@@ -153,7 +153,7 @@ States marked **†** are carried from the v5 UIUX review and must be confirmed 
 | INC-16 | `USER_DISABLED` manual-Run prohibition | CLOSED | UIUX + SE/SDT + PO | — | `047_USER_DISABLED_Manual_Run_UX_Specification.md`, `053_USER_DISABLED_Manual_Run_UIUX_Validation_Evidence.md` (histfints_uiue); §8/§16a baseline |
 | INC-17 | `IdentityAdjudication` corrective increment (authoritative-contradiction resolution + case-specific materiality persistence) | **CLOSED / ACCEPTED** — Gate A PASS (`0b111d0`); Gate B PASS (`072`, `AC-COR-03` PASS at `27b6865`, `AC-COR-07` not an application FAIL, real-NVDA `AC-COR-08`/`09` PASS); **Gate C PASS (DFA); Gate D PASS / PO ACCEPTED**. Governing boundary: candidate context + EvidenceSignals → materiality assessment → human adjudication → separately authorized catalog action. Does not close INC-4 overall; does not authorize Tier 3, G1/G9, automated adjudication, or production adjudication without eligible evidence | DFA (§7 ✓) → SDT-HF (design ✓) → [UIUX (contract ✓) \|\| DFA (trigger-map ✓)] → implementation ✓ → corrective fixes ✓ (`2f7e1d8`, `27b6865`) → AC-COR-03/07 resolved ✓ (`071`, corrected by `072`) → Gate B PASS (`072`) → **Gate C PASS (DFA)** → **Gate D PASS (PO)** → **CLOSED/ACCEPTED** | — | `TIER_0_1_2_3_FINANCIAL_IDENTITY_EVIDENCE_METHODOLOGY_REFERENCE_2026-09-01.md` §6b/§7b/§7c; `histfints/docs/future_designs/INC17_CORRECTIVE_INCREMENT_DESIGN.md`; `068`/`069`/`070`/`071`/`072` (histfints_uiue); §8 baseline entry; §12a–§12n detail |
 | INC-15 | Catalog: Cross-Workflow (Search/Discover/Resolve hand-offs) | CLOSED | UIUX + SE/SDT + DFA | — | `040_Catalog_Workflow_Cross_Screen_UX_Assessment.md`, `041_Catalog_Workflow_Cross_Screen_UX_Specification.md`, `045_Catalog_Workflow_AC_XWF_11_Revalidation_Evidence.md` (histfints_uiue); §8/§10a baseline |
-| INC-7 | Core Workbench research capability | BLOCKED overall; **one bounded surface CLOSED/PO ACCEPTED** — AAPL CEDEAR↔underlying single-pair implied-FX/staleness diagnostic (§15b): Gate A PASS, Gate B PASS, Gate C PASS WITH LIMITATION (DFA), PO ACCEPTED. `fb7c9df`/`073@81ff017`/`AC-FX-01..51`. `15 days` staleness remains PROVISIONAL; `P90 CV 0.167` dispersion NOT authorized for operating use; no cross-sectional feature; pair-specific implied FX only, no global eligibility/CCL/fair-value/mispricing/arbitrage/recommendation. Production AAPL numeric result remains evidence-blocked (`ratio_effective_from` NULL live) — a standing condition, not a reopening. **AAPL ratio-history evidence stage: STOP — EVIDENCE LIMIT REACHED (§15c)** — `10:1` through `2024-01-25` and `20:1` from `2024-01-26` each established as endpoint facts, plus an independent `20:1` point fact on `2026-09-02`; uninterrupted continuity between them `UNRESOLVED`; no interval may be curated from the endpoints; current schema cannot represent "start established, continuity unresolved" without overclaiming; modeling gap only, no model extension or new implementation requirement authorized | DFA → SE/SDT + UIUX | closed for this one bounded surface — see §15b; every other INC-7 direction remains blocked on its own evidence prerequisites | `SPEC-panel-eligibility.md`; `IMPLEMENTATION-PANEL-ELIGIBILITY.md`; `docs/calibration-evidence-2026-08-18.md`/`.json`; `DECISIONS.md` D-024/D-037/D-042/D-044–D-046; `histfints_uiue 073`; §8 baseline entry; §15a–§15c detail |
+| INC-7 | Core Workbench research capability | BLOCKED overall; **one bounded surface CLOSED/PO ACCEPTED** — AAPL CEDEAR↔underlying single-pair implied-FX/staleness diagnostic (§15b): Gate A PASS, Gate B PASS, Gate C PASS WITH LIMITATION (DFA), PO ACCEPTED. `fb7c9df`/`073@81ff017`/`AC-FX-01..51`. `15 days` staleness remains PROVISIONAL; `P90 CV 0.167` dispersion NOT authorized for operating use; no cross-sectional feature; pair-specific implied FX only, no global eligibility/CCL/fair-value/mispricing/arbitrage/recommendation. Production AAPL numeric result remains evidence-blocked (`ratio_effective_from` NULL live) — a standing condition, not a reopening. **AAPL ratio-history evidence stage: STOP — EVIDENCE LIMIT REACHED (§15c)** — `10:1` through `2024-01-25` and `20:1` from `2024-01-26` each established as endpoint facts, plus an independent `20:1` point fact on `2026-09-02`; uninterrupted continuity between them `UNRESOLVED`; no interval may be curated from the endpoints; current schema cannot represent "start established, continuity unresolved" without overclaiming; modeling gap only, no model extension or new implementation requirement authorized. **2026-08-18 primary 5-pair dispersion/CV calibration downgraded to RETAIN AS UNVERIFIED / NON-DECISION-BEARING HISTORICAL ARTIFACT (§15d)** — computational provenance unavailable, `P90 CV 0.167` not current evidence and not an operating threshold; AAPL-only calibration and the accepted AAPL INC-7 closure both confirmed unaffected | DFA → SE/SDT + UIUX | closed for this one bounded surface — see §15b; every other INC-7 direction remains blocked on its own evidence prerequisites | `SPEC-panel-eligibility.md`; `IMPLEMENTATION-PANEL-ELIGIBILITY.md`; `docs/calibration-evidence-2026-08-18.md`/`.json`; `DECISIONS.md` D-024/D-037/D-042/D-044–D-046; `histfints_uiue 073`; §8 baseline entry; §15a–§15d detail |
 | INC-8 | Screen-by-screen UIUX expansion | CONTINUOUS | UIUX + SE + DFA | per-screen decision gates | UIUX audits and specifications |
 | INC-9 | Workbench-wide information architecture | DEFERRED | PO, informed by UIUX + DFA + SE | several validated workflows delivered | future PO decision |
 | INC-10 | Four-gate validation | CONTINUOUS | SE + UIUX + DFA + PO | — | §4 |
@@ -1782,6 +1782,59 @@ stopping point.
 **No HistFinTS or `histfints_uiue` file modified by this record.** No production ratio-period
 write occurs or is authorized. §15b's closure is not reopened, reversed, or extended — this
 record only sharpens the account of the same standing evidence-blocked condition it already named.
+
+## 15d. Durable evidentiary downgrade — 2026-08-18 primary 5-pair CEDEAR dispersion/CV
+calibration: RETAIN AS UNVERIFIED / NON-DECISION-BEARING HISTORICAL ARTIFACT (2026-09-03)
+
+**Recorded exactly as relayed and attributed to DFA — not self-certified or re-derived by
+SDT-WB.** §15/§15a/§15b/§15c preserved completely unedited; this record does not reopen, close,
+or reverse any of them. The original artifact itself,
+`docs/evidence/calibration-evidence-cohort-analysis-2026-08-18.md`, is **preserved unchanged**,
+its reported numbers untouched — an additive status block was added at its top (per this
+repository's established amendment pattern, e.g. `IMPLEMENTATION-PANEL-ELIGIBILITY.md`'s own
+2026-08-27 note), the original body below it left byte-for-byte as written.
+
+- **Artifact status: RETAIN AS UNVERIFIED / NON-DECISION-BEARING HISTORICAL ARTIFACT.**
+- **Calculation provenance, reproducible inputs, and inspectable computational methodology are
+  unavailable** — per this session's own prior read-only retrospective impact review: the
+  authoring commit (`7f7f73c`, 2026-08-18) added only two markdown documents, no code, and a
+  third deliverable that commit's own message claims was never actually added.
+- **The Evidence → Calculation → Analytical Finding chain cannot presently be verified** for the
+  dispersion/CV section of that artifact. The staleness-distribution section is unaffected — a
+  pure inter-observation-gap-in-time metric, structurally independent of `Series.ratio`.
+- **Median `0.062`, mean `0.078`, P95 `0.189`, and P90 `0.167` remain historically reported
+  values only.** **`P90 CV 0.167` specifically is an unverified historical provisional result —
+  not current calibration evidence and not an operating threshold**, unchanged from every prior
+  record of it in this repository, which already declined to authorize it operationally.
+- **The newly discovered BABA/BIDU/UBER/GLD ratio contradictions increase uncertainty if ratio
+  normalization was used in the undocumented calculation, but do not prove those values
+  contaminated it** — the defect mechanism itself remains unestablished, not confirmed either way.
+- **No recalculation is authorized now.**
+- **If cross-sectional dispersion is later reactivated, a new, auditable calibration must be
+  produced using the then-governing normalized methodology and historically applicable ratio
+  evidence** — not an attempt to merely reproduce `0.167`.
+- **Current BYMA ratios must not be projected retrospectively into historical calibration dates.**
+- **AAPL-only calibration remains unaffected** (`calibration-evidence-2026-08-18.md`, real
+  `ratio=20.0`).
+- **Accepted AAPL INC-7 remains CLOSED / PO ACCEPTED** (§15b) — structurally isolated,
+  single-pair only, untouched by this downgrade.
+- **`F-033`'s seven-Series cohort remains independently blocked** — no calibration distribution
+  was ever reported for it, for its own already-documented reason, unaffected by this record.
+- **The ADR/local-share cohort remains unaffected** — external mapping, not `Series.ratio`.
+- **Cross-sectional dispersion remains DEFERRED** — this downgrade does not itself reactivate it.
+
+**Brief user-log entry, per PO's instruction, same introduced format as §15b's/§15c's:**
+
+> **Question** → Can the 2026-08-18 five-pair dispersion/CV study continue to serve as
+> calibration evidence?
+> **Answer** → No. DFA classified it as an unverified, non-decision-bearing historical artifact
+> because its computational provenance is unavailable; ratio contradictions add uncertainty but
+> do not establish the original defect mechanism.
+> **Immediate action** → Preserve the original artifact and numbers with an explicit evidentiary
+> downgrade; do not recalculate unless cross-sectional dispersion is separately reactivated.
+
+**No HistFinTS or `histfints_uiue` file modified by this record.** No recalculation performed.
+No previously accepted decision changed — §15b/§15c preserved exactly as recorded.
 
 ## 16. INC-8, INC-9, INC-14 — UIUX programme
 
