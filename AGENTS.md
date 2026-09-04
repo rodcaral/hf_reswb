@@ -151,9 +151,16 @@ same day to explicitly cover a relocated charter.
 | `docs/ACTION_PLAN.md` | The master, dependency-ordered coordination plan: parties and settled authority (PO/DFA/SE/SDT/UIUX), the standing prohibitions (SP) and UIUX defaults (UP) that increments cite by ID, the four-gate validation model, and every increment's current state (`CLOSED`/`ACTIVE`/`NEXT`/`BLOCKED`/`DEFERRED`/`CONTINUOUS`). Read this to know what's currently in scope and why before touching an increment. `docs/README.md`'s reading order covers the rest of this table too — this file duplicates only the entries most load-bearing for day-to-day work. |
 | `docs/HISTFINTS-BRIEF-v2.md` | **Start here.** Corrected technical brief: schema, known defects, adjustment basis, V0 data reality. Supersedes the original consuming-team brief, which was twice misread as exhaustive during review and caused a retracted finding. |
 | `docs/DECISIONS.md` | The full specification and reasoning log. Every architectural decision (`D-###`), open question (`Q-###`), known defect (`F-###`), and queued spec amendment (`A-###`), each with evidence. Read before implementing anything touching identity, adjustment, currency, or panels — the brief gives you the facts, this gives you why. |
-| `docs/SPEC_PANEL_ELIGIBILITY.md` | Converged spec for panel-derived analytics (implied FX, cross-section screening). Status: design-complete, gated on Q-027 (trading calendar) and the HistFinTS Tranche 2 migration. |
+| `docs/SPEC_PANEL_ELIGIBILITY.md` | Converged spec for panel-derived analytics (implied FX, cross-section screening). Status: design-complete; both named gates resolved (Q-027 by D-037, Tranche 2 by D-044/D-045) — implementation authorized per D-046, provisional parameters remain calibration-gated. |
 | `docs/SPEC_F009_EVIDENCE_CONSUMPTION.md` | Design note for the Workbench-side F-009 evidence-consumption/reconciliation capability (D-032–D-034). Reference-by-key evidence model, three-verdict reconciler (`explained` / `not explained` / `insufficient evidence`), full traceability chain. `explained by captured evidence` is structurally unreachable against the live database until HistFinTS migrations 0011–0013 are applied — read §8 before assuming otherwise. |
 | `docs/histfints-requests/` | Filings sent to (or pending for) the HistFinTS team: `DEFECT-F009.md` (still active — dormant, unresolved), `REQUEST-event-capture.md`, `REQUEST-apply-migrations-0011-0013.md`. Track their status in `DECISIONS.md`'s Tranche table before assuming any of them have landed. (`REQUEST-tranche2-migration.md` landed — confirmed via D-044 — and now lives in `docs/evidence/` as closed historical, not here.) |
+
+**Correction, 2026-09-04:** the `SPEC_PANEL_ELIGIBILITY.md` row above stated implementation was
+still gated on Q-027/Tranche 2 — stale, and it stood beside this same table's own `docs/
+histfints-requests/` row, which already correctly noted Tranche 2 landed via D-044. Both named
+gates are resolved (Q-027 by D-037, Tranche 2 by D-044/D-045); D-046 authorizes implementation.
+Repository instructions outrank shared protocol, so a stale status here resolves conflicts the
+wrong way by design — found by SE, relayed by GA.
 
 ## Documentation lifecycle (structural changes only)
 
