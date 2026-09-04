@@ -1,5 +1,15 @@
 # Cross-Sectional Dispersion — Methodology Design Study (2026-09-04)
 
+> **Amended 2026-09-04 (additive — everything below this block through §11 is unedited).** Per
+> DFA's methodology rulings, relayed by SE/PO: `LOG_RELATIVE` is now the **primary** residual
+> representation (no longer co-equal with `PERCENTAGE_RELATIVE`, which remains only as a
+> diagnostic cross-check). The provisional same-date median remains accepted **for methodology
+> design only** — not an approved calibration or production center. §12 below records DFA's
+> rulings and the next bounded design increment performed under them, using the same five
+> `2026-09-02` observations, no new pairs or dates, and no `F-033` retest. §1–§11 are preserved
+> exactly as originally written — read them as the prior comparative-design stage's own record,
+> superseded only where §12 says so, not retroactively edited.
+
 **Status: CANDIDATE-METHOD DIAGNOSTIC OUTPUT ONLY. Not an accepted production statistic, not a
 calibration, not an operating threshold, not a consensus/panel conclusion.** Every number in
 this document is labeled as such and must be read as such. This study does not promote any
@@ -382,3 +392,172 @@ claim `F-033` resolved, or claim today's price-level distinctness clears its own
 return-correlation concern. Does not promote Candidate A or Candidate B to "the methodology."
 Does not reactivate calibration — that remains a separately authorized, DFA-gated future stage.
 Does not modify HistFinTS, `histfints_uiue`, or any production data — read-only throughout.
+
+---
+
+## 12. DFA's methodology rulings and the next bounded design increment (2026-09-04, additive)
+
+**Recorded exactly as relayed, attributed to DFA — not self-certified or re-derived by SDT-WB.**
+§1–§11 above preserved exactly as originally written. This section performs the next bounded
+design increment DFA's rulings authorize, using the same five `2026-09-02` observations only —
+no new pair, no new date, no `F-033` retest.
+
+### 12.1 Governing design choice, recorded exactly as instructed
+
+**Primary residual representation: `LOG_RELATIVE`, around the provisional same-date median.**
+For pair `i`, `LOG_RELATIVE_i = ln(value_i / median)` — the log ratio between that pair's own
+implied-FX value and the same-date median center, sign and dimensionless interpretation
+preserved (a negative value means below the center on a log scale, a positive value means
+above; the quantity itself carries no unit, matching a log-ratio's own standard interpretation).
+**`PERCENTAGE_RELATIVE` is no longer a co-equal candidate** — it remains available only as a
+diagnostic cross-check demonstrating numerical similarity/difference against `LOG_RELATIVE`, per
+§12.3 below, never silently substituted for it.
+
+**The provisional same-date median remains accepted for methodology design only** — restated
+per instruction: not yet an approved calibration or production center. Its own value is
+unchanged from §3.1: **`1591.7233371077455`** (MSFT's own `2026-09-02` value — the odd-`n`
+structural-zero property named in §3.1/§7 applies identically here and is not re-derived).
+
+### 12.2 `LOG_RELATIVE` residuals, exact, for each of the five pairs
+
+`LOG_RELATIVE_i = ln(value_i / 1591.7233371077455)`, independently recomputed and confirmed:
+
+| Pair | Value | `LOG_RELATIVE` (dimensionless) | Sign, relative to provisional center |
+|---|---|---|---|
+| AAPL | `1591.5805440667510` | `−0.0000897137354274` | below |
+| Banco Bradesco | `1592.7536011743740` | `+0.0006470538945903` | above |
+| Microsoft | `1591.7233371077455` | `0.0000000000000000` | at center (structural zero, §3.1/§7 — not a correctness signal) |
+| MercadoLibre | `1589.5703484805817` | `−0.0013535304619091` | below |
+| QQQ | `1593.2547735028038` | `+0.0009616621903794` | above |
+
+Sign is interpreted only and exactly as instructed: whether the pair's own implied-FX value sits
+above or below the provisional same-date center on this log scale — no further meaning (no
+"outlier," "anomaly," or "error" characterization attaches to sign or magnitude anywhere in this
+record).
+
+### 12.3 `PERCENTAGE_RELATIVE`, diagnostic cross-check only, shown beside `LOG_RELATIVE`
+
+| Pair | `LOG_RELATIVE` | `PERCENTAGE_RELATIVE` (diagnostic only) | Difference |
+|---|---|---|---|
+| AAPL | `−0.0000897137354274` | `−0.0000897097112706` | `−0.0000000040241568` |
+| Bradesco | `+0.0006470538945903` | `+0.0006472632791202` | `−0.0000002093845299` |
+| MSFT | `0.0000000000000000` | `0.0000000000000000` | `0.0000000000000000` |
+| MELI | `−0.0013535304619091` | `−0.0013526148527016` | `−0.0000009156092075` |
+| QQQ | `+0.0009616621903794` | `+0.0009621247357226` | `−0.0000004625453432` |
+
+Confirms §3.6's own finding again, now with `LOG_RELATIVE` as primary: at today's small
+magnitudes the two are numerically near-identical (largest difference ≈ `9.16×10⁻⁷` in raw
+ratio terms, i.e. about `9.16×10⁻⁵` percentage points) — `PERCENTAGE_RELATIVE`'s role here is
+exactly what DFA's ruling assigns it: a cross-check confirming the two representations agree
+closely at this scale, not an independent second methodology.
+
+### 12.4 Inversion-property demonstration
+
+**Claim to demonstrate**: reversing the FX quote convention (e.g. underlying-per-CEDEAR instead
+of CEDEAR-per-underlying — equivalently, using `1/value` and `1/median` instead of `value` and
+`median`) changes `LOG_RELATIVE`'s sign without changing its magnitude.
+
+**Computed directly, not asserted**: for each pair, `LOG_RELATIVE_inverted = ln((1/value_i) /
+(1/median))`.
+
+| Pair | `LOG_RELATIVE` (original quote) | `LOG_RELATIVE` (inverted quote) | Sum (should be ≈0) |
+|---|---|---|---|
+| AAPL | `−0.0000897137354274` | `+0.0000897137354274` | `4.88×10⁻¹⁷` |
+| Bradesco | `+0.0006470538945903` | `−0.0006470538945902` | `1.07×10⁻¹⁶` |
+| MSFT | `0.0000000000000000` | `0.0000000000000000` | `0.0000000000000000` |
+| MELI | `−0.0013535304619091` | `+0.0013535304619091` | `3.10×10⁻¹⁷` |
+| QQQ | `+0.0009616621903794` | `−0.0009616621903795` | `−4.40×10⁻¹⁷` |
+
+**Confirmed exactly**: `ln(1/x) = −ln(x)` is an algebraic identity, and this holds numerically
+here to the limit of IEEE double-precision floating-point representation (residual sums on the
+order of `10⁻¹⁷`, i.e. exactly zero to the precision available) — every pair's sign flips
+between the two quote conventions while its magnitude is preserved to full numerical precision.
+This is the exact inversion-symmetry property §3.5 already named for `LOG_RELATIVE` in the
+abstract; this section demonstrates it concretely, on this dataset, both ways.
+
+### 12.5 Cohort-membership sensitivity at `n=5`, already relevant
+
+Restated from §5, unchanged (the residual definition change does not alter which pair occupies
+which rank, so the leave-one-out median-shift table is identical regardless of `LOG_RELATIVE` vs
+`PERCENTAGE_RELATIVE`):
+
+| Excluded pair | New median (`n=4`) | Shift from full-`n=5` median |
+|---|---|---|
+| AAPL | `1592.2384691410598` | `+0.5151320333143` |
+| Bradesco | `1591.6519405872482` | `−0.0713965204973` |
+| MSFT | `1592.1670726205625` | `+0.4437355128170` |
+| MELI | `1592.2384691410598` | `+0.5151320333143` |
+| QQQ | `1591.6519405872482` | `−0.0713965204973` |
+
+**The median-member exact-zero structural effect (§3.1/§7) is already relevant at `n=5`,
+restated precisely for `LOG_RELATIVE`**: because the median is defined as one member's own
+value at odd `n`, that member's `LOG_RELATIVE` residual is `ln(median/median) = ln(1) = 0`
+exactly, by algebraic necessity — not because MSFT's own estimate is more accurate than the
+other four. A future presentation of `LOG_RELATIVE` residuals must carry this caveat explicitly,
+every time, not only in a methodology appendix.
+
+**No threshold or PASS/FAIL classification is computed anywhere in this section.**
+
+### 12.6 Calibration-eligibility table, methodology-design membership recorded separately from
+future calibration eligibility, exactly as instructed
+
+| Pair | Methodology-design membership | Calibration eligibility |
+|---|---|---|
+| AAPL | Permitted | No `F-033` exclusion currently identified |
+| Banco Bradesco | Permitted | No `F-033` exclusion currently identified |
+| Microsoft | Permitted | **CALIBRATION-INELIGIBLE while `F-033` unresolved** |
+| MercadoLibre | Permitted | **CALIBRATION-INELIGIBLE while `F-033` unresolved** |
+| QQQ | Permitted | **CALIBRATION-INELIGIBLE while `F-033` unresolved** |
+
+**Recorded exactly as instructed**: common Yahoo Finance provider usage alone is not a
+disqualifier for any of the five (§4.1's own finding, unaffected) — the specific, unresolved
+`F-033` shared-process/deep-history evidence (§4.2) is the calibration concern for Microsoft,
+MercadoLibre, and QQQ specifically, not provider commonality in general. **`F-033` was not
+retested in this increment** — its status is carried forward exactly as §4.2 recorded it, not
+re-verified again here.
+
+### 12.7 Remaining prerequisites before calibration could begin
+
+Unchanged in substance from §10, restated with the calibration-eligibility split now explicit:
+
+1. A fresh `F-033` return-correlation re-test, specifically for Microsoft, MercadoLibre, and
+   QQQ — the item that would resolve or confirm their `CALIBRATION-INELIGIBLE` status.
+2. A wider evidence-qualified pair population across dates/regimes — five pairs, one date,
+   remains sufficient only for design comparison, not calibration.
+3. Documentation of the shared-provider concentration (§4.1) for any future calibration package.
+4. **DFA's own confirmation that the provisional same-date median may be promoted to an approved
+   calibration/production center** — this section's own governing instruction states the median
+   remains provisional "for methodology design only"; that promotion is a separate, not-yet-made
+   decision.
+5. A settled robust-center definition for `n` other than 5, including even `n` (§10's own item 5,
+   unaffected by today's `LOG_RELATIVE` promotion).
+
+### 12.8 New methodological ambiguity exposed by this increment, requiring DFA review
+
+**One, worth naming precisely rather than glossing over**: `LOG_RELATIVE`'s inversion-symmetry
+property (§12.4) is exact only relative to the *quote convention* (which leg is numerator).
+**It does not, and cannot, address whether the provisional median itself is invariant under the
+same inversion** — i.e., whether `median(1/value_1, ..., 1/value_5)` equals `1/median(value_1,
+..., value_5)`. For an odd-`n` sample this holds exactly for the *median specifically* (median
+commutes with any monotonic transform, and `x → 1/x` is monotonic on positive reals), so today's
+provisional median does carry this property — but this is a property of the median as a
+statistic, not a property `LOG_RELATIVE` itself guarantees for every possible robust-center
+choice. **This matters for prerequisite §12.7 item 4**: if a future robust-center candidate
+other than the median is ever proposed (e.g. a trimmed mean), DFA should confirm whether
+quote-convention invariance is a requirement for that candidate too, since not every robust
+statistic shares the median's own monotonic-transform-commutation property. Not resolved here —
+named for DFA's awareness before any center other than the median is considered.
+
+**No other new ambiguity identified.** `LOG_RELATIVE`'s own definition, sign interpretation, and
+relationship to `PERCENTAGE_RELATIVE` are all fully specified by DFA's ruling and this section's
+own transparent calculations — nothing further requires DFA's interpretation to compute or
+present `LOG_RELATIVE` for this five-pair, single-date sample.
+
+### 12.9 What this section does not do
+
+Does not compute or adopt an operating dispersion threshold, suppression rule, consensus/panel
+FX, production center, calibration statistic, raw-price CV, or the historical `P90 CV 0.167`.
+Does not compute CCL, fair value/mispricing, arbitrage, recommendation, or trade/execution
+logic. Does not retest `F-033`. Does not add a pair or a date. Does not promote the provisional
+median to an approved calibration/production center. Does not modify HistFinTS, `histfints_uiue`,
+or any production data — read-only throughout.

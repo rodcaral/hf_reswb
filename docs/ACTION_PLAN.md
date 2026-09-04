@@ -153,7 +153,7 @@ States marked **†** are carried from the v5 UIUX review and must be confirmed 
 | INC-16 | `USER_DISABLED` manual-Run prohibition | CLOSED | UIUX + SE/SDT + PO | — | `047_USER_DISABLED_Manual_Run_UX_Specification.md`, `053_USER_DISABLED_Manual_Run_UIUX_Validation_Evidence.md` (histfints_uiue); §8/§16a baseline |
 | INC-17 | `IdentityAdjudication` corrective increment (authoritative-contradiction resolution + case-specific materiality persistence) | **CLOSED / ACCEPTED** — Gate A PASS (`0b111d0`); Gate B PASS (`072`, `AC-COR-03` PASS at `27b6865`, `AC-COR-07` not an application FAIL, real-NVDA `AC-COR-08`/`09` PASS); **Gate C PASS (DFA); Gate D PASS / PO ACCEPTED**. Governing boundary: candidate context + EvidenceSignals → materiality assessment → human adjudication → separately authorized catalog action. Does not close INC-4 overall; does not authorize Tier 3, G1/G9, automated adjudication, or production adjudication without eligible evidence | DFA (§7 ✓) → SDT-HF (design ✓) → [UIUX (contract ✓) \|\| DFA (trigger-map ✓)] → implementation ✓ → corrective fixes ✓ (`2f7e1d8`, `27b6865`) → AC-COR-03/07 resolved ✓ (`071`, corrected by `072`) → Gate B PASS (`072`) → **Gate C PASS (DFA)** → **Gate D PASS (PO)** → **CLOSED/ACCEPTED** | — | `TIER_0_1_2_3_FINANCIAL_IDENTITY_EVIDENCE_METHODOLOGY_REFERENCE_2026-09-01.md` §6b/§7b/§7c; `histfints/docs/future_designs/INC17_CORRECTIVE_INCREMENT_DESIGN.md`; `068`/`069`/`070`/`071`/`072` (histfints_uiue); §8 baseline entry; §12a–§12n detail |
 | INC-15 | Catalog: Cross-Workflow (Search/Discover/Resolve hand-offs) | CLOSED | UIUX + SE/SDT + DFA | — | `040_Catalog_Workflow_Cross_Screen_UX_Assessment.md`, `041_Catalog_Workflow_Cross_Screen_UX_Specification.md`, `045_Catalog_Workflow_AC_XWF_11_Revalidation_Evidence.md` (histfints_uiue); §8/§10a baseline |
-| INC-7 | Core Workbench research capability | BLOCKED overall; **one bounded surface CLOSED/PO ACCEPTED** — AAPL CEDEAR↔underlying single-pair implied-FX/staleness diagnostic (§15b): Gate A PASS, Gate B PASS, Gate C PASS WITH LIMITATION (DFA), PO ACCEPTED. `fb7c9df`/`073@81ff017`/`AC-FX-01..51`. `15 days` staleness remains PROVISIONAL; `P90 CV 0.167` dispersion NOT authorized for operating use; no cross-sectional feature; pair-specific implied FX only, no global eligibility/CCL/fair-value/mispricing/arbitrage/recommendation. Production AAPL numeric result remains evidence-blocked (`ratio_effective_from` NULL live) — a standing condition, not a reopening. **AAPL ratio-history evidence stage: STOP — EVIDENCE LIMIT REACHED (§15c)** — `10:1` through `2024-01-25` and `20:1` from `2024-01-26` each established as endpoint facts, plus an independent `20:1` point fact on `2026-09-02`; uninterrupted continuity between them `UNRESOLVED`; no interval may be curated from the endpoints; current schema cannot represent "start established, continuity unresolved" without overclaiming; modeling gap only, no model extension or new implementation requirement authorized. **2026-08-18 primary 5-pair dispersion/CV calibration downgraded to RETAIN AS UNVERIFIED / NON-DECISION-BEARING HISTORICAL ARTIFACT (§15d)** — computational provenance unavailable, `P90 CV 0.167` not current evidence and not an operating threshold; AAPL-only calibration and the accepted AAPL INC-7 closure both confirmed unaffected. **Point-date ratio applicability: CLOSED / PO ACCEPTED (D-048, §15f)** — `0077a67`/`075@18494ea`/`077@34ef247`; Gate A PASS, Gate B PASS (38/38 AC-RA), Gate C PASS (DFA), PO ACCEPTED. First production case: Banco Bradesco `11355→972`, `POINT`, `1:1`, `2024-07-08`, implied FX `1392.3581017966142`≈`1392.36`; `2024-07-07`/`2024-07-09` remain `UNKNOWN`. 15-day staleness remains PROVISIONAL; no continuity inference/historical reconstruction/dispersion/CCL/fair-value/mispricing/arbitrage/recommendation/trade/global-validity authorized. Does not reopen AAPL continuity (§15c), dispersion (§15d), or G1/G9 (§12q). **AAPL production curation under the closed capability (§15g)**: assertion `id=2`, `POINT`, `20:1`, `2026-09-02`; implied FX `1591.580544066751`≈`1591.58`; `2026-09-01`/`2026-09-03` remain `UNKNOWN`; `2024-01-26` remains calculation-ineligible (CEDEAR observation absent); AAPL continuity remains `UNRESOLVED`, Bradesco case unaffected. **Bounded 2026-09-02 five-pair descriptive comparison — COMPLETE under PO-approved scope (§15h)**: AAPL/Bradesco/MSFT/MELI/QQQ, each own `POINT` assertion (`id=2..6`), five independent pair-specific implied-FX results; DFA-authorized finding: descriptive side-by-side only, no panel/consensus/dispersion/representativeness/market-rate conclusion; cross-sectional dispersion NOT reactivated, remains DEFERRED (§15d). **Banco Bradesco four-date sparse temporal comparison — COMPLETE under DFA-approved bounded scope (§15i)**: four independent `POINT` facts (`id=1,7,8,3` — `2022-06-09`/`2022-11-08`/`2024-07-08`/`2026-09-02`), consecutive arithmetic differences recorded as arithmetic only (no trend/continuity/slope/regime claim); `2022-09-06`/`2024-09-17` deliberately uncurated, confirmed `UNKNOWN`. **Cross-sectional dispersion: METHODOLOGY DESIGN REACTIVATED / PO ACCEPTED (§15j)** — calibration/thresholds/suppression/consensus/production use remain DEFERRED; bounded read-only methodology study delivered (`docs/evidence/CROSS_SECTIONAL_DISPERSION_METHODOLOGY_STUDY_2026-09-04.md`), two candidate normalized-residual definitions compared, no candidate promoted; independence diagnostic found 3 of 5 pairs (MSFT/MELI/QQQ) are members of the still-LIVE, unresolved `F-033` shared-driver defect — flagged, not cleared | DFA → SE/SDT + UIUX | closed for this one bounded surface — see §15b; every other INC-7 direction remains blocked on its own evidence prerequisites | `SPEC-panel-eligibility.md`; `IMPLEMENTATION-PANEL-ELIGIBILITY.md`; `docs/calibration-evidence-2026-08-18.md`/`.json`; `DECISIONS.md` D-024/D-037/D-042/D-044–D-046/D-048; `histfints_uiue 073`/`075`/`076`/`077`; §8 baseline entry; §15a–§15j detail |
+| INC-7 | Core Workbench research capability | BLOCKED overall; **one bounded surface CLOSED/PO ACCEPTED** — AAPL CEDEAR↔underlying single-pair implied-FX/staleness diagnostic (§15b): Gate A PASS, Gate B PASS, Gate C PASS WITH LIMITATION (DFA), PO ACCEPTED. `fb7c9df`/`073@81ff017`/`AC-FX-01..51`. `15 days` staleness remains PROVISIONAL; `P90 CV 0.167` dispersion NOT authorized for operating use; no cross-sectional feature; pair-specific implied FX only, no global eligibility/CCL/fair-value/mispricing/arbitrage/recommendation. Production AAPL numeric result remains evidence-blocked (`ratio_effective_from` NULL live) — a standing condition, not a reopening. **AAPL ratio-history evidence stage: STOP — EVIDENCE LIMIT REACHED (§15c)** — `10:1` through `2024-01-25` and `20:1` from `2024-01-26` each established as endpoint facts, plus an independent `20:1` point fact on `2026-09-02`; uninterrupted continuity between them `UNRESOLVED`; no interval may be curated from the endpoints; current schema cannot represent "start established, continuity unresolved" without overclaiming; modeling gap only, no model extension or new implementation requirement authorized. **2026-08-18 primary 5-pair dispersion/CV calibration downgraded to RETAIN AS UNVERIFIED / NON-DECISION-BEARING HISTORICAL ARTIFACT (§15d)** — computational provenance unavailable, `P90 CV 0.167` not current evidence and not an operating threshold; AAPL-only calibration and the accepted AAPL INC-7 closure both confirmed unaffected. **Point-date ratio applicability: CLOSED / PO ACCEPTED (D-048, §15f)** — `0077a67`/`075@18494ea`/`077@34ef247`; Gate A PASS, Gate B PASS (38/38 AC-RA), Gate C PASS (DFA), PO ACCEPTED. First production case: Banco Bradesco `11355→972`, `POINT`, `1:1`, `2024-07-08`, implied FX `1392.3581017966142`≈`1392.36`; `2024-07-07`/`2024-07-09` remain `UNKNOWN`. 15-day staleness remains PROVISIONAL; no continuity inference/historical reconstruction/dispersion/CCL/fair-value/mispricing/arbitrage/recommendation/trade/global-validity authorized. Does not reopen AAPL continuity (§15c), dispersion (§15d), or G1/G9 (§12q). **AAPL production curation under the closed capability (§15g)**: assertion `id=2`, `POINT`, `20:1`, `2026-09-02`; implied FX `1591.580544066751`≈`1591.58`; `2026-09-01`/`2026-09-03` remain `UNKNOWN`; `2024-01-26` remains calculation-ineligible (CEDEAR observation absent); AAPL continuity remains `UNRESOLVED`, Bradesco case unaffected. **Bounded 2026-09-02 five-pair descriptive comparison — COMPLETE under PO-approved scope (§15h)**: AAPL/Bradesco/MSFT/MELI/QQQ, each own `POINT` assertion (`id=2..6`), five independent pair-specific implied-FX results; DFA-authorized finding: descriptive side-by-side only, no panel/consensus/dispersion/representativeness/market-rate conclusion; cross-sectional dispersion NOT reactivated, remains DEFERRED (§15d). **Banco Bradesco four-date sparse temporal comparison — COMPLETE under DFA-approved bounded scope (§15i)**: four independent `POINT` facts (`id=1,7,8,3` — `2022-06-09`/`2022-11-08`/`2024-07-08`/`2026-09-02`), consecutive arithmetic differences recorded as arithmetic only (no trend/continuity/slope/regime claim); `2022-09-06`/`2024-09-17` deliberately uncurated, confirmed `UNKNOWN`. **Cross-sectional dispersion: METHODOLOGY DESIGN REACTIVATED / PO ACCEPTED (§15j)** — calibration/thresholds/suppression/consensus/production use remain DEFERRED; bounded read-only methodology study delivered (`docs/evidence/CROSS_SECTIONAL_DISPERSION_METHODOLOGY_STUDY_2026-09-04.md`), two candidate normalized-residual definitions compared, no candidate promoted; independence diagnostic found 3 of 5 pairs (MSFT/MELI/QQQ) are members of the still-LIVE, unresolved `F-033` shared-driver defect — flagged, not cleared. **DFA methodology rulings (§15k)**: `LOG_RELATIVE` now primary residual representation (`PERCENTAGE_RELATIVE` diagnostic cross-check only); provisional median still design-only, not an approved center; inversion-symmetry demonstrated exactly (sign flips, magnitude preserved to double precision); calibration-eligibility split recorded — AAPL/Bradesco no exclusion identified, MSFT/MELI/QQQ CALIBRATION-INELIGIBLE while `F-033` unresolved; one new ambiguity flagged (median's quote-convention invariance doesn't automatically extend to other robust-center candidates) | DFA → SE/SDT + UIUX | closed for this one bounded surface — see §15b; every other INC-7 direction remains blocked on its own evidence prerequisites | `SPEC-panel-eligibility.md`; `IMPLEMENTATION-PANEL-ELIGIBILITY.md`; `docs/calibration-evidence-2026-08-18.md`/`.json`; `DECISIONS.md` D-024/D-037/D-042/D-044–D-046/D-048; `histfints_uiue 073`/`075`/`076`/`077`; §8 baseline entry; §15a–§15k detail |
 | INC-8 | Screen-by-screen UIUX expansion | CONTINUOUS | UIUX + SE + DFA | per-screen decision gates | UIUX audits and specifications |
 | INC-9 | Workbench-wide information architecture | DEFERRED | PO, informed by UIUX + DFA + SE | several validated workflows delivered | future PO decision |
 | INC-10 | Four-gate validation | CONTINUOUS | SE + UIUX + DFA + PO | — | §4 |
@@ -2246,6 +2246,80 @@ erroneous pair — neither claim appears anywhere in the study.
 
 **Documentation/index consistency validated**: §5's INC-7 master-row detail-range citation
 extended to §15a–§15j in this change; no other index required updating. **No HistFinTS or
+`histfints_uiue` file modified by this record — read-only throughout.**
+
+## 15k. DFA's methodology rulings — `LOG_RELATIVE` primary; calibration-eligibility split
+recorded (2026-09-04)
+
+**Recorded exactly as relayed, attributed to DFA — not self-certified or re-derived by
+SDT-WB.** §15/§15a–§15j preserved completely unedited. The methodology-design study itself
+(`docs/evidence/CROSS_SECTIONAL_DISPERSION_METHODOLOGY_STUDY_2026-09-04.md`) was amended
+additively — §1–§11 of that document preserved exactly as originally written; a new §12 records
+this increment's own full calculations, demonstrations, and findings in full. This record is the
+`ACTION_PLAN.md`-side pointer/summary, not a second independent statement.
+
+**DFA's governing design choice, recorded exactly as instructed**: **`LOG_RELATIVE` is now the
+primary residual representation**, around the provisional same-date median —
+`LOG_RELATIVE_i = ln(value_i / median)`, sign and dimensionless interpretation preserved.
+**`PERCENTAGE_RELATIVE` is no longer co-equal** — retained only as a diagnostic cross-check.
+**The provisional same-date median remains accepted for methodology design only** — not yet an
+approved calibration or production center.
+
+**`LOG_RELATIVE` residuals, exact, using the same five §15h `2026-09-02` observations, no new
+pair or date**: AAPL `−0.0000897137354274` (below); Bradesco `+0.0006470538945903` (above);
+MSFT `0.0000000000000000` (at center — structural zero, not a correctness signal); MELI
+`−0.0013535304619091` (below); QQQ `+0.0009616621903794` (above). `PERCENTAGE_RELATIVE` shown
+beside these as a diagnostic cross-check only, confirming close numerical agreement at today's
+small magnitudes (largest difference ≈`9.16×10⁻⁵` percentage points) — full table: study §12.3.
+
+**Inversion-property demonstrated concretely, not merely asserted**: reversing the FX quote
+convention (`1/value`, `1/median`) flips every pair's `LOG_RELATIVE` sign while preserving its
+magnitude to full IEEE double-precision (residual sums ~`10⁻¹⁷`, zero to available precision) —
+full per-pair table: study §12.4.
+
+**Cohort-membership sensitivity at `n=5` restated as already relevant**: the leave-one-out
+median-shift table (§5/§12.5, unchanged by the residual-definition change) and the median-member
+exact-zero structural effect (`ln(median/median)=0` by algebraic necessity, not accuracy) both
+apply identically under `LOG_RELATIVE`.
+
+**Calibration-eligibility table, methodology-design membership recorded separately from
+calibration eligibility, exactly as instructed**:
+
+| Pair | Methodology-design membership | Calibration eligibility |
+|---|---|---|
+| AAPL | Permitted | No `F-033` exclusion currently identified |
+| Banco Bradesco | Permitted | No `F-033` exclusion currently identified |
+| Microsoft | Permitted | **CALIBRATION-INELIGIBLE while `F-033` unresolved** |
+| MercadoLibre | Permitted | **CALIBRATION-INELIGIBLE while `F-033` unresolved** |
+| QQQ | Permitted | **CALIBRATION-INELIGIBLE while `F-033` unresolved** |
+
+**Recorded exactly as instructed**: common Yahoo Finance provider usage alone is not a
+disqualifier — the specific, unresolved `F-033` shared-process/deep-history evidence is the
+calibration concern for Microsoft/MercadoLibre/QQQ specifically. **`F-033` was not retested in
+this increment** — carried forward exactly as previously recorded (§4.2/§15j), not re-verified.
+
+**New methodological ambiguity exposed, requiring DFA review, recorded exactly as found**: the
+provisional median's own quote-convention invariance (`median(1/values) = 1/median(values)`)
+holds for the median specifically at odd `n` (median commutes with any monotonic transform, and
+inversion is monotonic on positive reals) — but this is a property of *the median as a
+statistic*, not one every possible future robust-center candidate (e.g. a trimmed mean) would
+automatically share. Flagged for DFA's awareness before any robust-center candidate other than
+the median is considered — not resolved here, no other new ambiguity identified.
+
+**Remaining prerequisites before calibration, restated with the eligibility split now
+explicit**: a fresh `F-033` return-correlation re-test for Microsoft/MercadoLibre/QQQ; a wider
+evidence-qualified population across dates/regimes; documentation of the shared-provider
+concentration; DFA's own confirmation that the provisional median may be promoted to an approved
+calibration/production center (a separate, not-yet-made decision); a settled robust-center
+definition for `n` other than 5.
+
+**Explicitly not computed or adopted in this increment**: an operating dispersion threshold;
+suppression rule; consensus/panel FX; production center; calibration statistic; raw-price CV;
+the historical `P90 CV 0.167`; CCL; fair value/mispricing; arbitrage; recommendation;
+trade/execution logic. **No pair or date added. `F-033` not retested.**
+
+**Documentation/index consistency validated**: §5's INC-7 master-row detail-range citation
+extended to §15a–§15k in this change; no other index required updating. **No HistFinTS or
 `histfints_uiue` file modified by this record — read-only throughout.**
 
 ## 16. INC-8, INC-9, INC-14 — UIUX programme
