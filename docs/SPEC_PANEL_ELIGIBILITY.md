@@ -1,7 +1,15 @@
 # SPEC — Panel Eligibility and Diagnostics
 
-**Status:** specification complete; implementation blocked on Tranche 2 schema · **Version:** 0.2 · **Date:** 2026-08-17
-**Governing decisions:** D-016 (panel principle) · D-017 (time-varying membership) · D-024 (this spec) · D-037 (calendar and alignment) · D-038/D-039 (observation suitability — implemented, gate cleared) · **D-041 (Q-061 resolved; three parameters specified with calibration methodology, provisional status)**
+**Status:** specification complete; both named implementation gates (Tranche 2 schema, Q-061) resolved — implementation authorized per D-046, provisional parameters remain calibration-gated (§8.5) · **Version:** 0.2 · **Date:** 2026-08-17
+**Governing decisions:** D-016 (panel principle) · D-017 (time-varying membership) · D-024 (this spec) · D-037 (calendar and alignment) · D-038/D-039 (observation suitability — implemented, gate cleared) · D-041 (Q-061 resolved; three parameters specified with calibration methodology, provisional status) · **D-044/D-045 (Tranche 2 implemented and validated) · D-046 (panel-eligibility implementation authorized)**
+
+> **Update 2026-09-04 — stale status corrected.** This spec's own two remaining gates, both
+> named below (Tranche 2 migration, Q-061), are resolved: Q-061 by D-041 (2026-08-17, already
+> reflected above); Tranche 2 by D-044/D-045 (implemented and validated in production).
+> D-046 authorizes panel-eligibility implementation on that basis. The provisional
+> parameters (`include_delisted`, `staleness_policy`, `dispersion_threshold`) remain
+> calibration-gated per §8.5, unaffected by this correction. The historical update blocks
+> below are preserved unedited as dated narrative of 2026-08-17's own state, not rewritten.
 
 > **Update 2026-08-17 — Q-061 resolved at financial-domain level; three inclusion-rule parameters now specified.**
 > `include_delisted` (default to inclusion for historical research), `staleness_policy` (time-local exclusion, 

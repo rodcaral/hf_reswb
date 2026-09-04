@@ -1,6 +1,6 @@
 # HistFinTS Research Workbench — Decision Log
 
-**Status:** living document · **Owner:** Carlos · **Last updated:** 2026-08-15
+**Status:** living document · **Owner:** Carlos · **Last updated:** 2026-09-04
 
 This log is the authoritative record of *what has been decided and why* for the
 Research Workbench. The specification document describes the target product; this
