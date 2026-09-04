@@ -11,6 +11,29 @@
 > calibration-gated per §8.5, unaffected by this correction. The historical update blocks
 > below are preserved unedited as dated narrative of 2026-08-17's own state, not rewritten.
 
+> **Update 2026-09-04 — DOM-1: dispersion threshold status corrected; `CV 0.167` superseded.**
+> DFA has issued **DOM-1**, superseding every normative statement below asserting that
+> `dispersion_threshold = 0.167` is a current operational parameter, that `0.167` may proceed
+> analytically, that `0.167` is sufficient for PRIMARY-cohort analytical use, that dispersion
+> presently has an operational numerical threshold, or that raw-price coefficient of variation
+> remains the current dispersion methodology. **None of those statements is current.** The
+> governing current state, per DOM-1:
+>
+> **Dispersion threshold: UNCALIBRATED.** No numerical dispersion threshold is currently
+> authorized for analytical, suppression, eligibility, or production use. The historical
+> `CV 0.167` value is retained only as an unverified/non-decision-bearing artifact and must not
+> be reused as calibration evidence. Current methodology design uses `LOG_RELATIVE` residuals
+> around a provisional same-date median; neither the residual distribution nor any operating
+> threshold has yet been calibrated. Calibration remains gated on an eligible multi-date/regime
+> population and applicable independence requirements.
+>
+> Every §8.3/§8.5/§8 (Open items) passage below that states or implies `0.167` is a live,
+> operational, or analytically-usable parameter is **marked `[SUPERSEDED BY DOM-1]` in place,
+> preserved verbatim as dated historical record — not deleted, not rewritten to read as if it
+> had never been reported.** Full DOM-1 text and provenance: `DECISIONS.md`, 2026-09-04 entry;
+> full impact trace: `workbench/docs/evidence/DOM1_DISPERSION_THRESHOLD_IMPACT_TRACE_2026-09-04.md`.
+> Governing calibration-artifact downgrade this DOM-1 reaffirms, unchanged: `ACTION_PLAN.md` §15d.
+
 > **Update 2026-08-17 — Q-061 resolved at financial-domain level; three inclusion-rule parameters now specified.**
 > `include_delisted` (default to inclusion for historical research), `staleness_policy` (time-local exclusion, 
 > detection separate from eligibility), and `dispersion_threshold` (parameterized aggregate suppression). All three
@@ -551,6 +574,14 @@ domain implications, they are reviewed by the FDA.**
 
 **Dispersion calibration approach:**
 
+> **[SUPERSEDED BY DOM-1, 2026-09-04 — preserved verbatim as dated historical record, not
+> current specification.]** The passage below (through the end of §8.5's dispersion-specific
+> text) describes the 2026-08-18 provisional state as it stood before DOM-1. It is **not**
+> current: no numerical dispersion threshold is currently authorized for any use, and
+> `CV 0.167` is retained only as an unverified/non-decision-bearing historical artifact
+> (`ACTION_PLAN.md` §15d). Do not read anything below this marker, through the end of §8.5, as
+> a live operational parameter.
+
 **Current provisional parameter (FDA directive 2026-08-18):** `dispersion_threshold = 0.167` (coefficient of variation).
 
 This parameter is **provisional and not a financially validated universal threshold.** It is set as an operational parameter for current use while calibration proceeds, with the following constraints:
@@ -638,6 +669,12 @@ The specification is a contract for *how* calibration and validation will procee
   reviewed by the financial domain. No production use of staleness_policy until then.
 
 **Dispersion:**
+
+> **[SUPERSEDED BY DOM-1, 2026-09-04.]** The first bullet below ("sufficient for analytical
+> use") is not current — preserved verbatim as dated historical record. Current state:
+> **UNCALIBRATED, no numerical threshold authorized for any use** (see the 2026-09-04 update
+> block at the top of this document).
+
 - Current provisional parameter (CV 0.167) sufficient for analytical use in PRIMARY cohort.
 - Recalibration required when:
   - F-032 resolution expands PRIMARY cohort from 5 to 12 pairs (pending Phase 3 validation).
