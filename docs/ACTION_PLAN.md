@@ -153,7 +153,7 @@ States marked **†** are carried from the v5 UIUX review and must be confirmed 
 | INC-16 | `USER_DISABLED` manual-Run prohibition | CLOSED | UIUX + SE/SDT + PO | — | `047_USER_DISABLED_Manual_Run_UX_Specification.md`, `053_USER_DISABLED_Manual_Run_UIUX_Validation_Evidence.md` (histfints_uiue); §8/§16a baseline |
 | INC-17 | `IdentityAdjudication` corrective increment (authoritative-contradiction resolution + case-specific materiality persistence) | **CLOSED / ACCEPTED** — Gate A PASS (`0b111d0`); Gate B PASS (`072`, `AC-COR-03` PASS at `27b6865`, `AC-COR-07` not an application FAIL, real-NVDA `AC-COR-08`/`09` PASS); **Gate C PASS (DFA); Gate D PASS / PO ACCEPTED**. Governing boundary: candidate context + EvidenceSignals → materiality assessment → human adjudication → separately authorized catalog action. Does not close INC-4 overall; does not authorize Tier 3, G1/G9, automated adjudication, or production adjudication without eligible evidence | DFA (§7 ✓) → SDT-HF (design ✓) → [UIUX (contract ✓) \|\| DFA (trigger-map ✓)] → implementation ✓ → corrective fixes ✓ (`2f7e1d8`, `27b6865`) → AC-COR-03/07 resolved ✓ (`071`, corrected by `072`) → Gate B PASS (`072`) → **Gate C PASS (DFA)** → **Gate D PASS (PO)** → **CLOSED/ACCEPTED** | — | `TIER_0_1_2_3_FINANCIAL_IDENTITY_EVIDENCE_METHODOLOGY_REFERENCE_2026-09-01.md` §6b/§7b/§7c; `histfints/docs/future_designs/INC17_CORRECTIVE_INCREMENT_DESIGN.md`; `068`/`069`/`070`/`071`/`072` (histfints_uiue); §8 baseline entry; §12a–§12n detail |
 | INC-15 | Catalog: Cross-Workflow (Search/Discover/Resolve hand-offs) | CLOSED | UIUX + SE/SDT + DFA | — | `040_Catalog_Workflow_Cross_Screen_UX_Assessment.md`, `041_Catalog_Workflow_Cross_Screen_UX_Specification.md`, `045_Catalog_Workflow_AC_XWF_11_Revalidation_Evidence.md` (histfints_uiue); §8/§10a baseline |
-| INC-7 | Core Workbench research capability | BLOCKED overall; **one bounded surface CLOSED/PO ACCEPTED** — AAPL CEDEAR↔underlying single-pair implied-FX/staleness diagnostic (§15b): Gate A PASS, Gate B PASS, Gate C PASS WITH LIMITATION (DFA), PO ACCEPTED. `fb7c9df`/`073@81ff017`/`AC-FX-01..51`. `15 days` staleness remains PROVISIONAL; `P90 CV 0.167` dispersion NOT authorized for operating use; no cross-sectional feature; pair-specific implied FX only, no global eligibility/CCL/fair-value/mispricing/arbitrage/recommendation. Production AAPL numeric result remains evidence-blocked (`ratio_effective_from` NULL live) — a standing condition, not a reopening. **AAPL ratio-history evidence stage: STOP — EVIDENCE LIMIT REACHED (§15c)** — `10:1` through `2024-01-25` and `20:1` from `2024-01-26` each established as endpoint facts, plus an independent `20:1` point fact on `2026-09-02`; uninterrupted continuity between them `UNRESOLVED`; no interval may be curated from the endpoints; current schema cannot represent "start established, continuity unresolved" without overclaiming; modeling gap only, no model extension or new implementation requirement authorized. **2026-08-18 primary 5-pair dispersion/CV calibration downgraded to RETAIN AS UNVERIFIED / NON-DECISION-BEARING HISTORICAL ARTIFACT (§15d)** — computational provenance unavailable, `P90 CV 0.167` not current evidence and not an operating threshold; AAPL-only calibration and the accepted AAPL INC-7 closure both confirmed unaffected. **Point-date ratio applicability: CLOSED / PO ACCEPTED (D-048, §15f)** — `0077a67`/`075@18494ea`/`077@34ef247`; Gate A PASS, Gate B PASS (38/38 AC-RA), Gate C PASS (DFA), PO ACCEPTED. First production case: Banco Bradesco `11355→972`, `POINT`, `1:1`, `2024-07-08`, implied FX `1392.3581017966142`≈`1392.36`; `2024-07-07`/`2024-07-09` remain `UNKNOWN`. 15-day staleness remains PROVISIONAL; no continuity inference/historical reconstruction/dispersion/CCL/fair-value/mispricing/arbitrage/recommendation/trade/global-validity authorized. Does not reopen AAPL continuity (§15c), dispersion (§15d), or G1/G9 (§12q). **AAPL production curation under the closed capability (§15g)**: assertion `id=2`, `POINT`, `20:1`, `2026-09-02`; implied FX `1591.580544066751`≈`1591.58`; `2026-09-01`/`2026-09-03` remain `UNKNOWN`; `2024-01-26` remains calculation-ineligible (CEDEAR observation absent); AAPL continuity remains `UNRESOLVED`, Bradesco case unaffected. **Bounded 2026-09-02 five-pair descriptive comparison — COMPLETE under PO-approved scope (§15h)**: AAPL/Bradesco/MSFT/MELI/QQQ, each own `POINT` assertion (`id=2..6`), five independent pair-specific implied-FX results; DFA-authorized finding: descriptive side-by-side only, no panel/consensus/dispersion/representativeness/market-rate conclusion; cross-sectional dispersion NOT reactivated, remains DEFERRED (§15d). **Banco Bradesco four-date sparse temporal comparison — COMPLETE under DFA-approved bounded scope (§15i)**: four independent `POINT` facts (`id=1,7,8,3` — `2022-06-09`/`2022-11-08`/`2024-07-08`/`2026-09-02`), consecutive arithmetic differences recorded as arithmetic only (no trend/continuity/slope/regime claim); `2022-09-06`/`2024-09-17` deliberately uncurated, confirmed `UNKNOWN` | DFA → SE/SDT + UIUX | closed for this one bounded surface — see §15b; every other INC-7 direction remains blocked on its own evidence prerequisites | `SPEC-panel-eligibility.md`; `IMPLEMENTATION-PANEL-ELIGIBILITY.md`; `docs/calibration-evidence-2026-08-18.md`/`.json`; `DECISIONS.md` D-024/D-037/D-042/D-044–D-046/D-048; `histfints_uiue 073`/`075`/`076`/`077`; §8 baseline entry; §15a–§15i detail |
+| INC-7 | Core Workbench research capability | BLOCKED overall; **one bounded surface CLOSED/PO ACCEPTED** — AAPL CEDEAR↔underlying single-pair implied-FX/staleness diagnostic (§15b): Gate A PASS, Gate B PASS, Gate C PASS WITH LIMITATION (DFA), PO ACCEPTED. `fb7c9df`/`073@81ff017`/`AC-FX-01..51`. `15 days` staleness remains PROVISIONAL; `P90 CV 0.167` dispersion NOT authorized for operating use; no cross-sectional feature; pair-specific implied FX only, no global eligibility/CCL/fair-value/mispricing/arbitrage/recommendation. Production AAPL numeric result remains evidence-blocked (`ratio_effective_from` NULL live) — a standing condition, not a reopening. **AAPL ratio-history evidence stage: STOP — EVIDENCE LIMIT REACHED (§15c)** — `10:1` through `2024-01-25` and `20:1` from `2024-01-26` each established as endpoint facts, plus an independent `20:1` point fact on `2026-09-02`; uninterrupted continuity between them `UNRESOLVED`; no interval may be curated from the endpoints; current schema cannot represent "start established, continuity unresolved" without overclaiming; modeling gap only, no model extension or new implementation requirement authorized. **2026-08-18 primary 5-pair dispersion/CV calibration downgraded to RETAIN AS UNVERIFIED / NON-DECISION-BEARING HISTORICAL ARTIFACT (§15d)** — computational provenance unavailable, `P90 CV 0.167` not current evidence and not an operating threshold; AAPL-only calibration and the accepted AAPL INC-7 closure both confirmed unaffected. **Point-date ratio applicability: CLOSED / PO ACCEPTED (D-048, §15f)** — `0077a67`/`075@18494ea`/`077@34ef247`; Gate A PASS, Gate B PASS (38/38 AC-RA), Gate C PASS (DFA), PO ACCEPTED. First production case: Banco Bradesco `11355→972`, `POINT`, `1:1`, `2024-07-08`, implied FX `1392.3581017966142`≈`1392.36`; `2024-07-07`/`2024-07-09` remain `UNKNOWN`. 15-day staleness remains PROVISIONAL; no continuity inference/historical reconstruction/dispersion/CCL/fair-value/mispricing/arbitrage/recommendation/trade/global-validity authorized. Does not reopen AAPL continuity (§15c), dispersion (§15d), or G1/G9 (§12q). **AAPL production curation under the closed capability (§15g)**: assertion `id=2`, `POINT`, `20:1`, `2026-09-02`; implied FX `1591.580544066751`≈`1591.58`; `2026-09-01`/`2026-09-03` remain `UNKNOWN`; `2024-01-26` remains calculation-ineligible (CEDEAR observation absent); AAPL continuity remains `UNRESOLVED`, Bradesco case unaffected. **Bounded 2026-09-02 five-pair descriptive comparison — COMPLETE under PO-approved scope (§15h)**: AAPL/Bradesco/MSFT/MELI/QQQ, each own `POINT` assertion (`id=2..6`), five independent pair-specific implied-FX results; DFA-authorized finding: descriptive side-by-side only, no panel/consensus/dispersion/representativeness/market-rate conclusion; cross-sectional dispersion NOT reactivated, remains DEFERRED (§15d). **Banco Bradesco four-date sparse temporal comparison — COMPLETE under DFA-approved bounded scope (§15i)**: four independent `POINT` facts (`id=1,7,8,3` — `2022-06-09`/`2022-11-08`/`2024-07-08`/`2026-09-02`), consecutive arithmetic differences recorded as arithmetic only (no trend/continuity/slope/regime claim); `2022-09-06`/`2024-09-17` deliberately uncurated, confirmed `UNKNOWN`. **Cross-sectional dispersion: METHODOLOGY DESIGN REACTIVATED / PO ACCEPTED (§15j)** — calibration/thresholds/suppression/consensus/production use remain DEFERRED; bounded read-only methodology study delivered (`docs/evidence/CROSS_SECTIONAL_DISPERSION_METHODOLOGY_STUDY_2026-09-04.md`), two candidate normalized-residual definitions compared, no candidate promoted; independence diagnostic found 3 of 5 pairs (MSFT/MELI/QQQ) are members of the still-LIVE, unresolved `F-033` shared-driver defect — flagged, not cleared | DFA → SE/SDT + UIUX | closed for this one bounded surface — see §15b; every other INC-7 direction remains blocked on its own evidence prerequisites | `SPEC-panel-eligibility.md`; `IMPLEMENTATION-PANEL-ELIGIBILITY.md`; `docs/calibration-evidence-2026-08-18.md`/`.json`; `DECISIONS.md` D-024/D-037/D-042/D-044–D-046/D-048; `histfints_uiue 073`/`075`/`076`/`077`; §8 baseline entry; §15a–§15j detail |
 | INC-8 | Screen-by-screen UIUX expansion | CONTINUOUS | UIUX + SE + DFA | per-screen decision gates | UIUX audits and specifications |
 | INC-9 | Workbench-wide information architecture | DEFERRED | PO, informed by UIUX + DFA + SE | several validated workflows delivered | future PO decision |
 | INC-10 | Four-gate validation | CONTINUOUS | SE + UIUX + DFA + PO | — | §4 |
@@ -2176,6 +2176,77 @@ closure convention:**
 **Documentation/index consistency validated**: §5's INC-7 master-row detail-range citation
 extended to §15a–§15i in this change; no other index required updating. **No HistFinTS or
 `histfints_uiue` file modified by this record.**
+
+## 15j. PO decision — Cross-sectional dispersion: METHODOLOGY DESIGN REACTIVATED / PO ACCEPTED;
+bounded read-only methodology-design study (2026-09-04)
+
+**Recorded exactly as relayed, attributed to PO — not self-certified by SDT-WB.** §15/§15a–§15i
+preserved completely unedited. §15d's own RETAIN AS UNVERIFIED / NON-DECISION-BEARING HISTORICAL
+ARTIFACT downgrade of the 2026-08-18 dispersion/CV calibration is **not reversed** by this
+record — that artifact remains exactly as recorded; this is a fresh reactivation of the
+*methodology-design* question only, using today's own independently-verified evidence.
+
+**PO decision, recorded exactly as instructed**: **Cross-sectional dispersion — METHODOLOGY
+DESIGN REACTIVATED / PO ACCEPTED.**
+
+**Preserved separately, exactly as instructed**: calibration, operating thresholds, suppression
+rules, consensus/panel output, and production use **remain DEFERRED** — this decision reactivates
+only the design/comparison question, not any of these.
+
+**Bounded, read-only methodology-design study performed and delivered — full detail, all
+calculations, all evidence, and all findings**: `docs/evidence/
+CROSS_SECTIONAL_DISPERSION_METHODOLOGY_STUDY_2026-09-04.md`. Uses only the five already-
+established, evidence-qualified `2026-09-02` pair-specific implied-FX observations already
+recorded at §15h — no new pair, date, HistFinTS mutation, or ratio curation was performed. Every
+number in that study is labeled candidate-method diagnostic output, not an accepted production
+statistic; it does not promote any candidate to "the methodology," does not define an operating
+threshold, and does not reactivate calibration.
+
+**Summary of the study's own findings, cited here as a pointer, not restated in full — see the
+study document for complete transparency**:
+
+- **Two candidate normalized-residual definitions compared**, both centered on the same-date
+  median (`1591.7233371077455`, MSFT's own value): percentage-relative and log-relative. Both
+  well-behaved at the magnitudes observed (all residuals under ±0.14%); numerically
+  near-indistinguishable at this scale (largest A-vs-B difference: ~9.2×10⁻⁵ percentage points).
+  Neither is rejected; neither is promoted.
+- **A structural artifact named explicitly**: at odd `n=5`, the median-as-center is always
+  exactly one member's own value (here, MSFT), giving that member a residual of exactly zero by
+  construction — not a correctness signal.
+- **Independence diagnostic — the study's single most material finding**: all ten legs (five
+  CEDEAR, five underlying) trace to the same live Yahoo Finance provider for `2026-09-02`
+  specifically — not disqualifying by itself, but a real, named shared-infrastructure fact.
+  **Three of the five selected pairs — Microsoft, MercadoLibre, and QQQ — are members of the
+  still-`LIVE`/unresolved `F-033` cohort**, whose deep-history data showed exactly `+1.00`
+  day-over-day return correlation, diagnosed as likely shared-process/single-input construction.
+  Today's specific `2026-09-02` observations are confirmed sourced from the live provider (not
+  `F-033`'s flagged `BACKFILL_` mechanism) and show instrument-distinct price levels — but
+  `F-033`'s own deeper return-correlation concern was **not** re-tested in this pass and is
+  **not** cleared by this study. This is named as the single most consequential open item before
+  any future calibration.
+- **Sensitivity**: leave-one-out median shifts by at most ~0.032% of the center value — expected,
+  structurally-bounded small-sample behavior, no pair found to have disproportionate influence.
+- **Smallest candidate set for DFA's own financial-methodology selection**: both candidates
+  (percentage-relative and log-relative around the same-date median) — already the smallest set
+  exposing a real, named trade-off (symmetry under inversion).
+- **Exact evidence still missing before calibration could begin**: a fresh `F-033`
+  return-correlation re-test for `MSFT`/`MELI`/`QQQ`; a wider evidence-qualified pair population
+  across dates/regimes; documentation of the shared-provider concentration; DFA's own
+  Candidate-A-vs-B selection; a settled robust-center definition for `n` other than 5 (including
+  even `n`, where the structural-zero artifact does not apply the same way).
+
+**Explicitly not computed or adopted anywhere in the study, recorded exactly as instructed**:
+the historical raw-price CV methodology; `P90 CV 0.167`; an operating threshold; PASS/FAIL
+dispersion classification; a suppression rule; a consensus FX; a representative-panel
+conclusion; CCL; fair value/mispricing; arbitrage; recommendation; trade/execution meaning.
+
+**No production functionality or UI implemented. Calibration not reactivated.** Low residuals
+are not claimed to establish correctness, and high residuals are not claimed to identify an
+erroneous pair — neither claim appears anywhere in the study.
+
+**Documentation/index consistency validated**: §5's INC-7 master-row detail-range citation
+extended to §15a–§15j in this change; no other index required updating. **No HistFinTS or
+`histfints_uiue` file modified by this record — read-only throughout.**
 
 ## 16. INC-8, INC-9, INC-14 — UIUX programme
 
