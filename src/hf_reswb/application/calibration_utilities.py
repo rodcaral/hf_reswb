@@ -3,12 +3,21 @@
 Provides helper functions to analyze historical panel data and compute statistics
 for staleness and dispersion calibration. These utilities are used by the calibration
 study to generate empirical evidence for parameter tuning.
+
+F-033 quarantine integration (DOM-2 ordering, item 1): both direct-query functions below
+exclude any observation present in `histfints.observation_quarantine_active` -- a
+CONFIRMED_SYNTHETIC row must not enter a staleness gap or panel-depth count, since neither
+computation is a step/persistence comparison across the excluded row (unlike
+reconciliation_service.py's F-009 path) -- simple exclusion is correct here, not a
+continuity-bridging risk.
 """
 from __future__ import annotations
 
 import sqlite3
 import statistics
 from datetime import datetime
+
+from hf_reswb.application.quarantine import quarantine_view_exists
 
 
 def compute_staleness_lengths(
@@ -31,6 +40,13 @@ def compute_staleness_lengths(
     """
     staleness_by_series: dict[int, list[int]] = {s: [] for s in series_ids}
 
+    # Absent only against a HistFinTS copy older than migration 0027 (never today's actual
+    # production schema); see quarantine.py's own docstring on why this degrades to "no
+    # quarantine data to exclude" rather than raising.
+    quarantine_exclusion = (
+        "AND id NOT IN (SELECT observation_id FROM histfints.observation_quarantine_active)"
+        if quarantine_view_exists(connection) else ""
+    )
     placeholders = ",".join("?" for _ in series_ids)
     rows = connection.execute(
         f"""
@@ -38,6 +54,7 @@ def compute_staleness_lengths(
         FROM histfints.observation
         WHERE series_id IN ({placeholders})
           AND DATE(observed_at) BETWEEN ? AND ?
+          {quarantine_exclusion}
         ORDER BY series_id, observed_at
         """,
         (*series_ids, period_start, period_end),
@@ -132,12 +149,17 @@ def compute_panel_depth_by_date(
     """
     depth_by_date: dict[str, int] = {}
 
+    quarantine_exclusion = (
+        "AND o.id NOT IN (SELECT observation_id FROM histfints.observation_quarantine_active)"
+        if quarantine_view_exists(connection) else ""
+    )
     placeholders = ",".join("?" for _ in series_ids)
     rows = connection.execute(
         f"""
         SELECT DISTINCT DATE(o.observed_at) as obs_date, s.id
         FROM histfints.series s
         LEFT JOIN histfints.observation o ON s.id = o.series_id
+          {quarantine_exclusion}
         WHERE s.id IN ({placeholders})
           AND (o.observed_at IS NULL OR DATE(o.observed_at) <= ?)
         ORDER BY obs_date

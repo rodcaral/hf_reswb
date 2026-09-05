@@ -16,6 +16,7 @@ import sqlite3
 from datetime import datetime, timezone
 
 from hf_reswb.application.discontinuity_detector import Boundary, DetectorParams, detect_boundaries
+from hf_reswb.application.quarantine import quarantined_observation_ids
 from hf_reswb.domain.evidence import EvidenceReference, HistFintsObject, ResolutionState
 from hf_reswb.domain.finding import AnalyticalFinding, DiscontinuityCalculation, ReasonCode, Verdict
 
@@ -78,18 +79,50 @@ def reconcile(
             )
         ]
 
-    values = [r["value"] for r in rows]
-    ids = [r["id"] for r in rows]
-    dates = [r["observed_at"] for r in rows]
+    quarantined_ids = quarantined_observation_ids(connection, [r["id"] for r in rows])
 
-    boundaries = detect_boundaries(values, params)
-    findings: list[AnalyticalFinding] = []
-    for boundary in boundaries:
-        findings.append(
-            _reconcile_one_boundary(
-                connection, series_id, period_start, period_end, dates, ids, boundary, params
+    # F-033 quarantine integration (DOM-2 ordering, item 1): a CONFIRMED_SYNTHETIC row is
+    # excluded outright rather than fed into detect_boundaries() as genuine price evidence.
+    # Excluding it must not let the surviving rows on either side of it be compared as
+    # though they were temporally adjacent -- the correct treatment of a step/persistence
+    # comparison bridging a quarantined gap is not specified anywhere, so this segments the
+    # sequence at every quarantined row instead of silently closing the gap: detect_boundaries()
+    # only ever sees maximal contiguous runs of non-quarantined observations, and never
+    # compares a value across an excluded one.
+    segments: list[list[sqlite3.Row]] = []
+    current: list[sqlite3.Row] = []
+    for row in rows:
+        if row["id"] in quarantined_ids:
+            if current:
+                segments.append(current)
+                current = []
+            continue
+        current.append(row)
+    if current:
+        segments.append(current)
+
+    if not segments:
+        return [
+            _record_no_calculation_finding(
+                connection,
+                series_id,
+                period_start,
+                period_end,
+                reason=ReasonCode.ALL_OBSERVATIONS_QUARANTINED,
             )
-        )
+        ]
+
+    findings: list[AnalyticalFinding] = []
+    for segment in segments:
+        values = [r["value"] for r in segment]
+        ids = [r["id"] for r in segment]
+        dates = [r["observed_at"] for r in segment]
+        for boundary in detect_boundaries(values, params):
+            findings.append(
+                _reconcile_one_boundary(
+                    connection, series_id, period_start, period_end, dates, ids, boundary, params
+                )
+            )
     connection.commit()
     return findings
 

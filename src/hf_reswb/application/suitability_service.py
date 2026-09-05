@@ -17,6 +17,17 @@ This module only classifies and records; a continuity-sensitive calculation is w
 excludes NO_TRADE_REPORTED / TRADE_EVIDENCE_UNRESOLVED by default (§4, point 2/3) -- that
 consuming logic lives with whatever builds on this (e.g. SPEC_PANEL_ELIGIBILITY.md), not
 here.
+
+F-033 quarantine integration (DOM-2 ordering: quarantine/provenance -> suitability ->
+calendar -> calculation, item 1): a row whose `observation.id` is CONFIRMED_SYNTHETIC per
+`histfints.observation_quarantine_active` (quarantine.py) is excluded from classification
+outright -- it receives no `ObservationSuitability` row at all, never a TRADE_OBSERVED (or
+any other) verdict, and does not update the `prior`-close continuity tracker. Resetting
+`prior` to None across a quarantined row is a conservative default (unresolved rather than
+computed) preventing the row immediately before and the row immediately after a quarantined
+gap from being compared for EQUALS_PRIOR_CLOSE as though they were adjacent trading
+sessions -- that specific continuity treatment is this default, not a separate domain
+ruling.
 """
 from __future__ import annotations
 
@@ -24,6 +35,7 @@ import json
 import sqlite3
 from datetime import datetime, timezone
 
+from hf_reswb.application.quarantine import quarantined_observation_ids
 from hf_reswb.domain.evidence import EvidenceReference, HistFintsObject, ResolutionState
 from hf_reswb.domain.suitability import (
     CalendarConfidence,
@@ -94,11 +106,22 @@ def classify_series(
         (series_id, period_start, period_end),
     ).fetchall()
 
+    candidate_ids = [r["id"] for r in rows]
+    if prior_ctx is not None:
+        candidate_ids.append(prior_ctx["id"])
+    quarantined_ids = quarantined_observation_ids(connection, candidate_ids)
+
     run = SuitabilityRun(
         series_id=series_id, period_start=period_start, period_end=period_end,
         rule_version=RULE_VERSION, created_at=_now(),
     )
     run.id = _insert_suitability_run(connection, run)
+
+    # F-033 quarantine integration: a CONFIRMED_SYNTHETIC prior-close context row is not
+    # genuine evidence -- treat it as no prior context at all rather than fetching a
+    # fallback further back (module docstring).
+    if prior_ctx is not None and prior_ctx["id"] in quarantined_ids:
+        prior_ctx = None
 
     prior = prior_ctx
     prior_evidence_ref_id = (
@@ -119,6 +142,14 @@ def classify_series(
 
     results: list[ObservationSuitability] = []
     for row in rows:
+        if row["id"] in quarantined_ids:
+            # F-033 quarantine integration: CONFIRMED_SYNTHETIC, excluded outright -- no
+            # ObservationSuitability row, no TradeEvidence value of any kind, and the
+            # continuity tracker resets rather than silently bridging across it.
+            prior = None
+            prior_evidence_ref_id = None
+            continue
+
         ohlc_collapsed = (
             row["open"] is not None and row["high"] is not None and row["low"] is not None
             and row["open"] == row["high"] == row["low"] == row["value"]

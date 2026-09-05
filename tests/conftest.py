@@ -106,6 +106,60 @@ def histfints_copy_v17(tmp_path) -> Path:
 
 
 @pytest.fixture
+def histfints_copy_v27(tmp_path) -> Path:
+    """The real schema through migration 0027 (`observation_quarantine_case`/
+    `observation_quarantine_member` + the `observation_quarantine_active` view, F-033
+    quarantine integration) -- isolated from the shared `PRODUCTION_USER_VERSION`/
+    `histfints_copy` fixture for the same reason as `histfints_copy_v17`: bumping the shared
+    constant has its own blast radius, out of scope for one feature's tests. Use this fixture
+    only for tests that specifically need quarantine support."""
+    return _build_histfints_db(tmp_path / "histfints_copy_v27.db", up_to_version=27)
+
+
+def insert_fixture_quarantine(
+    db_path: Path,
+    *,
+    series_id: int,
+    provider_assignment_id: int,
+    observation_ids: list[int],
+    provenance_mode: str = "BACKFILL_LABELED",
+) -> int:
+    """Quarantines the given observation ids under one new `observation_quarantine_case`/
+    `observation_quarantine_member` pair, built directly against HistFinTS's own migration-0027
+    schema -- a test fixture, not a reimplementation of F-033 curation logic (which stays
+    entirely HistFinTS-side; Workbench only ever reads `observation_quarantine_active`)."""
+    conn = sqlite3.connect(db_path)
+    try:
+        now = _now()
+        run_id = conn.execute(
+            "INSERT INTO import_run (provider_assignment_id, trigger_type, status, started_at, "
+            "ended_at, created_at, updated_at) VALUES (?, 'MANUAL', 'SUCCESS', ?, ?, ?, ?)",
+            (provider_assignment_id, now, now, now, now),
+        ).lastrowid
+        case_id = conn.execute(
+            "INSERT INTO observation_quarantine_case (series_id, provenance_mode, disposition, "
+            "originating_import_run_id, rationale, adjudication_reference, recorded_at, created_at) "
+            "VALUES (?, ?, 'CONFIRMED_SYNTHETIC', ?, ?, ?, ?, ?)",
+            (series_id, provenance_mode, run_id, "test fixture", "TEST-FIXTURE", now, now),
+        ).lastrowid
+        for obs_id in observation_ids:
+            row = conn.execute(
+                "SELECT value, open, high, low, volume, import_run_id FROM observation WHERE id = ?",
+                (obs_id,),
+            ).fetchone()
+            conn.execute(
+                "INSERT INTO observation_quarantine_member (case_id, observation_id, snapshot_value, "
+                "snapshot_open, snapshot_high, snapshot_low, snapshot_volume, snapshot_import_run_id, "
+                "created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (case_id, obs_id, row[0], row[1], row[2], row[3], row[4], row[5], now),
+            )
+        conn.commit()
+        return case_id
+    finally:
+        conn.close()
+
+
+@pytest.fixture
 def real_production_db_readonly_path() -> Path:
     """The actual production file, used read-only and never copied or written to — for the
     one test that must prove the boundary holds against the real thing, not a
