@@ -2958,20 +2958,23 @@ only throughout, confirmed by `git status` in both repositories.**
 
 ## 16b. BYMA EOD publication-window investigation — assigned to SE (2026-09-04)
 
-**State:** ACTIVE, pre-implementation investigation — **Owner:** SE (analytical/design) — **No gate structure defined yet**, per field 7 below.
+**State:** ACTIVE, Gate 1 (field discovery) open, assigned to SDT-HF — **Owner:** SE (analytical/design), SDT-HF (implementation, gated) — **Gate structure defined 2026-09-04, per SE.**
 
 **Background.** A scheduled task (`HistFinTS BYMA Publication Window Measurement`, `histfints@37525f6`, PO's own direct instruction, 2026-09-01) had been running for three days with no entry anywhere in this document or in `_shared-standards/EVENT_INDEX.md` — discovered only when PO noticed its CMD window and asked RGC to identify it. Recorded as its own governance gap at `_shared-standards/ACTOR_AND_MODEL_INTERACTION_RULES.md` §14 item 17 ("The BYMA EOD rollover"): an operational fact with no required registration point, distinct from a document going stale or a rule not firing. This entry is that registration, closing the gap for this specific case.
 
 1. **Goal/question.** Determine the hour at which BYMA's free snapshot panel stops reflecting the current trading session's value and starts reflecting the next session's — not merely whether EOD data is available and stable, which is a different, already-answered question.
-2. **Required evidence.** Continuous polling spanning the actual transition window (currently unknown, presumed overnight — the existing measurement never observes it), with each poll capturing a genuine session/date identifier per symbol, not only a bare time-of-day.
-3. **Methodology or governing decision.** None yet — SE's to design. The existing measurement cannot answer this, confirmed directly: it polls every 15 minutes 16:45–21:00, then nothing until a single check at 08:30 the next morning — an ~11.5-hour gap covering almost certainly the actual rollover — and even where it does poll, the captured `tradeHour` field carries no date/session identifier, so it can't distinguish a carried-over value from a fresh one.
-4. **Legitimate conclusion level.** None yet — no rollover hour has been established, and the existing 63 recorded polls (2026-09-01 onward, no anomalies) must not be read as establishing one.
-5. **Prohibited.** Do not infer a rollover hour from the existing measurement's data — it is structurally incapable of showing it, per field 3.
-6. **Owner and dependencies.** SE, assigned 2026-09-04, per PO. SE's authority here is analytical/design, not implementation — any actual script or schedule change routes through SDT-HF (histfints repo owner) or RGC/PO, per the existing scheduled-task rights rule.
-7. **Gate closure criteria.** N/A — pre-implementation investigation stage; no gate structure defined until SE returns a redesign or a determination that the panel doesn't expose enough information to answer this at all.
-8. **Open questions, named GAP owner.** GAP — SE: redesign the measurement (what to poll, when, what fields to capture), or determine the question is unanswerable from this panel.
+2. **Required evidence.** A genuine trade/session/business-date identifier per symbol, captured continuously across the actual transition window. **Proxy-only evidence — price changes, trade-count/volume resets, `tradeHour` changes — may serve as diagnostics but cannot by themselves satisfy this requirement**, per SE's 2026-09-04 sharpening.
+3. **Methodology, per SE's 2026-09-04 design — sequential, not parallel.**
+   - **Gate 1 (SDT-HF): field discovery.** Inspect the raw BYMA free-panel response directly and determine whether it exposes a genuine trade/session/business-date identifier — possibly one the current reader already receives but discards.
+   - **Gate 2 (SDT-HF, only if Gate 1 finds a qualifying identifier):** implement PO's bounded 48-hour measurement — continuous 15-minute polling, Monday 2026-09-07 10:00 → Wednesday 2026-09-09 10:00, capturing that identifier plus the relevant raw fields.
+   - **If Gate 1 finds no qualifying identifier:** do not run Gate 2. Return that the rollover hour is not answerable from this panel as currently exposed. Observable persistence/change bounds may still be described, but must not be labeled the session rollover this item requires.
+4. **Legitimate conclusion level.** None yet. The existing 63 recorded polls (2026-09-01 onward) remain baseline evidence only and cannot establish the rollover hour, per §16b's own original finding — unchanged by this update.
+5. **Prohibited.** Do not run Gate 2 before Gate 1 confirms a qualifying identifier exists — field discovery is a prerequisite, not a step folded into the 48-hour run, specifically to avoid collecting 48 hours of data the investigation has already defined as insufficient. Do not label proxy-only signals (price change, trade-count/volume reset, `tradeHour` change) as satisfying this item's requirement, even where useful as diagnostics.
+6. **Owner and dependencies.** SE holds analytical/design authority and interprets Gate 1's finding. SDT-HF holds implementation for both gates, per the existing scheduled-task rights rule (histfints repo owner). RGC relays between them per PO.
+7. **Gate closure criteria.** **Gate 1** closes when SDT-HF reports whether a qualifying identifier exists in the raw response. **Gate 2** is N/A unless Gate 1 passes; if it does, Gate 2 closes when the 48-hour measurement completes and its data is handed to SE for interpretation.
+8. **Open questions, named GAP owner.** GAP — SDT-HF: does the raw BYMA panel response expose a genuine trade/session/business-date identifier?
 
-**Self-expiry, not a dependency of this entry.** The current task's own `EndBoundary` is 2026-09-22 — it stops firing on its own regardless of whether SE has acted by then. This entry stays open until SE returns a result, independent of the task's own schedule.
+**Self-expiry, not a dependency of this entry.** The original task's own `EndBoundary` is 2026-09-22 — it stops firing on its own regardless of progress here. This entry stays open until Gate 1, and Gate 2 if triggered, resolve.
 
 ## 17. Remaining verification gaps
 
