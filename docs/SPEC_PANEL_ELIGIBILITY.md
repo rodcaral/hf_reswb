@@ -427,9 +427,16 @@ part of the question, exclusion is appropriate.
 **Observational rule:** A Series contributes its observations on dates where **all** the
 following hold: (a) both legs have observations (§4.1 `both_legs_present`); (b) the
 relationship and ratio are known as-of-date; (c) the Series' own `status` **at that historical
-date** would have been `ACTIVE` (not `DELISTED_OR_DISCONTINUED`). The `status` field is
-historical per row, not a current flag. If `include_delisted = TRUE`, condition (c) is
-ignored.
+date** would have been `ACTIVE` (not `DELISTED_OR_DISCONTINUED`). ~~The `status` field is
+historical per row, not a current flag.~~ **`[SUPERSEDED BY DOM-2, 2026-09-04 — preserved
+struck through as dated historical record, not deleted.]` This claim is factually incorrect
+about HistFinTS's actual schema: `series.status` is a single current scalar column with no
+per-date history table. Until point-in-time status evidence exists, current `series.status`
+cannot establish historical status for a prior analysis date — classification for condition (c)
+must be `UNRESOLVED` where such evidence is absent, not silently satisfied by the current value.
+No historical-status mechanism is invented by this correction — see `DECISIONS.md`'s DOM-2
+entry and `docs/evidence/F034_CADENCE_IMPACT_ASSESSMENT_2026-09-04.md` §3.** If
+`include_delisted = TRUE`, condition (c) is ignored.
 
 **Why separate from calendar/coverage gates:** A discontinued Series' history is evidence; the
 decision to exclude it is analytical, not technical. It does not belong in a technical

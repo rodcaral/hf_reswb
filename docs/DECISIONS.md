@@ -3175,6 +3175,101 @@ status.
 
 ---
 
+### DOM-2 — Observation cadence suitability is time-local
+
+*Settled 2026-09-04. DFA's own ruling, persisted per SE/PO relay — DOM-2 is DFA's own
+governance identifier, recorded here verbatim, not renumbered into this log's own `D-###`
+sequence, the same convention already applied to DOM-1 and to `F-###` defect identifiers.*
+
+**Governing requirement, recorded exactly as instructed**:
+
+> Observation cadence suitability is time-local. A Series' current `configured_interval` must
+> not be projected backward to determine whether observations in an earlier analysis period are
+> classifiable by session date. Eligibility for date-based observation suitability must be
+> established for the specific observation range. If the cadence applicable to that range cannot
+> be established from sufficient evidence, classification for that range is `UNRESOLVED`;
+> current metadata must not decide the historical state.
+
+**DOM-2 does not authorize inferring historical cadence merely because stored observations
+appear daily.** Choosing whether historical cadence can be established from persisted interval
+history, import provenance, observation-shape evidence, or another source remains an
+**unresolved downstream design/evidence question** — not settled by this ruling.
+
+**Specification corrected in the same change**: `docs/SPEC_OBSERVATION_SUITABILITY.md` — a new
+2026-09-04 DOM-2 update block added at the top; the §7 item-6 gate-table row describing
+`is_classifiable()`'s series-global behavior marked `[SUPERSEDED BY DOM-2]` in place, preserved
+verbatim. `docs/SPEC_PANEL_ELIGIBILITY.md` §8.1's separate, factually-incorrect claim that
+*"the `status` field is historical per row, not a current flag"* is struck through and marked
+`[SUPERSEDED BY DOM-2]` in place — preserved as dated historical record, not deleted.
+
+**Already-settled analytical precedence restated, unaffected, in the same documentation
+increment**:
+
+> `confirmed-synthetic quarantine/provenance → observation suitability → calendar/alignment →
+> analytical calculation`
+
+`TRADE_OBSERVED` or any other suitability result cannot rehabilitate an observation present in
+the canonical `F-033` quarantine.
+
+**Current normative text treating scalar `series.status` as historical point-in-time status —
+corrected, no historical-status mechanism invented.** `panel_eligibility_service.py:99-109`
+queries the plain current `series.status` column with no temporal qualifier, despite taking an
+`analysis_date` parameter — confirmed by direct source read. **Until point-in-time status
+evidence exists, current `series.status` cannot establish historical status for a prior analysis
+date.** No historical-status mechanism is invented by this ruling.
+
+**Older `F-033` lineage statement corrected additively**: `docs/evidence/
+F033_RETEST_2026-09-04.md` §7's own inference — *"distinct `import_run_id` per row rules out
+simple storage-layer row reuse"* — is qualified in place (preserved, not deleted) as **no
+longer a fully valid provenance procedure on its own**: `observation.import_run_id` is mutable
+last-writer provenance (overwritten on `ON CONFLICT DO UPDATE`), not an immutable acquisition-
+origin marker; `observation.origin_import_run_id` is origin-bearing only from its own
+provenance epoch (`2026-08-20`) onward; older `NULL` origins remain unresolved. **This
+qualification does not reopen `F-033`** — its root defect (the value-level bit-for-bit
+`1.0000000000` ratio evidence and the `+1.00`/`0.997`+ correlation findings) is independently
+established from the observation values themselves, not from the `import_run_id` provenance
+argument this qualification narrows.
+
+**Repository-wide, read-only `F-034` technical impact assessment performed** — full detail:
+`docs/evidence/F034_CADENCE_IMPACT_ASSESSMENT_2026-09-04.md`. Summary: `is_classifiable()`
+(`suitability_service.py:45-68`) queries `series.configured_interval` with no
+`period_start`/`period_end` awareness at all, gating every downstream analytical consumer
+(`panel_eligibility_service.py`'s precondition check, `panel_integration.py`'s coverage
+validation) through one choke point. **Confirmed still actively failing today, independently
+re-run**: `tests/test_observation_suitability.py::test_ground_truth_against_real_production_
+series_11312` — `ValueError: series 11312 is not classifiable: configured_interval='1h'`, for a
+request window (`2000-12-20`–`2001-01-02`) squarely inside that Series' own genuinely-daily era,
+over two decades before its cadence changed. **No synthetic/fixture test in the entire suite
+exercises the mid-history cadence-change scenario** — the only real evidence of it is this one
+currently-failing real-production test. No occurrence found in any presentation/UI surface.
+
+**Smallest technically viable design options identified, not chosen, per instruction** —
+separated by evidence category in the linked assessment: (a) inspecting the requested range's
+own stored-observation shape directly (evidence exists today, no schema change, but whether this
+alone is financially sufficient — as opposed to the explicitly-prohibited "infer from appearing
+daily" — is exactly the DFA-adjudication question flagged below); (b) cross-Series population-
+level cadence-change inference (weakest, most generalized, explicitly not authorized without
+further ruling); (c) a new per-date/per-range `configured_interval` history table (cleanest,
+requires HistFinTS-side migration + backfill); (d) a structured, append-only cadence-change
+event log, `RatioApplicabilityAssertion`-style (lighter-weight, same HistFinTS-side schema
+requirement, incremental backfill).
+
+**Explicit DFA-adjudication flag, not resolved here**: what evidence is financially sufficient
+to establish that a specific historical range's cadence was daily (or any other specific
+interval) — the requested range's own stored-observation shape alone, a recorded sourced
+cadence-change event, cross-Series population evidence, or some combination — is named for
+DFA's own judgment, not selected on engineering convenience.
+
+**Implementation ordering remains binding, restated**: (1) `F-033` Workbench quarantine
+integration; (2) `F-034` cadence correction; (3) historical-status correction. **This
+documentation increment and the read-only `F-034` assessment do not implement items 2 or 3
+ahead of item 1** — no historical-cadence inference mechanism, no code change, implemented by
+this ruling or its supporting documents.
+
+**No HistFinTS or `histfints_uiue` file modified.**
+
+---
+
 ### Inherited principles (ratified, not re-decided)
 
 These come from the specification and are treated as binding constraints on all
@@ -3957,6 +4052,7 @@ Binding across spec, code and conversation.
 
 | Date | Change |
 |---|---|
+| 2026-09-04 | **Recorded DFA's DOM-2 ruling — observation cadence suitability is time-local — corrected `SPEC_OBSERVATION_SUITABILITY.md`/`SPEC_PANEL_ELIGIBILITY.md`, additively qualified the older `F-033` `import_run_id` lineage statement, and performed a read-only `F-034` technical impact assessment — §1 DOM-2, `ACTION_PLAN.md` §15r, §5; `docs/evidence/F034_CADENCE_IMPACT_ASSESSMENT_2026-09-04.md`.** Per SE/PO directive, relaying DFA's ruling. **Governing requirement recorded exactly as instructed**: a Series' current `configured_interval` must not be projected backward onto an earlier analysis period; eligibility must be established for the specific range; if the applicable cadence cannot be established from sufficient evidence, classification for that range is `UNRESOLVED`; current metadata must not decide the historical state. **DOM-2 does not authorize inferring historical cadence merely because stored observations appear daily** — the source/mechanism for establishing historical cadence remains an unresolved downstream design/evidence question. **Both specifications corrected additively**: `SPEC_OBSERVATION_SUITABILITY.md`'s series-global `is_classifiable()` description and `SPEC_PANEL_ELIGIBILITY.md` §8.1's factually-incorrect "`status` field is historical per row" claim both marked `[SUPERSEDED BY DOM-2]` in place, preserved verbatim/struck through, not deleted. **Already-settled analytical precedence restated, unaffected**: confirmed-synthetic quarantine/provenance → observation suitability → calendar/alignment → analytical calculation; `TRADE_OBSERVED` cannot rehabilitate a canonically-quarantined observation. **Current `series.status`-as-historical text corrected, no historical-status mechanism invented** — `panel_eligibility_service.py:99-109` confirmed to query the plain current column with no temporal qualifier. **Older `F-033` lineage statement in `F033_RETEST_2026-09-04.md` §7 additively qualified**: the "distinct `import_run_id` rules out simple storage-layer reuse" inference is no longer fully valid on its own (`import_run_id` is mutable last-writer provenance; `origin_import_run_id` is origin-bearing only from its `2026-08-20` epoch onward) — **explicitly does not reopen `F-033`**, whose root defect is independently established from the observation values themselves. **`F-034` technical impact assessment performed, full detail in the linked evidence document**: `is_classifiable()` (`suitability_service.py:45-68`) gates every downstream consumer through one choke point with no range-awareness at all; `test_ground_truth_against_real_production_series_11312` confirmed still actively failing today, independently re-run; no synthetic test in the suite exercises the mid-history cadence-change scenario; no presentation/UI occurrence found. **Smallest technically viable design options identified, not chosen**: direct range-shape inspection (no schema change, evidence-sufficiency question flagged for DFA), cross-Series inference (weakest, not authorized), a new per-range `configured_interval` history table (HistFinTS migration + backfill), or a structured cadence-change event log (`RatioApplicabilityAssertion`-style). **Explicit DFA-adjudication flag**: what evidence is financially sufficient to establish historical cadence is named, not decided. **Implementation ordering remains binding and unaffected**: (1) `F-033` Workbench quarantine integration; (2) `F-034` cadence correction; (3) historical-status correction — neither item 2 nor 3 implemented ahead of item 1 by this documentation increment. **No HistFinTS or `histfints_uiue` file modified — read-only throughout** (the one test run performed reads the real production database read-only). |
 | 2026-09-04 | **Recorded PO's latest `F-033` scope decision — remediation population expanded to 39,876 observations across 17 Series — `ACTION_PLAN.md` §15q, §5, §20.** Per SE/PO directive. Additive. §15/§15a–§15p preserved completely unedited — §15h remains preserved unchanged, per §15p's own amendment, not reopened by this scope expansion. **PO's decision recorded exactly as instructed**: ACCEPTED expansion of the remediation scope by the DFA-adjudicated 2,840 observations in Series `11343`, `11347`, and `11344`. **Currently authorized remediation population recorded exactly as instructed**: 39,876 directly established observations across 17 Series currently known — existing 37,036 (§15n) + newly authorized 2,840 = 39,876 exactly. **Explicitly not described as the globally complete `F-033` population** — a renewed HistFinTS completeness/reconciliation sweep is required before the additional rows are curated, because prior completeness statements were subsequently disproved by new evidence (the same pattern §15n's own correction of §15m already established once). **Preserved explicitly, exactly as instructed**: the observation-local qualification (only established contaminated intervals financially ineligible; genuine `2026-05-29`-onward observations unaffected by Series membership); §15h remains unchanged; the DFA §15j/§15k qualification amendment (§15p) unaffected — `LOG_RELATIVE`, the provisional same-date median, and the methodology study remain exactly as recorded; no accepted INC-7 result reopened. **Implementation status recorded exactly as instructed**: Workbench quarantine consumption is NOT implemented yet — dependent on SE's verification of the final HistFinTS contract and the renewed population reconciliation, neither prerequisite satisfied by this record. §5's detail-range citation and §20's INC-7 pointer bullet both updated to reflect the expanded scope, superseding (not erasing) the prior 37,036/14-Series figures. **No HistFinTS or `histfints_uiue` file modified.** |
 | 2026-09-04 | **Recorded DFA's latest `F-033` methodology ruling — calibration eligibility is date/evidence-specific; §15h UNCHANGED/ACCEPTED — `ACTION_PLAN.md` §15p, §5, §20.** Per SE/PO directive, relaying DFA's ruling. Additive qualification amendment. §15/§15a–§15o preserved completely unedited — **§15h in particular preserved unchanged, not reopened.** **§15h's disposition recorded exactly as instructed**: UNCHANGED/ACCEPTED — no reopening required. **DFA's ruling recorded exactly as instructed**: the exact `2026-09-02` MSFT/MELI/QQQ observations §15h used were not confirmed synthetic — they occurred after those Series' own established contaminated interval (§15l's retest: the exact `1:1` shared-driver signature ran through `2026-08-17`); §15h's own conclusion was descriptive only; historical contamination of a Series does not invalidate that Series' later genuine observations. **§15j and §15k preserved, including the `LOG_RELATIVE` methodology-design selection and the provisional same-date median — the methodology study is not withdrawn or recalculated.** **Stale F-033 calibration qualification replaced by this governing ruling, recorded verbatim**: *"Historical F-033 contamination does not by itself make MSFT, MELI, or QQQ calibration-ineligible on later dates where the exact observations are independently established as genuine. Calibration eligibility is date- and evidence-specific. Contaminated dates remain excluded. Clean post-contamination dates may be considered, subject to all other comparability and independence requirements."* **Stated explicitly, exactly as instructed**: this does not make MSFT/MELI/QQQ automatically calibration-eligible; common Yahoo provider usage alone establishes neither independence nor non-independence. **Current calibration state preserved**: no calibration performed or authorized; no operating threshold authorized; the same-date median remains provisional/design-only; the outstanding requirement is an adequate multi-date, multi-regime, evidence-qualified population with explicit contemporaneous independence diagnostics — a fresh, date-specific independence check would still be required before any specific later date's observations could actually be used in a calibration population. **Current pointer/summary corrected in the same change** (§5 master-row, §20 pointer bullet) — neither may continue to read "CALIBRATION-INELIGIBLE while `F-033` unresolved" as the current state; §15k's own historical body text preserved exactly as written, only the current-state pointers corrected. **No current documentation statement found that could not be reconciled additively** — every remaining occurrence of the stale framing is confined to §15k/§15l/§15m's own dated historical body text, correctly left untouched since none purports to be a current-state summary. **No analytical change implemented. No HistFinTS or `histfints_uiue` file modified.** |
 | 2026-09-04 | **Recorded DFA's DOM-1 ruling — dispersion threshold UNCALIBRATED — corrected `SPEC_PANEL_ELIGIBILITY.md` and performed a repository-wide impact trace — §1 DOM-1, `ACTION_PLAN.md` §15o, §5; `docs/evidence/DOM1_DISPERSION_THRESHOLD_IMPACT_TRACE_2026-09-04.md`.** Per SE/PO directive, relaying DFA's ruling. §15/§15a–§15n preserved completely unedited. **Governing current state recorded exactly as instructed**: dispersion threshold UNCALIBRATED, no numerical threshold currently authorized for analytical, suppression, eligibility, or production use; `CV 0.167` retained only as an unverified/non-decision-bearing artifact, must not be reused as calibration evidence; `LOG_RELATIVE` residuals around a provisional same-date median remain the current design (§15k), calibration gated on an eligible multi-date/regime population and applicable independence requirements. **`SPEC_PANEL_ELIGIBILITY.md` corrected in the same change**: a new 2026-09-04 DOM-1 update block added at the top using the document's own established dated-correction convention; every §8.3/§8.5/second-§8 passage asserting `0.167` as current, operational, or analytically-usable is marked `[SUPERSEDED BY DOM-1]` in place — preserved verbatim as dated historical record, not deleted, not rewritten to make it appear `0.167` was never reported. **Repository-wide impact trace performed and recorded in full in the linked evidence document**: fifteen files contain the literal `0.167`, all fifteen documentation files, **zero occurrences in `src/` or `tests/`**; `dispersion_threshold` is a caller-supplied `Optional[DispersionThreshold] = None` field throughout `hf_reswb`, no default/config/test-fixture anywhere sets it to `0.167`. **Category 3 (unauthorized current default/runtime parameter): none found. Category 4 (actual decision-bearing consumption): none found.** All fifteen files classified Category 1, each already self-qualified as provisional when written; two files flagged as the closest borderline case (`CALIBRATION_EVIDENCE_12PAIR_COMPLETE_2026-08-18.md`, `CALIBRATION_EXPANDED_12PAIR_DIAGNOSTICS.md`) — both computed a hypothetical 100%-suppression finding demonstrating `0.167` is inoperable at 12-pair scale, a diagnostic finding, not an applied suppression affecting a real result. **Confirmed explicitly, verified rather than assumed**: no accepted bounded INC-7 result consumed `0.167` — INC-7's implied-FX diagnostic chain lives entirely in HistFinTS, structurally disjoint from `hf_reswb`'s panel/dispersion modules; within `hf_reswb`, `0.167` is never wired to any code path. Every one of §15b/§15f/§15g/§15h/§15i remains exactly as recorded, none reopened. **Preserved unaffected**: §15d's own historical-artifact downgrade (reaffirmed, not reopened); §15j/§15k's own cross-sectional dispersion methodology design (confirmed, not changed). §5's detail-range citation extended to §15a–§15o in the same change. **No HistFinTS or `histfints_uiue` file modified.** |

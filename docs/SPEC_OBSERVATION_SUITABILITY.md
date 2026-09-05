@@ -1,5 +1,28 @@
 # SPEC — Observation Suitability (zero-volume and carried-forward bars)
 
+> **Update 2026-09-04 — DOM-2: observation cadence suitability is time-local.** DFA has settled
+> **DOM-2**, correcting the `is_classifiable()`/F-030-guard behavior this document describes
+> below (status line, §7 item 6): **a Series' current `configured_interval` must not be
+> projected backward to determine whether observations in an earlier analysis period are
+> classifiable by session date.** Eligibility for date-based observation suitability must be
+> established **for the specific observation range** — if the applicable cadence for that range
+> cannot be established from sufficient evidence, classification for that range is
+> `UNRESOLVED`; current metadata must not decide the historical state. **DOM-2 does not
+> authorize inferring historical cadence merely because stored observations appear daily.**
+> Every passage below describing `is_classifiable()` as a Series-global check (status line,
+> §7 item 6's own "Guarded, not fixed" row) is **marked `[SUPERSEDED BY DOM-2]` in place below —
+> preserved verbatim as dated historical record, not deleted, not rewritten.** Full ruling text
+> and provenance: `workbench/docs/DECISIONS.md`, DOM-2 entry. Full technical impact assessment:
+> `workbench/docs/evidence/F034_CADENCE_IMPACT_ASSESSMENT_2026-09-04.md`. **No historical-
+> cadence inference mechanism is implemented by this update** — the smallest technically viable
+> design options remain identified, not chosen, in the linked assessment; implementation ordering
+> (F-033 Workbench quarantine integration → F-034 cadence correction → historical-status
+> correction) remains binding and unaffected by this documentation-only update. The already-
+> settled analytical precedence is restated, unaffected: `confirmed-synthetic quarantine/
+> provenance → observation suitability → calendar/alignment → analytical calculation` —
+> `TRADE_OBSERVED` or any other suitability result cannot rehabilitate an observation present in
+> the canonical `F-033` quarantine.
+
 **Status:** implemented (§7 items 1–3, 6), ratified · **Version:** 0.2 · **Date:** 2026-08-17
 **Governing decisions:** D-001 (read-only boundary) · D-033 (reference by key, four epistemic
 layers) · D-036 (a verdict describes evidence state, not permission) · D-037 (derived venue
@@ -419,7 +442,7 @@ a stored answer — `rule_version` plus the run's date range make the invalidati
 | 3 | Axis B | **Implemented** — `apply_calendar()`. Follows 2. |
 | 4 | `SPEC_PANEL_ELIGIBILITY.md` implementation | **Unblocked by D-039** for this gate specifically. Tranche 2 and Q-061 remain independent gates — see `SPEC_PANEL_ELIGIBILITY.md` header. |
 | 5 | F-009 candidate generation on filtered rows (§5.1) | Specification only; **D-035 freeze holds.** Not implemented — out of scope for D-039. |
-| 6 | F-030 (series 11311 mixed interval) | **Guarded, not fixed** — `is_classifiable()` refuses classification and calendar-quorum participation for any Series failing the daily/unique-date check. Series 11311 itself is untouched upstream. |
+| 6 | F-030 (series 11311 mixed interval) | **Guarded, not fixed** — `is_classifiable()` refuses classification and calendar-quorum participation for any Series failing the daily/unique-date check. Series 11311 itself is untouched upstream. **`[SUPERSEDED BY DOM-2, 2026-09-04 — preserved verbatim as dated historical record]`: this guard is series-global (no `period_start`/`period_end` awareness), which DOM-2 corrects for the historical-range case — see the update block at the top of this document; also root-caused as F-034 (`DECISIONS.md`).** |
 | 7 | Alpha Vantage / Stooq behaviour (§1.7) | Not testable; open, not clean. |
 
 ---
